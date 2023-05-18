@@ -3,6 +3,7 @@
         xmlns:tools="http://schemas.android.com/tools">
 
     <application
+            android:name="com.bhm.support.sdk.common.BaseApplication"
             android:allowBackup="true"
             android:fullBackupContent="@xml/backup_rules"
             tools:targetApi="31"
