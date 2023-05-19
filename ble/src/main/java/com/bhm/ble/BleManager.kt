@@ -4,6 +4,7 @@ package com.bhm.ble
 
 import android.app.Application
 import com.bhm.ble.attribute.BleOptions
+import com.bhm.ble.utils.BleLogger
 
 
 /**
@@ -51,6 +52,8 @@ class BleManager private constructor() {
         if (bleOptions == null) {
             bleOptions = BleOptions.getDefaultBleOptions()
         }
+        BleLogger.isLogger = bleOptions?.enableLog?: false
+        BleLogger.d("ble Successful initialization")
     }
 
     fun scan() {
