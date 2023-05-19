@@ -44,6 +44,8 @@ class BleOptions private constructor(builder: Builder) {
 
     internal var maxConnectNum = builder.maxConnectNum
 
+    internal var mtu = builder.mtu
+
     companion object {
 
         internal const val CONTAIN_SCAN_DEVICE_NAME = false
@@ -69,6 +71,8 @@ class BleOptions private constructor(builder: Builder) {
         internal const val DEFAULT_WRITE_INTERVAL: Long = 100
 
         internal const val DEFAULT_MAX_CONNECT_NUM: Int = 7
+
+        internal const val DEFAULT_MTU: Int = 20
 
         @JvmStatic
         fun getDefaultBleOptions() : BleOptions = BleOptions(Builder())
@@ -108,6 +112,8 @@ class BleOptions private constructor(builder: Builder) {
         internal var writeInterval: Long = DEFAULT_WRITE_INTERVAL
 
         internal var maxConnectNum: Int = DEFAULT_MAX_CONNECT_NUM
+
+        internal var mtu: Int = DEFAULT_MTU
 
         /**
          * 设置扫描过滤规则：只查询对应ServiceUuid的设备
@@ -224,6 +230,16 @@ class BleOptions private constructor(builder: Builder) {
          */
         fun setMaxConnectNum(maxConnectNum: Int) = apply {
             this.maxConnectNum = maxConnectNum
+        }
+
+        /**
+         * 设置mtu，默认为[DEFAULT_MTU]，最大为512
+         */
+        fun setMtu(mtu: Int) = apply {
+            this.mtu = mtu
+            if (this.mtu > 512) {
+                this.mtu = 512
+            }
         }
 
         fun build(): BleOptions {

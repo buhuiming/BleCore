@@ -13,7 +13,28 @@
             implementation 'com.github.buhuiming:SupportCore:1.0.0-beta01'
         }
 
-#### 1、说明
+#### 1、初始化
+    val options =
+            BleOptions.builder()
+                .setScanServiceUuid("0000414b-0000-1000-8000-00805f9b34fb")
+                .setScanDeviceName("V8001")
+                .setScanDeviceMac("DC:A1:2F:44:NC")
+                .isContainScanDeviceName(true)
+                .setAutoConnect(false)
+                .setEnableLog(true)
+                .setScanMillisTimeOut(12000)
+                .setScanRetryCountAndInterval(2, 1000)
+                .setConnectMillisTimeOut(10000)
+                .setConnectRetryCountAndInterval(2, 5000)
+                .setOperateMillisTimeOut(6000)
+                .setWriteInterval(80)
+                .setMaxConnectNum(5)
+                .setMtu(500)
+                .build()
+    BleManager.init(application, options)
+
+    //或者使用默认配置
+    BleManager.init(application)
 
 ## License
 

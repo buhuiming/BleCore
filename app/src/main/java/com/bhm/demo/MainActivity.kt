@@ -38,6 +38,7 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>(){
                 .setOperateMillisTimeOut(6000)
                 .setWriteInterval(80)
                 .setMaxConnectNum(5)
+                .setMtu(500)
                 .build()
         BleManager.init(application, options)
     }
