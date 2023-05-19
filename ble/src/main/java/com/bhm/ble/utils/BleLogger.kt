@@ -18,7 +18,7 @@ object BleLogger {
 
     var isLogger = true
 
-    const val MARK = "#######----> "
+    private const val MARK = "#######----> "
 
     fun d(msg: String?) {
         if (isLogger && msg != null) {
@@ -56,7 +56,7 @@ object BleLogger {
             try {
                 val clazz = Class.forName(className)
                 if (this.javaClass != clazz) {
-                    return clazz.simpleName
+                    return clazz.simpleName.ifEmpty { BleLogger.javaClass.simpleName }
                 }
             } catch (e: ClassNotFoundException) {
                 e.printStackTrace()

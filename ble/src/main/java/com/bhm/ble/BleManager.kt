@@ -3,6 +3,8 @@
 package com.bhm.ble
 
 import android.app.Application
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.utils.BleLogger
 
@@ -37,9 +39,16 @@ class BleManager private constructor() {
             get().init(context, option)
         }
 
+        /**
+         * 蓝牙是否打开
+         * @return true = 打开
+         */
+        fun isBleEnable() = get().isBleEnable()
+
         fun connect() {
             get()
         }
+
 
     }
 
@@ -54,6 +63,15 @@ class BleManager private constructor() {
         }
         BleLogger.isLogger = bleOptions?.enableLog?: false
         BleLogger.d("ble Successful initialization")
+    }
+
+    /**
+     * 蓝牙是否打开
+     */
+    fun isBleEnable(): Boolean {
+        val bluetoothManager = application?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?
+        val bluetoothAdapter = bluetoothManager?.adapter
+        return bluetoothAdapter?.isEnabled?: false
     }
 
     fun scan() {

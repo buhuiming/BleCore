@@ -7,6 +7,16 @@
         android:orientation="vertical"
         tools:context=".MainActivity">
 
+    <ProgressBar
+            android:id="@+id/pbLoading"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="14dp"
+            android:visibility="invisible"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/black"/>
+
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
@@ -22,7 +32,7 @@
             android:gravity="center">
 
         <Button
-                android:id="@+id/btnAllStart"
+                android:id="@+id/btnStart"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="40dp"
@@ -36,7 +46,7 @@
                 android:text="开启扫描"/>
 
         <Button
-                android:id="@+id/btnAllStop"
+                android:id="@+id/btnStop"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="40dp"
@@ -44,7 +54,6 @@
                 android:layout_marginEnd="10dp"
                 android:textColor="@color/white"
                 android:gravity="center"
-                android:enabled="false"
                 android:textSize="14sp"
                 android:padding="0dp"
                 android:background="@color/purple_500"

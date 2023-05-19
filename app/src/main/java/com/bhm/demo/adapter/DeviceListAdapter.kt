@@ -1,4 +1,4 @@
-package com.bhm.demo
+package com.bhm.demo.adapter
 
 import android.bluetooth.BluetoothDevice
 import android.view.LayoutInflater
