@@ -20,10 +20,10 @@ import android.os.Parcelable
  */
 data class BleDevice(
     val deviceInfo: BluetoothDevice?, //设备信息
-    val deviceName: String?, //设备名称
-    val deviceMac: String?, //设备Mac
-    val rssi: Int?, //信号
-    val scanRecord: ByteArray?, //广播内容
+    val deviceName: String?, //蓝牙广播名
+    val deviceMac: String?, //蓝牙Mac地址
+    val rssi: Int?, //被扫描到时候的信号强度
+    val scanRecord: ByteArray?, // 被扫描到时候携带的广播数据
 ) : Parcelable{
 
     constructor(parcel: Parcel) : this(

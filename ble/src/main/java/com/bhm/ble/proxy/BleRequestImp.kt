@@ -39,8 +39,11 @@ internal class BleRequestImp private constructor() : BleBaseRequest{
      * 开始扫描
      */
     override fun startScan(bleScanCallback: BleScanCallback) {
-        val request: BleScanRequest = BleRequestManager.get().getRequest(BleScanRequest::class.java)
-        request.startScan(bleScanCallback)
+        BleRequestManager.get().getRequest(BleScanRequest::class.java).startScan(bleScanCallback)
+    }
+
+    override fun isScanning(): Boolean {
+        return BleRequestManager.get().getRequest(BleScanRequest::class.java).isScanning()
     }
 
 }

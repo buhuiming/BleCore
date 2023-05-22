@@ -77,4 +77,8 @@ class BleManager private constructor() {
         callback.apply(bleScanCallback)
         bleBaseRequest?.startScan(callback)
     }
+
+    fun isScanning(): Boolean {
+        return bleBaseRequest?.isScanning()?: false
+    }
 }

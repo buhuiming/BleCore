@@ -4,6 +4,8 @@ import android.view.View
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bhm.ble.BleManager
+import com.bhm.ble.utils.BleLogger
 import com.bhm.demo.adapter.DeviceListAdapter
 import com.bhm.demo.databinding.ActivityMainBinding
 import com.bhm.demo.vm.MainViewModel
@@ -40,7 +42,7 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>(){
         }
 
         viewBinding.btnStop.setOnClickListener {
-
+            BleLogger.e("是否开始扫描: ${BleManager.get().isScanning()}")
         }
     }
 

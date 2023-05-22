@@ -62,10 +62,13 @@ internal class BleRequestProxy : InvocationHandler {
     override fun invoke(
         paramObject: Any?,
         paramMethod: Method,
-        paramArrayOfObject: Array<Any?>
+        paramArrayOfObject: Array<Any?>?
     ): Any? {
         try {
-            return paramMethod.invoke(this.target, *paramArrayOfObject)
+            paramArrayOfObject?.let {
+                return paramMethod.invoke(this.target, *it)
+            }
+            return paramMethod.invoke(this.target)
         } catch (e: Exception) {
             BleLogger.e(e.stackTraceToString())
         }

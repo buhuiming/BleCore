@@ -7,6 +7,7 @@ package com.bhm.ble.request
 
 import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.utils.BleLogger
+import java.util.concurrent.atomic.AtomicBoolean
 
 
 /**
@@ -18,10 +19,15 @@ import com.bhm.ble.utils.BleLogger
 
 internal class BleScanRequest {
 
+    private val isScanning = AtomicBoolean(false)
+
     /**
      * 开始扫描
      */
     fun startScan(bleScanCallback: BleScanCallback) {
         BleLogger.d("开始扫描")
+        isScanning.set(true)
     }
+
+    fun isScanning() = isScanning.get()
 }
