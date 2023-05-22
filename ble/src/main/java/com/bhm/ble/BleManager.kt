@@ -58,7 +58,8 @@ class BleManager private constructor() {
     }
 
     /**
-     * 蓝牙是否打开
+     * 设备是否支持蓝牙
+     *  @return true = 支持
      */
     fun isBleSupport(): Boolean {
         return application?.packageManager?.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)?: false
@@ -66,19 +67,33 @@ class BleManager private constructor() {
 
     /**
      * 蓝牙是否打开
+     * @return true = 打开
      */
     fun isBleEnable(): Boolean {
         val bluetoothAdapter = bluetoothManager?.adapter
         return isBleSupport() && (bluetoothAdapter?.isEnabled?: false)
     }
 
+    /**
+     * 开始扫描
+     */
     fun startScan(bleScanCallback: BleScanCallback.() -> Unit) {
         val callback = BleScanCallback()
         callback.apply(bleScanCallback)
         bleBaseRequest?.startScan(callback)
     }
 
+    /**
+     * 是否扫描中
+     * @return true = 扫描中
+     */
     fun isScanning(): Boolean {
         return bleBaseRequest?.isScanning()?: false
     }
+
+    internal fun getContext() = application
+
+    internal fun getOptions() = bleOptions
+
+    internal fun getBluetoothManager() = bluetoothManager
 }

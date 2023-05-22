@@ -42,6 +42,9 @@ internal class BleRequestImp private constructor() : BleBaseRequest{
         BleRequestManager.get().getRequest(BleScanRequest::class.java).startScan(bleScanCallback)
     }
 
+    /**
+     * 是否扫描中
+     */
     override fun isScanning(): Boolean {
         return BleRequestManager.get().getRequest(BleScanRequest::class.java).isScanning()
     }

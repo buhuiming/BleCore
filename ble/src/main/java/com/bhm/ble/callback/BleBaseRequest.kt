@@ -19,5 +19,8 @@ internal interface BleBaseRequest {
      */
     fun startScan(bleScanCallback: BleScanCallback)
 
+    /**
+     * 是否扫描中
+     */
     fun isScanning(): Boolean
 }

@@ -22,7 +22,7 @@ sealed class BleScanFailType {
     /**
      * 设备未打开蓝牙
      */
-    object BleEnableType: BleScanFailType()
+    object BleDisable: BleScanFailType()
 
     /**
      * 未申请权限

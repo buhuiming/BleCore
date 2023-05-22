@@ -6,6 +6,7 @@ import android.provider.Settings
 import androidx.lifecycle.viewModelScope
 import com.bhm.ble.BleManager
 import com.bhm.ble.attribute.BleOptions
+import com.bhm.ble.data.BleScanFailType
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import com.bhm.demo.constants.LOCATION_PERMISSION
@@ -34,7 +35,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
             BleOptions.builder()
                 .setScanServiceUuid("0000414b-0000-1000-8000-00805f9b34fb")
                 .setScanDeviceName("V8001")
-                .setScanDeviceMac("DC:A1:2F:44:NC")
+                .setScanDeviceAddress("DC:A1:2F:44:NC")
                 .isContainScanDeviceName(true)
                 .setAutoConnect(false)
                 .setEnableLog(true)
@@ -114,24 +115,33 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
     fun startScan(activity: BaseActivity<*>) {
         viewModelScope.launch {
             val hasScanPermission = hasScanPermission(activity)
-            BleLogger.e("是否开始扫描: $hasScanPermission")
-            BleManager.get().startScan {
-                onStart {
+            if (hasScanPermission) {
+                BleManager.get().startScan {
+                    onStart {
+                        BleLogger.d("onStart")
+                    }
+                    onLeScan {
 
-                }
-                onLeScan {
+                    }
+                    onLeScanDuplicateRemoval {
 
-                }
-                onLeScanDuplicateRemoval {
+                    }
+                    onScanComplete { bleDeviceList, bleDeviceDuplicateRemovalList ->
 
-                }
-                onScanComplete { bleDeviceList, bleDeviceDuplicateRemovalList ->
-
-                }
-                onScanFail {
-
+                    }
+                    onScanFail {
+                        when (it) {
+                            is BleScanFailType.UnTypeSupportBle -> BleLogger.e("设置不支持蓝牙")
+                            is BleScanFailType.NoBlePermissionType -> BleLogger.e("权限不足，请检查")
+                            is BleScanFailType.BleDisable -> BleLogger.e("蓝牙未打开")
+                            is BleScanFailType.AlReadyScanning -> BleLogger.e("正在扫描")
+                            is BleScanFailType.ScanOverTimeType -> BleLogger.e("扫描超时")
+                            is BleScanFailType.UnKnowError -> BleLogger.e("未知错误")
+                        }
+                    }
                 }
             }
+            BleLogger.e("请检查权限、检查GPS开关、检查蓝牙开关")
         }
     }
 }

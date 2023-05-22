@@ -34,7 +34,7 @@
             BleOptions.builder()
                 .setScanServiceUuid("0000414b-0000-1000-8000-00805f9b34fb")
                 .setScanDeviceName("V8001")
-                .setScanDeviceMac("DC:A1:2F:44:NC")
+                .setScanDeviceAddress("DC:A1:2F:44:NC")
                 .isContainScanDeviceName(true)
                 .setAutoConnect(false)
                 .setEnableLog(true)

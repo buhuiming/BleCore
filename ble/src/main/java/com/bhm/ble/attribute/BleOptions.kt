@@ -18,7 +18,7 @@ class BleOptions private constructor(builder: Builder) {
 
     internal var scanDeviceNames = builder.scanDeviceNames
 
-    internal var scanDeviceMacs = builder.scanDeviceMacs
+    internal var scanDeviceAddresses = builder.scanDeviceAddresses
 
     internal var containScanDeviceName = builder.containScanDeviceName
 
@@ -87,7 +87,7 @@ class BleOptions private constructor(builder: Builder) {
 
         internal var scanDeviceNames: ArrayList<String> = ArrayList(1)
 
-        internal var scanDeviceMacs: ArrayList<String> = ArrayList(1)
+        internal var scanDeviceAddresses: ArrayList<String> = ArrayList(1)
 
         internal var containScanDeviceName = CONTAIN_SCAN_DEVICE_NAME
 
@@ -146,15 +146,15 @@ class BleOptions private constructor(builder: Builder) {
         /**
          * 设置扫描过滤规则：只查询对应设备Mac的设备
          */
-        fun setScanDeviceMacs(scanDeviceMacs: ArrayList<String>) = apply {
-            this.scanDeviceMacs = scanDeviceMacs
+        fun setScanDeviceAddresses(scanDeviceAddresses: ArrayList<String>) = apply {
+            this.scanDeviceAddresses = scanDeviceAddresses
         }
 
         /**
          * 设置扫描过滤规则：只查询对应设备Mac的设备
          */
-        fun setScanDeviceMac(scanDeviceMac: String) = apply {
-            this.scanDeviceMacs.add(scanDeviceMac)
+        fun setScanDeviceAddress(scanDeviceAddress: String) = apply {
+            this.scanDeviceAddresses.add(scanDeviceAddress)
         }
 
         /**

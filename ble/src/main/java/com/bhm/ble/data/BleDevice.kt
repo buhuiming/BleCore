@@ -21,7 +21,7 @@ import android.os.Parcelable
 data class BleDevice(
     val deviceInfo: BluetoothDevice?, //设备信息
     val deviceName: String?, //蓝牙广播名
-    val deviceMac: String?, //蓝牙Mac地址
+    val DeviceAddress: String?, //蓝牙Mac地址
     val rssi: Int?, //被扫描到时候的信号强度
     val scanRecord: ByteArray?, // 被扫描到时候携带的广播数据
 ) : Parcelable{
@@ -42,7 +42,7 @@ data class BleDevice(
 
         if (deviceInfo != other.deviceInfo) return false
         if (deviceName != other.deviceName) return false
-        if (deviceMac != other.deviceMac) return false
+        if (DeviceAddress != other.DeviceAddress) return false
         if (rssi != other.rssi) return false
         if (scanRecord != null) {
             if (other.scanRecord == null) return false
@@ -55,7 +55,7 @@ data class BleDevice(
     override fun hashCode(): Int {
         var result = deviceInfo?.hashCode() ?: 0
         result = 31 * result + (deviceName?.hashCode() ?: 0)
-        result = 31 * result + (deviceMac?.hashCode() ?: 0)
+        result = 31 * result + (DeviceAddress?.hashCode() ?: 0)
         result = 31 * result + (rssi ?: 0)
         result = 31 * result + (scanRecord?.contentHashCode() ?: 0)
         return result
@@ -64,7 +64,7 @@ data class BleDevice(
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeParcelable(deviceInfo, flags)
         parcel.writeString(deviceName)
-        parcel.writeString(deviceMac)
+        parcel.writeString(DeviceAddress)
         parcel.writeValue(rssi)
         parcel.writeByteArray(scanRecord)
     }
