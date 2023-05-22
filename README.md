@@ -14,12 +14,22 @@
         }
 
 #### 1、添加权限
-    <uses-permission android:name="android.permission.bluetooth" />
-    <uses-permission android:name="android.permission.bluetooth_admin" />
     
     //动态申请
-    <uses-permission android:name="android.permission.access_coarse_location" />
-    <uses-permission android:name="android.permission.access_fine_location" />
+    val LOCATION_PERMISSION = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            )
+        } else {
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_ADVERTISE,
+                Manifest.permission.BLUETOOTH_CONNECT,
+            )
+        }
 
     注意：
     有些设备GPS是关闭状态的话，申请定位权限之后，GPS是依然关闭状态，这里要根据GPS是否打开来跳转页面

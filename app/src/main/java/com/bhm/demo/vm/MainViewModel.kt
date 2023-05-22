@@ -63,7 +63,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
         var hasScanPermission = suspendCoroutine {
             activity.requestPermission(LOCATION_PERMISSION, object : PermissionCallBack {
                 override fun agree() {
-                    BleLogger.d("获取到了定位权限")
+                    BleLogger.d("获取到了权限")
                     it.resume(true)
                 }
 

@@ -5,10 +5,12 @@
  */
 package com.bhm.ble.utils
 
+import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
+import com.bhm.ble.data.BleScanFailType
 
 
 /**
@@ -33,7 +35,31 @@ object BleUtil {
      * 判断是否拥有[permission]权限
      * @return true = 拥有该权限
      */
-    fun isPermission(context: Context?, permission: String): Boolean {
+    private fun isPermission(context: Context?, permission: String): Boolean {
         return context?.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+    }
+
+    /**
+     * 判断是否拥有蓝牙权限
+     * @return true = 拥有该权限
+     */
+    fun isPermission(context: Context?): Boolean {
+        if (isPermission(context?.applicationContext,
+                Manifest.permission.ACCESS_FINE_LOCATION) &&
+            isPermission(context?.applicationContext,
+                Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            return true
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            isPermission(context?.applicationContext,
+                Manifest.permission.BLUETOOTH_SCAN) &&
+            isPermission(context?.applicationContext,
+                Manifest.permission.BLUETOOTH_ADVERTISE) &&
+            isPermission(context?.applicationContext,
+                Manifest.permission.BLUETOOTH_CONNECT)
+        ) {
+            return true
+        }
+        return false
     }
 }

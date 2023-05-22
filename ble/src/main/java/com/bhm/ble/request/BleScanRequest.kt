@@ -11,6 +11,7 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
+import android.os.Build
 import android.os.ParcelUuid
 import com.bhm.ble.BleManager
 import com.bhm.ble.callback.BleScanCallback
@@ -38,19 +39,16 @@ internal class BleScanRequest {
     @SuppressLint("MissingPermission")
     fun startScan(bleScanCallback: BleScanCallback) {
         val bleManager = BleManager.get()
+        if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext)) {
+            bleScanCallback.callScanFail(BleScanFailType.NoBlePermissionType)
+            return
+        }
         if (!bleManager.isBleSupport()) {
             bleScanCallback.callScanFail(BleScanFailType.UnTypeSupportBle)
             return
         }
         if (!bleManager.isBleEnable()) {
             bleScanCallback.callScanFail(BleScanFailType.BleDisable)
-            return
-        }
-        if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext,
-                Manifest.permission.ACCESS_FINE_LOCATION) &&
-            !BleUtil.isPermission(bleManager.getContext()?.applicationContext,
-                Manifest.permission.ACCESS_COARSE_LOCATION)) {
-            bleScanCallback.callScanFail(BleScanFailType.NoBlePermissionType)
             return
         }
         if (isScanning.get()) {
@@ -89,7 +87,7 @@ internal class BleScanRequest {
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
             .build()
         val scanner = bleManager.getBluetoothManager()?.adapter?.bluetoothLeScanner
-        
+
         scanner?.startScan(scanFilters, scanSetting, object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult?) {
                 super.onScanResult(callbackType, result)
