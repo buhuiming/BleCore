@@ -47,13 +47,18 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                 .setMaxConnectNum(5)
                 .setMtu(500)
                 .build()
-        BleManager.init(application, options)
+        BleManager.get().init(application, options)
     }
 
     /**
      * 检查权限、检查GPS开关、检查蓝牙开关
      */
     private suspend fun hasScanPermission(activity: BaseActivity<*>): Boolean {
+        val isBleSupport = BleManager.get().isBleSupport()
+        BleLogger.e("设置是否支持蓝牙: $isBleSupport")
+        if (!isBleSupport) {
+            return false
+        }
         var hasScanPermission = suspendCoroutine {
             activity.requestPermission(LOCATION_PERMISSION, object : PermissionCallBack {
                 override fun agree() {
@@ -82,7 +87,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                     })
             }
         }
-        if (hasScanPermission && !BleManager.isBleEnable()) {
+        if (hasScanPermission && !BleManager.get().isBleEnable()) {
             //跳转到系统GPS设置页面，GPS设置是全局的独立的，是否打开跟权限申请无关
             hasScanPermission = suspendCoroutine {
                 activity.startActivity(
@@ -92,7 +97,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                             viewModelScope.launch {
                                 //打开蓝牙后需要一些时间才能获取到时开启状态，这里延时一下处理
                                 delay(1000)
-                                val enable = BleManager.isBleEnable()
+                                val enable = BleManager.get().isBleEnable()
                                 BleLogger.i("是否打开了蓝牙: $enable")
                                 it.resume(enable)
                             }
@@ -110,6 +115,23 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
         viewModelScope.launch {
             val hasScanPermission = hasScanPermission(activity)
             BleLogger.e("是否开始扫描: $hasScanPermission")
+            BleManager.get().startScan {
+                onStart {
+
+                }
+                onLeScan {
+
+                }
+                onLeScanDuplicateRemoval {
+
+                }
+                onScanComplete { bleDeviceList, bleDeviceDuplicateRemovalList ->
+
+                }
+                onScanFail {
+
+                }
+            }
         }
     }
 }

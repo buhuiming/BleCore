@@ -5,7 +5,12 @@ package com.bhm.ble
 import android.app.Application
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.content.pm.PackageManager
 import com.bhm.ble.attribute.BleOptions
+import com.bhm.ble.callback.BleBaseRequest
+import com.bhm.ble.callback.BleScanCallback
+import com.bhm.ble.proxy.BleRequestImp
+import com.bhm.ble.proxy.BleRequestProxy
 import com.bhm.ble.utils.BleLogger
 
 
@@ -20,40 +25,25 @@ class BleManager private constructor() {
 
     private var bleOptions: BleOptions? = null
 
+    private var bluetoothManager: BluetoothManager? = null
+
+    private var bleBaseRequest: BleBaseRequest? = null
+
     companion object {
 
         private var instance: BleManager = BleManager()
 
         @Synchronized
-        private fun get(): BleManager {
+        fun get(): BleManager {
             if (instance == null) {
                 instance = BleManager()
             }
             return instance
         }
-
-        /**
-         * 初始化
-         */
-        fun init(context: Application, option: BleOptions? = null) {
-            get().init(context, option)
-        }
-
-        /**
-         * 蓝牙是否打开
-         * @return true = 打开
-         */
-        fun isBleEnable() = get().isBleEnable()
-
-        fun connect() {
-            get()
-        }
-
-
     }
 
     /**
-     * 初始化
+     * 初始化，使用BleManager其他方法前，需先调用此方法
      */
     fun init(context: Application, option: BleOptions? = null) {
         application = context
@@ -61,6 +51,8 @@ class BleManager private constructor() {
         if (bleOptions == null) {
             bleOptions = BleOptions.getDefaultBleOptions()
         }
+        bleBaseRequest = BleRequestProxy.get().bindProxy(BleRequestImp.get()) as BleBaseRequest
+        bluetoothManager = application?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?
         BleLogger.isLogger = bleOptions?.enableLog?: false
         BleLogger.d("ble Successful initialization")
     }
@@ -68,13 +60,21 @@ class BleManager private constructor() {
     /**
      * 蓝牙是否打开
      */
-    fun isBleEnable(): Boolean {
-        val bluetoothManager = application?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?
-        val bluetoothAdapter = bluetoothManager?.adapter
-        return bluetoothAdapter?.isEnabled?: false
+    fun isBleSupport(): Boolean {
+        return application?.packageManager?.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)?: false
     }
 
-    fun scan() {
+    /**
+     * 蓝牙是否打开
+     */
+    fun isBleEnable(): Boolean {
+        val bluetoothAdapter = bluetoothManager?.adapter
+        return isBleSupport() && (bluetoothAdapter?.isEnabled?: false)
+    }
 
+    fun startScan(bleScanCallback: BleScanCallback.() -> Unit) {
+        val callback = BleScanCallback()
+        callback.apply(bleScanCallback)
+        bleBaseRequest?.startScan(callback)
     }
 }

@@ -47,10 +47,10 @@
                 .setMaxConnectNum(5)
                 .setMtu(500)
                 .build()
-    BleManager.init(application, options)
+    BleManager.get().init(application, options)
 
     //或者使用默认配置
-    BleManager.init(application)
+    BleManager.get().init(application)
 
 ## License
 
