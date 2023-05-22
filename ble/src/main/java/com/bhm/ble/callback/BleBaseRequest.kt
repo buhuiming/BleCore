@@ -23,4 +23,9 @@ internal interface BleBaseRequest {
      * 是否扫描中
      */
     fun isScanning(): Boolean
+
+    /**
+     * 停止扫描
+     */
+    fun stopScan()
 }

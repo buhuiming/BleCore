@@ -49,4 +49,11 @@ internal class BleRequestImp private constructor() : BleBaseRequest{
         return BleRequestManager.get().getRequest(BleScanRequest::class.java).isScanning()
     }
 
+    /**
+     * 停止扫描
+     */
+    override fun stopScan() {
+        BleRequestManager.get().getRequest(BleScanRequest::class.java).stopScan()
+    }
+
 }

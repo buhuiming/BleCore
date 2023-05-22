@@ -8,6 +8,7 @@
 package com.bhm.ble.data
 
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.le.ScanRecord
 import android.os.Parcel
 import android.os.Parcelable
 
@@ -21,9 +22,10 @@ import android.os.Parcelable
 data class BleDevice(
     val deviceInfo: BluetoothDevice?, //设备信息
     val deviceName: String?, //蓝牙广播名
-    val DeviceAddress: String?, //蓝牙Mac地址
+    val deviceAddress: String?, //蓝牙Mac地址
     val rssi: Int?, //被扫描到时候的信号强度
-    val scanRecord: ByteArray?, // 被扫描到时候携带的广播数据
+    val timestampNanos: Long?, //当扫描记录被观察到时，返回自启动以来的时间戳。
+    val scanRecord: ScanRecord?, // 被扫描到时候携带的广播数据
 ) : Parcelable{
 
     constructor(parcel: Parcel) : this(
@@ -31,42 +33,16 @@ data class BleDevice(
         parcel.readString(),
         parcel.readString(),
         parcel.readValue(Int::class.java.classLoader) as? Int,
-        parcel.createByteArray()
+        parcel.readValue(Long::class.java.classLoader) as? Long,
+        parcel.readValue(ScanRecord::class.java.classLoader) as? ScanRecord,
     )
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as BleDevice
-
-        if (deviceInfo != other.deviceInfo) return false
-        if (deviceName != other.deviceName) return false
-        if (DeviceAddress != other.DeviceAddress) return false
-        if (rssi != other.rssi) return false
-        if (scanRecord != null) {
-            if (other.scanRecord == null) return false
-            if (!scanRecord.contentEquals(other.scanRecord)) return false
-        } else if (other.scanRecord != null) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = deviceInfo?.hashCode() ?: 0
-        result = 31 * result + (deviceName?.hashCode() ?: 0)
-        result = 31 * result + (DeviceAddress?.hashCode() ?: 0)
-        result = 31 * result + (rssi ?: 0)
-        result = 31 * result + (scanRecord?.contentHashCode() ?: 0)
-        return result
-    }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeParcelable(deviceInfo, flags)
         parcel.writeString(deviceName)
-        parcel.writeString(DeviceAddress)
+        parcel.writeString(deviceAddress)
         parcel.writeValue(rssi)
-        parcel.writeByteArray(scanRecord)
+        parcel.writeValue(timestampNanos)
     }
 
     override fun describeContents(): Int {

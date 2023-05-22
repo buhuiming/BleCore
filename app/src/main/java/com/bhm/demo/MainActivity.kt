@@ -4,11 +4,13 @@ import android.view.View
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bhm.ble.utils.BleLogger
 import com.bhm.demo.adapter.DeviceListAdapter
 import com.bhm.demo.databinding.ActivityMainBinding
 import com.bhm.demo.vm.MainViewModel
 import com.bhm.support.sdk.common.BaseVBActivity
 import com.bhm.support.sdk.core.AppTheme
+import kotlinx.coroutines.*
 import leakcanary.LeakCanary
 
 
@@ -34,15 +36,28 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>(){
         }
 
         viewBinding.btnStart.setOnClickListener {
-            viewBinding.pbLoading.visibility = View.VISIBLE
-            viewBinding.btnStart.text = "扫描中..."
-            viewModel.startScan(this@MainActivity)
+//            viewBinding.pbLoading.visibility = View.VISIBLE
+//            viewBinding.btnStart.text = "扫描中..."
+//            viewModel.startScan(this@MainActivity)
+            job?.cancel()
         }
 
         viewBinding.btnStop.setOnClickListener {
-
+            job = CoroutineScope(Dispatchers.IO).launch {
+                withTimeout(5000) {
+                    for (i in 1..20) {
+                        BleLogger.e("-----------------$i")
+                        delay(1000)
+                    }
+                }
+            }
+            job?.invokeOnCompletion {
+                BleLogger.e("-----------------完成")
+            }
         }
     }
+
+    private var job: Job? = null
 
     private fun initList() {
         viewBinding.recyclerView.setHasFixedSize(true)

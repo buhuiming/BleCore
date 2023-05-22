@@ -77,6 +77,7 @@ class BleManager private constructor() {
     /**
      * 开始扫描
      */
+    @Synchronized
     fun startScan(bleScanCallback: BleScanCallback.() -> Unit) {
         val callback = BleScanCallback()
         callback.apply(bleScanCallback)
@@ -89,6 +90,14 @@ class BleManager private constructor() {
      */
     fun isScanning(): Boolean {
         return bleBaseRequest?.isScanning()?: false
+    }
+
+    /**
+     * 停止扫描
+     */
+    @Synchronized
+    fun stopScan() {
+        bleBaseRequest?.stopScan()
     }
 
     internal fun getContext() = application

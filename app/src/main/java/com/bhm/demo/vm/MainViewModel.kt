@@ -135,8 +135,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                             is BleScanFailType.NoBlePermissionType -> BleLogger.e("权限不足，请检查")
                             is BleScanFailType.BleDisable -> BleLogger.e("蓝牙未打开")
                             is BleScanFailType.AlReadyScanning -> BleLogger.e("正在扫描")
-                            is BleScanFailType.ScanOverTimeType -> BleLogger.e("扫描超时")
-                            is BleScanFailType.UnKnowError -> BleLogger.e("未知错误")
+                            is BleScanFailType.ScanError -> BleLogger.e("未知错误")
                         }
                     }
                 }
