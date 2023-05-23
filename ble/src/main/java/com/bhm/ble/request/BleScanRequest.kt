@@ -157,23 +157,17 @@ internal class BleScanRequest {
             }
             result?.let {
                 val bleDevice = BleUtil.scanResultToBleDevice(it)
-                if (bleDevice.deviceName == null || bleOptions?.scanDeviceNames?.contains(bleDevice.deviceName) == false) {
-                    results.add(bleDevice)
-                    bleScanCallback?.callLeScan(bleDevice)
-                    if (duplicateRemovalResults.isEmpty()) {
-                        duplicateRemovalResults.add(bleDevice)
-                        bleScanCallback?.callLeScanDuplicateRemoval(bleDevice)
-                    } else {
-                        var same = false
-                        for (mBleDevice in duplicateRemovalResults) {
-                            if (bleDevice == mBleDevice) {
-                                same = true
-                                break
-                            }
-                        }
-                        if (!same) {
-                            duplicateRemovalResults.add(bleDevice)
-                            bleScanCallback?.callLeScanDuplicateRemoval(bleDevice)
+                BleLogger.d(bleDevice.toString())
+                if (bleDevice.deviceName == null) {
+                    filterData(bleDevice)
+                } else if (bleOptions?.scanDeviceNames?.isEmpty() == true) {
+                    filterData(bleDevice)
+                } else {
+                    bleOptions?.scanDeviceNames?.forEach { scanDeviceName ->
+                        if ((bleOptions?.containScanDeviceName == true &&
+                                    bleDevice.deviceName.uppercase().contains(scanDeviceName.uppercase())) ||
+                            bleDevice.deviceName.uppercase() == scanDeviceName.uppercase() ) {
+                            filterData(bleDevice)
                         }
                     }
                 }
@@ -200,6 +194,30 @@ internal class BleScanRequest {
              */
             bleScanCallback?.callScanFail(BleScanFailType.ScanError(errorCode,
                 Throwable("扫描失败，请查验[android.bluetooth.le.ScanCallback错误码]")))
+        }
+    }
+
+    /**
+     * 回调扫描数据
+     */
+    private fun filterData(bleDevice: BleDevice) {
+        results.add(bleDevice)
+        bleScanCallback?.callLeScan(bleDevice)
+        if (duplicateRemovalResults.isEmpty()) {
+            duplicateRemovalResults.add(bleDevice)
+            bleScanCallback?.callLeScanDuplicateRemoval(bleDevice)
+        } else {
+            var same = false
+            for (mBleDevice in duplicateRemovalResults) {
+                if (bleDevice == mBleDevice) {
+                    same = true
+                    break
+                }
+            }
+            if (!same) {
+                duplicateRemovalResults.add(bleDevice)
+                bleScanCallback?.callLeScanDuplicateRemoval(bleDevice)
+            }
         }
     }
 

@@ -57,20 +57,21 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
             BleOptions.builder()
 //                .setScanServiceUuid("0000ff90-0000-1000-8000-00805f9b34fb")
 //                .setScanServiceUuids(arrayListOf("0000ff80-0000-1000-8000-00805f9b34fb", "0000ff90-0000-1000-8000-00805f9b34fb"))
-//                .setScanDeviceName("midea")*
+//                .setScanDeviceName("midea")
+//                .setScanDeviceNames(arrayListOf("midea", "BYD BLE3"))
 //                .setScanDeviceAddress("70:86:CE:88:7A:AF")
 //                .setScanDeviceAddresses(arrayListOf("70:86:CE:88:7A:AF", "5B:AE:65:88:59:5E", "B8:8C:29:8B:BE:07"))
-                .isContainScanDeviceName(true)
-                .setAutoConnect(false)
+//                .isContainScanDeviceName(false)
                 .setEnableLog(true)
-                .setScanMillisTimeOut(15000)
-                .setScanRetryCountAndInterval(2, 1000)
-                .setConnectMillisTimeOut(10000)
-                .setConnectRetryCountAndInterval(2, 5000)
-                .setOperateMillisTimeOut(6000)
-                .setWriteInterval(80)
-                .setMaxConnectNum(5)
-                .setMtu(500)
+                .setScanMillisTimeOut(6000)
+                .setScanRetryCountAndInterval(2, 1000)//未调试
+                .setConnectMillisTimeOut(10000)//未调试
+                .setConnectRetryCountAndInterval(2, 5000)//未调试
+                .setAutoConnect(false)//未调试
+                .setOperateMillisTimeOut(6000)//未调试
+                .setWriteInterval(80)//未调试
+                .setMaxConnectNum(5)//未调试
+                .setMtu(500)//未调试
                 .build()
         BleManager.get().init(application, options)
     }
@@ -146,15 +147,13 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                         scanStopMutableStateFlow.value = false
                     }
                     onLeScan {
-                        it.deviceName?.let { deviceName ->
-                            BleLogger.i("onLeScan-> $deviceName, ${it.deviceAddress}")
+                        it.deviceName?.let { _ ->
                             listData.add(it)
                             listMutableStateFlow.value = it
                         }
                     }
                     onLeScanDuplicateRemoval {
-                        it.deviceName?.let { deviceName ->
-                            BleLogger.e("onLeScanDuplicateRemoval-> $deviceName, ${it.deviceAddress}")
+                        it.deviceName?.let { _ ->
                             listDRData.add(it)
                             listDRMutableStateFlow.value = it
                         }
@@ -171,7 +170,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                             }
                         }
                         scanStopMutableStateFlow.value = true
-                        if (bleDeviceList.isEmpty()) {
+                        if (listData.isEmpty()) {
                             Toast.makeText(application, "没有扫描到数据", Toast.LENGTH_SHORT).show()
                         }
                     }
