@@ -6,10 +6,13 @@
 package com.bhm.ble.utils
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
+import com.bhm.ble.data.BleDevice
 import com.bhm.ble.data.BleScanFailType
 
 
@@ -61,5 +64,20 @@ object BleUtil {
             return true
         }
         return false
+    }
+
+    /**
+     * ScanResult转BleDevice
+     */
+    @SuppressLint("MissingPermission")
+    fun scanResultToBleDevice(scanResult: ScanResult): BleDevice {
+        return BleDevice(
+            deviceInfo = scanResult.device,
+            deviceName = scanResult.device?.name,
+            deviceAddress = scanResult.device?.address,
+            rssi = scanResult.rssi,
+            timestampNanos = scanResult.timestampNanos,
+            scanRecord = scanResult.scanRecord
+        )
     }
 }

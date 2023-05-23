@@ -49,6 +49,24 @@ data class BleDevice(
         return 0
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as BleDevice
+
+        if (deviceName != other.deviceName) return false
+        if (deviceAddress != other.deviceAddress) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = deviceName?.hashCode() ?: 0
+        result = 31 * result + (deviceAddress?.hashCode() ?: 0)
+        return result
+    }
+
     companion object CREATOR : Parcelable.Creator<BleDevice> {
         override fun createFromParcel(parcel: Parcel): BleDevice {
             return BleDevice(parcel)
@@ -58,5 +76,4 @@ data class BleDevice(
             return arrayOfNulls(size)
         }
     }
-
 }

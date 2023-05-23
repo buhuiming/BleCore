@@ -7,6 +7,10 @@ package com.bhm.ble.callback
 
 import com.bhm.ble.data.BleDevice
 import com.bhm.ble.data.BleScanFailType
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 
 /**
@@ -70,23 +74,39 @@ class BleScanCallback {
     }
 
     internal fun callStart() {
-        start?.invoke()
+        //MainScope是CoroutineScope类型，为协同作用域，子协程取消后，父协程也会取消
+        MainScope().launch {
+            start?.invoke()
+            cancel(CancellationException("callStart job cancel"))
+        }
     }
 
     internal fun callLeScan(bleDevice: BleDevice) {
-        leScan?.invoke(bleDevice)
+        MainScope().launch {
+            leScan?.invoke(bleDevice)
+            cancel(CancellationException("callLeScan job cancel"))
+        }
     }
 
     internal fun callLeScanDuplicateRemoval(bleDevice: BleDevice) {
-        leScanDuplicateRemoval?.invoke(bleDevice)
+        MainScope().launch {
+            leScanDuplicateRemoval?.invoke(bleDevice)
+            cancel(CancellationException("callLeScanDuplicateRemoval job cancel"))
+        }
     }
 
     internal fun callScanFail(scanFailType: BleScanFailType) {
-        scanFail?.invoke(scanFailType)
+        MainScope().launch {
+            scanFail?.invoke(scanFailType)
+            cancel(CancellationException("callScanFail job cancel"))
+        }
     }
 
     internal fun callScanComplete(bleDeviceList: MutableList<BleDevice>,
                                   bleDeviceDuplicateRemovalList: MutableList<BleDevice>) {
-        scanComplete?.invoke(bleDeviceList, bleDeviceDuplicateRemovalList)
+        MainScope().launch {
+            scanComplete?.invoke(bleDeviceList, bleDeviceDuplicateRemovalList)
+            cancel(CancellationException("callScanComplete job cancel"))
+        }
     }
 }

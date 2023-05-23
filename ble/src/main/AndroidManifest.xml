@@ -3,12 +3,8 @@
 
 
     <!-- android 30之前 静态声明的蓝牙权限 -->
-    <uses-permission
-            android:name="android.permission.BLUETOOTH"
-            android:maxSdkVersion="30" />
-    <uses-permission
-            android:name="android.permission.BLUETOOTH_ADMIN"
-            android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <!-- 使用蓝牙还需要 静态声明+动态申请位置（前台位置）权限 -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />

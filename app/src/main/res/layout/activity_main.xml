@@ -17,12 +17,26 @@
             android:indeterminate="true"
             android:indeterminateTint="@color/black"/>
 
-    <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+    <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_margin="20dp"/>
+            android:layout_margin="20dp"
+            android:orientation="horizontal">
+
+        <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewLeft"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+        <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewRight"
+                android:layout_width="0dp"
+                android:layout_marginStart="12dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
     <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
@@ -53,6 +67,7 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
                 android:textColor="@color/white"
+                android:enabled="false"
                 android:gravity="center"
                 android:textSize="14sp"
                 android:padding="0dp"

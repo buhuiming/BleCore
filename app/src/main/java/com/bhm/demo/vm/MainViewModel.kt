@@ -3,9 +3,11 @@ package com.bhm.demo.vm
 import android.app.Application
 import android.content.Intent
 import android.provider.Settings
+import android.widget.Toast
 import androidx.lifecycle.viewModelScope
 import com.bhm.ble.BleManager
 import com.bhm.ble.attribute.BleOptions
+import com.bhm.ble.data.BleDevice
 import com.bhm.ble.data.BleScanFailType
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
@@ -15,6 +17,8 @@ import com.bhm.support.sdk.common.BaseViewModel
 import com.bhm.support.sdk.interfaces.ARCallBack
 import com.bhm.support.sdk.interfaces.PermissionCallBack
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -26,20 +30,40 @@ import kotlin.coroutines.suspendCoroutine
  */
 class MainViewModel(private val application: Application) : BaseViewModel(application) {
 
+    private val listMutableStateFlow = MutableStateFlow(BleDevice(null,
+        null, null, null, null, null))
+
+    val listStateFlow: StateFlow<BleDevice> = listMutableStateFlow
+
+    val listData = mutableListOf<BleDevice>()
+
+    private val listDRMutableStateFlow = MutableStateFlow(BleDevice(null,
+        null, null, null, null, null))
+
+    val listDRStateFlow: StateFlow<BleDevice> = listDRMutableStateFlow
+
+    val listDRData = mutableListOf<BleDevice>()
+
+    private val scanStopMutableStateFlow = MutableStateFlow(true)
+
+    val scanStopStateFlow: StateFlow<Boolean> = scanStopMutableStateFlow
+
     /**
      * 初始化蓝牙组件
      */
     fun initBle() {
-//     BleManager.init(application)
+//     BleManager.get().init(application)
         val options =
             BleOptions.builder()
-                .setScanServiceUuid("0000414b-0000-1000-8000-00805f9b34fb")
-                .setScanDeviceName("V8001")
-                .setScanDeviceAddress("DC:A1:2F:44:NC")
+//                .setScanServiceUuid("0000ff90-0000-1000-8000-00805f9b34fb")
+//                .setScanServiceUuids(arrayListOf("0000ff80-0000-1000-8000-00805f9b34fb", "0000ff90-0000-1000-8000-00805f9b34fb"))
+//                .setScanDeviceName("midea")*
+//                .setScanDeviceAddress("70:86:CE:88:7A:AF")
+//                .setScanDeviceAddresses(arrayListOf("70:86:CE:88:7A:AF", "5B:AE:65:88:59:5E", "B8:8C:29:8B:BE:07"))
                 .isContainScanDeviceName(true)
                 .setAutoConnect(false)
                 .setEnableLog(true)
-                .setScanMillisTimeOut(12000)
+                .setScanMillisTimeOut(15000)
                 .setScanRetryCountAndInterval(2, 1000)
                 .setConnectMillisTimeOut(10000)
                 .setConnectRetryCountAndInterval(2, 5000)
@@ -119,28 +143,63 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                 BleManager.get().startScan {
                     onStart {
                         BleLogger.d("onStart")
+                        scanStopMutableStateFlow.value = false
                     }
                     onLeScan {
-
-                    }
-                    onLeScanDuplicateRemoval {
-
-                    }
-                    onScanComplete { bleDeviceList, bleDeviceDuplicateRemovalList ->
-
-                    }
-                    onScanFail {
-                        when (it) {
-                            is BleScanFailType.UnTypeSupportBle -> BleLogger.e("设置不支持蓝牙")
-                            is BleScanFailType.NoBlePermissionType -> BleLogger.e("权限不足，请检查")
-                            is BleScanFailType.BleDisable -> BleLogger.e("蓝牙未打开")
-                            is BleScanFailType.AlReadyScanning -> BleLogger.e("正在扫描")
-                            is BleScanFailType.ScanError -> BleLogger.e("未知错误")
+                        it.deviceName?.let { deviceName ->
+                            BleLogger.i("onLeScan-> $deviceName, ${it.deviceAddress}")
+                            listData.add(it)
+                            listMutableStateFlow.value = it
                         }
                     }
+                    onLeScanDuplicateRemoval {
+                        it.deviceName?.let { deviceName ->
+                            BleLogger.e("onLeScanDuplicateRemoval-> $deviceName, ${it.deviceAddress}")
+                            listDRData.add(it)
+                            listDRMutableStateFlow.value = it
+                        }
+                    }
+                    onScanComplete { bleDeviceList, bleDeviceDuplicateRemovalList ->
+                        bleDeviceList.forEach {
+                            it.deviceName?.let { deviceName ->
+                                BleLogger.i("bleDeviceList-> $deviceName, ${it.deviceAddress}")
+                            }
+                        }
+                        bleDeviceDuplicateRemovalList.forEach {
+                            it.deviceName?.let { deviceName ->
+                                BleLogger.e("bleDeviceDuplicateRemovalList-> $deviceName, ${it.deviceAddress}")
+                            }
+                        }
+                        scanStopMutableStateFlow.value = true
+                        if (bleDeviceList.isEmpty()) {
+                            Toast.makeText(application, "没有扫描到数据", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    onScanFail {
+                        val msg: String = when (it) {
+                            is BleScanFailType.UnTypeSupportBle -> "BleScanFailType.UnTypeSupportBle: 设置不支持蓝牙"
+                            is BleScanFailType.NoBlePermissionType -> "BleScanFailType.NoBlePermissionType: 权限不足，请检查"
+                            is BleScanFailType.BleDisable -> "BleScanFailType.BleDisable: 蓝牙未打开"
+                            is BleScanFailType.AlReadyScanning -> "BleScanFailType.AlReadyScanning: 正在扫描"
+                            is BleScanFailType.ScanError -> {
+                                "BleScanFailType.ScanError: ${it.throwable?.message}"
+                            }
+                        }
+                        BleLogger.e(msg)
+                        Toast.makeText(application, msg, Toast.LENGTH_SHORT).show()
+                        scanStopMutableStateFlow.value = true
+                    }
                 }
+                return@launch
             }
             BleLogger.e("请检查权限、检查GPS开关、检查蓝牙开关")
         }
+    }
+
+    /**
+     * 停止扫描
+     */
+    fun stopScan() {
+        BleManager.get().stopScan()
     }
 }

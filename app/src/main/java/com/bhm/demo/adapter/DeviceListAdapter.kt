@@ -1,8 +1,8 @@
 package com.bhm.demo.adapter
 
-import android.bluetooth.BluetoothDevice
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import com.bhm.ble.data.BleDevice
 import com.bhm.demo.databinding.LayoutRecyclerItemBinding
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.viewholder.BaseViewHolder
@@ -14,8 +14,8 @@ import com.chad.library.adapter.base.viewholder.BaseViewHolder
  * @author Buhuiming
  * @date 2023年05月18日 11时06分
  */
-class DeviceListAdapter(data: MutableList<BluetoothDevice>?
-) : BaseQuickAdapter<BluetoothDevice, DeviceListAdapter.VH>(0, data) {
+class DeviceListAdapter(data: MutableList<BleDevice>?
+) : BaseQuickAdapter<BleDevice, DeviceListAdapter.VH>(0, data) {
 
     class VH(
         parent: ViewGroup,
@@ -28,7 +28,12 @@ class DeviceListAdapter(data: MutableList<BluetoothDevice>?
         return VH(parent)
     }
 
-    override fun convert(holder: VH, item: BluetoothDevice) {
-        holder.binding.tvName.text = ""
+    override fun convert(holder: VH, item: BleDevice) {
+        holder.binding.tvName.text = buildString {
+            append(item.deviceName)
+            append(", ")
+            append(item.deviceAddress)
+        }
+        holder.binding.btnRssi.text = "${item.rssi ?: 0}"
     }
 }

@@ -48,6 +48,7 @@ sealed class BleScanFailType {
      * 由于硬件资源不足，无法启动扫描。
      * 6、errorCode = [android.bluetooth.le.ScanCallback.SCAN_FAILED_SCANNING_TOO_FREQUENTLY]
      * 由于应用程序尝试扫描过于频繁，无法开始扫描。
+     * 7、errorCode = -1，具体看throwable
      */
-    data class ScanError(val errorCode: Int): BleScanFailType()
+    data class ScanError(val errorCode: Int, val throwable: Throwable?): BleScanFailType()
 }

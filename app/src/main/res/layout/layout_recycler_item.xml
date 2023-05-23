@@ -16,7 +16,7 @@
         android:textColor="@color/black"
         android:layout_marginStart="@dimen/dp_10"
         android:layout_marginEnd="@dimen/dp_4"
-        android:textSize="13sp"
+        android:textSize="10sp"
         android:gravity="center_vertical"
         android:ellipsize="end"
         android:maxLines="3"
@@ -30,7 +30,7 @@
         android:layout_marginEnd="20dp"
         android:textColor="@color/black"
         android:gravity="center"
-        android:textSize="11sp"
+        android:textSize="10sp"
         android:padding="0dp"
         android:text="-100"/>
 
@@ -42,7 +42,7 @@
         android:layout_marginEnd="10dp"
         android:textColor="@color/white"
         android:gravity="center"
-        android:textSize="11sp"
+        android:textSize="10sp"
         android:padding="0dp"
         android:background="@color/purple_500"
         android:text="连接"/>
