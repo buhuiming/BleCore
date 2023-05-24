@@ -5,11 +5,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bhm.ble.data.BleDevice
 import com.bhm.demo.adapter.DeviceListAdapter
 import com.bhm.demo.databinding.ActivityMainBinding
 import com.bhm.demo.vm.MainViewModel
 import com.bhm.support.sdk.common.BaseVBActivity
 import com.bhm.support.sdk.core.AppTheme
+import com.bhm.support.sdk.utils.ViewUtil
 import kotlinx.coroutines.launch
 import leakcanary.LeakCanary
 
@@ -35,7 +37,6 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>(){
         lifecycleScope.launch {
             viewModel.listStateFlow.collect {
                 if (it.deviceName != null && it.deviceAddress != null) {
-//                    leftListAdapter?.addData(it)
                     val position = (leftListAdapter?.itemCount?: 1) - 1
                     leftListAdapter?.notifyItemInserted(position)
                     viewBinding.recyclerViewLeft.smoothScrollToPosition(position)
@@ -46,7 +47,6 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>(){
         lifecycleScope.launch {
             viewModel.listDRStateFlow.collect {
                 if (it.deviceName != null && it.deviceAddress != null) {
-//                    rightListAdapter?.addData(it)
                     val position = (rightListAdapter?.itemCount?: 1) - 1
                     rightListAdapter?.notifyItemInserted(position)
                     viewBinding.recyclerViewRight.smoothScrollToPosition(position)
@@ -64,16 +64,27 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>(){
         }
 
         leftListAdapter?.addChildClickViewIds(R.id.btnConnect)
-        leftListAdapter?.setOnItemChildClickListener { _, _, _ ->
-
+        leftListAdapter?.setOnItemChildClickListener { adapter, view, position ->
+            if (ViewUtil.isInvalidClick(view)) {
+                return@setOnItemChildClickListener
+            }
+            val bleDevice: BleDevice? = adapter.data[position] as BleDevice?
+            viewModel.connect(bleDevice)
         }
 
         rightListAdapter?.addChildClickViewIds(R.id.btnConnect)
-        rightListAdapter?.setOnItemChildClickListener { _, _, _ ->
-
+        rightListAdapter?.setOnItemChildClickListener { adapter, view, position ->
+            if (ViewUtil.isInvalidClick(view)) {
+                return@setOnItemChildClickListener
+            }
+            val bleDevice: BleDevice? = adapter.data[position] as BleDevice?
+            viewModel.disConnect(bleDevice)
         }
 
         viewBinding.btnStart.setOnClickListener {
+            if (ViewUtil.isInvalidClick(it)) {
+                return@setOnClickListener
+            }
             leftListAdapter?.notifyItemRangeRemoved(0, viewModel.listData.size)
             viewModel.listData.clear()
             rightListAdapter?.notifyItemRangeRemoved(0, viewModel.listDRData.size)
@@ -82,6 +93,9 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>(){
         }
 
         viewBinding.btnStop.setOnClickListener {
+            if (ViewUtil.isInvalidClick(it)) {
+                return@setOnClickListener
+            }
             viewModel.stopScan()
         }
     }

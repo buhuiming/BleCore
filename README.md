@@ -10,7 +10,7 @@
         }
 
         dependencies {
-            implementation 'com.github.buhuiming:SupportCore:1.0.0-beta01'
+            implementation 'com.github.buhuiming:BleCore:1.0.0-beta01'
         }
 
 #### 1、添加权限
@@ -42,9 +42,9 @@
 #### 1、初始化
     val options =
             BleOptions.builder()
-                .setScanServiceUuid("0000414b-0000-1000-8000-00805f9b34fb")
-                .setScanDeviceName("V8001")
-                .setScanDeviceAddress("DC:A1:2F:44:NC")
+                .setScanServiceUuid("0000ff80-0000-1000-8000-00805f9b34fb", "0000ff90-0000-1000-8000-00805f9b34fb")
+                .setScanDeviceName("midea", "BYD BLE3")
+                .setScanDeviceAddress("70:86:CE:88:7A:AF", "5B:AE:65:88:59:5E", "B8:8C:29:8B:BE:07")
                 .isContainScanDeviceName(true)
                 .setAutoConnect(false)
                 .setEnableLog(true)
@@ -64,6 +64,7 @@
 
 #### 2、扫描
     注意：扫描之前先检查权限、检查GPS开关、检查蓝牙开关
+    扫描及过滤过程是在工作线程中进行，所以不会影响主线程的UI操作，最终每一个回调结果都会回到主线程。
     开启扫描：
     BleManager.get().startScan {
         onStart {

@@ -8,9 +8,11 @@ import android.content.Context
 import android.content.pm.PackageManager
 import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.callback.BleBaseRequest
+import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.callback.BleScanCallback
-import com.bhm.ble.proxy.BleRequestImp
-import com.bhm.ble.proxy.BleRequestProxy
+import com.bhm.ble.data.BleDevice
+import com.bhm.ble.request.proxy.BleRequestImp
+import com.bhm.ble.request.proxy.BleRequestProxy
 import com.bhm.ble.utils.BleLogger
 
 
@@ -99,6 +101,38 @@ class BleManager private constructor() {
     fun stopScan() {
         bleBaseRequest?.stopScan()
     }
+
+    /**
+     * 开始连接
+     */
+    @Synchronized
+    fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit) {
+        val callback = BleConnectCallback()
+        callback.apply(bleConnectCallback)
+        bleBaseRequest?.connect(bleDevice, callback)
+    }
+
+    /**
+     * 断开连接
+     */
+    @Synchronized
+    fun disConnect(bleDevice: BleDevice) {
+        bleBaseRequest?.disConnect(bleDevice)
+    }
+
+    /**
+     * 断开所有连接 释放资源
+     */
+    @Synchronized
+    fun release() {
+        bleBaseRequest?.release()
+    }
+
+
+//    @Synchronized
+//    fun startScanAndConnect() {
+//
+//    }
 
     internal fun getContext() = application
 

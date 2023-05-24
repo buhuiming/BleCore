@@ -5,6 +5,8 @@
  */
 package com.bhm.ble.callback
 
+import com.bhm.ble.data.BleDevice
+
 
 /**
  * 抽象方法
@@ -28,4 +30,19 @@ internal interface BleBaseRequest {
      * 停止扫描
      */
     fun stopScan()
+
+    /**
+     * 开始连接
+     */
+    fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback)
+
+    /**
+     * 断开连接
+     */
+    fun disConnect(bleDevice: BleDevice)
+
+    /**
+     * 断开所有连接 释放资源
+     */
+    fun release()
 }

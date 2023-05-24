@@ -5,8 +5,9 @@
  */
 @file:Suppress("SENSELESS_COMPARISON")
 
-package com.bhm.ble.proxy
+package com.bhm.ble.request.proxy
 
+import com.bhm.ble.request.BleConnectRequest
 import com.bhm.ble.request.BleRequestManager
 import com.bhm.ble.request.BleScanRequest
 import com.bhm.ble.utils.BleLogger
@@ -46,6 +47,7 @@ internal class BleRequestProxy : InvocationHandler {
         BleRequestManager.get().init(
             arrayOf(
                 BleScanRequest::class.java,
+                BleConnectRequest::class.java,
             )
         )
         return Proxy.newProxyInstance(

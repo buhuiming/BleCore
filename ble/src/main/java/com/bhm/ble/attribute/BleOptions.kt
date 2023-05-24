@@ -118,43 +118,31 @@ class BleOptions private constructor(builder: Builder) {
         /**
          * 设置扫描过滤规则：只查询对应ServiceUuid的设备
          */
-        fun setScanServiceUuids(scanServiceUuids: ArrayList<String>) = apply {
-            this.scanServiceUuids = scanServiceUuids
-        }
-
-        /**
-         * 设置扫描过滤规则：只查询对应ServiceUuid的设备
-         */
-        fun setScanServiceUuid(scanServiceUuid: String) = apply {
+        fun setScanServiceUuid(scanServiceUuid: String, vararg scanServiceUuids: String) = apply {
             this.scanServiceUuids.add(scanServiceUuid)
+            scanServiceUuids.forEach {
+                this.scanServiceUuids.add(it)
+            }
         }
 
         /**
          * 设置扫描过滤规则：只查询对应设备名的设备
          */
-        fun setScanDeviceNames(scanDeviceNames: ArrayList<String>) = apply {
-            this.scanDeviceNames = scanDeviceNames
-        }
-
-        /**
-         * 设置扫描过滤规则：只查询对应设备名的设备
-         */
-        fun setScanDeviceName(scanDeviceName: String) = apply {
+        fun setScanDeviceName(scanDeviceName: String, vararg scanDeviceNames: String) = apply {
             this.scanDeviceNames.add(scanDeviceName)
+            scanDeviceNames.forEach {
+                this.scanDeviceNames.add(it)
+            }
         }
 
         /**
          * 设置扫描过滤规则：只查询对应设备Mac的设备
          */
-        fun setScanDeviceAddresses(scanDeviceAddresses: ArrayList<String>) = apply {
-            this.scanDeviceAddresses = scanDeviceAddresses
-        }
-
-        /**
-         * 设置扫描过滤规则：只查询对应设备Mac的设备
-         */
-        fun setScanDeviceAddress(scanDeviceAddress: String) = apply {
+        fun setScanDeviceAddress(scanDeviceAddress: String, vararg scanDeviceAddresses: String) = apply {
             this.scanDeviceAddresses.add(scanDeviceAddress)
+            scanDeviceAddresses.forEach {
+                this.scanDeviceAddresses.add(it)
+            }
         }
 
         /**
@@ -235,12 +223,12 @@ class BleOptions private constructor(builder: Builder) {
         }
 
         /**
-         * 设置mtu，默认为[DEFAULT_MTU]，最大为512
+         * 设置mtu，默认为[DEFAULT_MTU]，最大为517
          */
         fun setMtu(mtu: Int) = apply {
             this.mtu = mtu
-            if (this.mtu > 512) {
-                this.mtu = 512
+            if (this.mtu > 517) {
+                this.mtu = 517
             }
         }
 

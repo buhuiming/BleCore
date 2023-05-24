@@ -5,10 +5,13 @@
  */
 @file:Suppress("SENSELESS_COMPARISON")
 
-package com.bhm.ble.proxy
+package com.bhm.ble.request.proxy
 
 import com.bhm.ble.callback.BleBaseRequest
+import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.callback.BleScanCallback
+import com.bhm.ble.data.BleDevice
+import com.bhm.ble.request.BleConnectRequest
 import com.bhm.ble.request.BleRequestManager
 import com.bhm.ble.request.BleScanRequest
 import com.bhm.ble.utils.BleLogger
@@ -56,4 +59,24 @@ internal class BleRequestImp private constructor() : BleBaseRequest{
         BleRequestManager.get().getRequest(BleScanRequest::class.java).stopScan()
     }
 
+    /**
+     * 开始连接
+     */
+    override fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback) {
+        BleRequestManager.get().getRequest(BleConnectRequest::class.java).connect(bleDevice, bleConnectCallback)
+    }
+
+    /**
+     * 断开连接
+     */
+    override fun disConnect(bleDevice: BleDevice) {
+        BleRequestManager.get().getRequest(BleConnectRequest::class.java).disConnect(bleDevice)
+    }
+
+    /**
+     * 断开所有连接 释放资源
+     */
+    override fun release() {
+
+    }
 }
