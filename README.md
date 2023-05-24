@@ -62,6 +62,40 @@
     //或者使用默认配置
     BleManager.get().init(application)
 
+#### 2、扫描
+    注意：扫描之前先检查权限、检查GPS开关、检查蓝牙开关
+    开启扫描：
+    BleManager.get().startScan {
+        onStart {
+
+        }
+        onLeScan { bleDevice, currentScanCount ->
+            //可以根据currentScanCount是否已有清空列表数据
+        }
+        onLeScanDuplicateRemoval { bleDevice, currentScanCount ->
+
+        }
+        onScanComplete { bleDeviceList, bleDeviceDuplicateRemovalList ->
+            //扫描到的数据是所有扫描次数的总和
+        }
+        onScanFail {
+            val msg: String = when (it) {
+                is BleScanFailType.UnTypeSupportBle -> "BleScanFailType.UnTypeSupportBle: 设置不支持蓝牙"
+                is BleScanFailType.NoBlePermissionType -> "BleScanFailType.NoBlePermissionType: 权限不足，请检查"
+                is BleScanFailType.GPSDisable -> "BleScanFailType.BleDisable: 设备未打开GPS定位"
+                is BleScanFailType.BleDisable -> "BleScanFailType.BleDisable: 蓝牙未打开"
+                is BleScanFailType.AlReadyScanning -> "BleScanFailType.AlReadyScanning: 正在扫描"
+                is BleScanFailType.ScanError -> {
+                    "BleScanFailType.ScanError: ${it.throwable?.message}"
+                }
+            }
+            BleLogger.e(msg)
+            Toast.makeText(application, msg, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    停止扫描：BleManager.get().stopScan()
+
 ## License
 
 ```

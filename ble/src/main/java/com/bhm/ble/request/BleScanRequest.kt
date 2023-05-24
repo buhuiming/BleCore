@@ -6,14 +6,12 @@
 package com.bhm.ble.request
 
 import android.annotation.SuppressLint
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanFilter
-import android.bluetooth.le.ScanResult
-import android.bluetooth.le.ScanSettings
+import android.bluetooth.le.*
 import android.os.ParcelUuid
 import com.bhm.ble.BleManager
 import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.attribute.BleOptions.Companion.DEFAULT_SCAN_MILLIS_TIMEOUT
+import com.bhm.ble.attribute.BleOptions.Companion.DEFAULT_SCAN_RETRY_INTERVAL
 import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.data.BleDevice
 import com.bhm.ble.data.BleScanFailType
@@ -33,9 +31,17 @@ import java.util.concurrent.atomic.AtomicBoolean
 @SuppressLint("MissingPermission")
 internal class BleScanRequest {
 
+    companion object {
+        const val CANCEL_WAIT_SCAN_JOB_MESSAGE = "cancelWaitScanJobMessage"
+    }
+
     private val isScanning = AtomicBoolean(false)
 
+    private val cancelScan = AtomicBoolean(false)
+
     private var scanJob: Job? = null
+
+    private var waitScanJob: Job? = null
 
     private var bleScanCallback: BleScanCallback? = null
 
@@ -45,10 +51,19 @@ internal class BleScanRequest {
 
     private var bleOptions: BleOptions? = null
 
+    private var currentReyCount = 0
+
     /**
      * 开始扫描
      */
     fun startScan(bleScanCallback: BleScanCallback) {
+        initScannerAndStart(bleScanCallback)
+    }
+
+    /**
+     * 初始化扫描参数
+     */
+    private fun initScannerAndStart(bleScanCallback: BleScanCallback) {
         this.bleScanCallback = bleScanCallback
         val bleManager = BleManager.get()
         if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext)) {
@@ -59,6 +74,10 @@ internal class BleScanRequest {
             bleScanCallback.callScanFail(BleScanFailType.UnTypeSupportBle)
             return
         }
+        if (!BleUtil.isGpsOpen(bleManager.getContext()?.applicationContext)) {
+            bleScanCallback.callScanFail(BleScanFailType.GPSDisable)
+            return
+        }
         if (!bleManager.isBleEnable()) {
             bleScanCallback.callScanFail(BleScanFailType.BleDisable)
             return
@@ -67,9 +86,6 @@ internal class BleScanRequest {
             bleScanCallback.callScanFail(BleScanFailType.AlReadyScanning)
             return
         }
-        BleLogger.d("开始扫描")
-        bleScanCallback.callStart()
-        isScanning.set(true)
         duplicateRemovalResults.clear()
         results.clear()
         val scanFilters = arrayListOf<ScanFilter>()
@@ -98,7 +114,6 @@ internal class BleScanRequest {
                     scanFilters.add(scanFilter)
                 }
             } catch (e: IllegalArgumentException) {
-                isScanning.set(false)
                 bleScanCallback.callScanFail(BleScanFailType.ScanError(-1, e))
                 return
             }
@@ -110,12 +125,21 @@ internal class BleScanRequest {
                     .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                     .build()
             } catch (e: IllegalArgumentException) {
-                isScanning.set(false)
                 bleScanCallback.callScanFail(BleScanFailType.ScanError(-1, e))
                 return
             }
         val scanner = bleManager.getBluetoothManager()?.adapter?.bluetoothLeScanner
+        bleScanCallback.callStart()
+        bleScan(scanner, scanFilters, scanSetting)
+    }
 
+    /**
+     * 执行扫描
+     */
+    private fun bleScan(scanner: BluetoothLeScanner?, scanFilters: ArrayList<ScanFilter>, scanSetting: ScanSettings?) {
+        BleLogger.d("开始第${currentReyCount + 1}次扫描")
+        isScanning.set(true)
+        cancelScan.set(false)
         var scanTime = bleOptions?.scanMillisTimeOut?: DEFAULT_SCAN_MILLIS_TIMEOUT
         //不支持无限扫描，可以设置scanMillisTimeOut + setScanRetryCountAndInterval
         if (scanTime <= 0) {
@@ -128,23 +152,63 @@ internal class BleScanRequest {
             }
         }
         scanJob?.invokeOnCompletion {
-            isScanning.set(false)
-            scanner?.stopScan(scanCallback)
-            it?.let {
-                if (it !is CancellationException) {
-                    bleScanCallback.callScanFail(BleScanFailType.ScanError(-1, it))
+            onCompletion(scanner, scanFilters, scanSetting, it)
+        }
+    }
+
+    /**
+     * 是否继续扫描
+     */
+    private fun ifContinueScan(): Boolean {
+        if (!cancelScan.get()) {
+            var retryCount = bleOptions?.scanRetryCount?: 0
+            if (retryCount < 0) {
+                retryCount = 0
+            }
+            if (retryCount > 0 && currentReyCount < retryCount) {
+                return true
+            }
+        }
+        return false
+    }
+
+    /**
+     * 完成
+     */
+    private fun onCompletion(scanner: BluetoothLeScanner?,
+                             scanFilters: ArrayList<ScanFilter>,
+                             scanSetting: ScanSettings?,
+                             throwable: Throwable?) {
+        isScanning.set(false)
+        scanner?.stopScan(scanCallback)
+        if (ifContinueScan()) {
+            val retryInterval = bleOptions?.scanRetryInterval?: DEFAULT_SCAN_RETRY_INTERVAL
+            waitScanJob = CoroutineScope(Dispatchers.Default).launch {
+                delay(retryInterval)
+                currentReyCount ++
+                bleScan(scanner, scanFilters, scanSetting)
+            }
+            waitScanJob?.invokeOnCompletion {
+                //手动取消，等待扫描任务取消后，要返回最终信息
+                //waitScanJob取消后，会导致scanJob被取消
+                if (CANCEL_WAIT_SCAN_JOB_MESSAGE == it?.message) {
+                    onCompletion(scanner, scanFilters, scanSetting, it)
                 }
             }
-            bleScanCallback.callScanComplete(results, duplicateRemovalResults)
-            if (BleLogger.isLogger) {
-                if (results.isEmpty()) {
-                    BleLogger.d("没有扫描到数据")
+        } else {
+            throwable?.let {
+                if (throwable !is CancellationException) {
+                    bleScanCallback?.callScanFail(BleScanFailType.ScanError(-1, it))
                 }
-                CoroutineScope(Dispatchers.Default).launch {
-                    delay(800)
-                    BleLogger.d("扫描完毕")
-                    cancel()
-                }
+            }
+            bleScanCallback?.callScanComplete(results, duplicateRemovalResults)
+            if (results.isEmpty()) {
+                BleLogger.d("没有扫描到数据")
+            }
+            CoroutineScope(Dispatchers.Default).launch {
+                delay(500)
+                BleLogger.d("扫描完毕，扫描次数${currentReyCount + 1}次")
+                currentReyCount = 0
             }
         }
     }
@@ -202,10 +266,10 @@ internal class BleScanRequest {
      */
     private fun filterData(bleDevice: BleDevice) {
         results.add(bleDevice)
-        bleScanCallback?.callLeScan(bleDevice)
+        bleScanCallback?.callLeScan(bleDevice, currentReyCount + 1)
         if (duplicateRemovalResults.isEmpty()) {
             duplicateRemovalResults.add(bleDevice)
-            bleScanCallback?.callLeScanDuplicateRemoval(bleDevice)
+            bleScanCallback?.callLeScanDuplicateRemoval(bleDevice, currentReyCount + 1)
         } else {
             var same = false
             for (mBleDevice in duplicateRemovalResults) {
@@ -216,7 +280,7 @@ internal class BleScanRequest {
             }
             if (!same) {
                 duplicateRemovalResults.add(bleDevice)
-                bleScanCallback?.callLeScanDuplicateRemoval(bleDevice)
+                bleScanCallback?.callLeScanDuplicateRemoval(bleDevice, currentReyCount + 1)
             }
         }
     }
@@ -231,6 +295,8 @@ internal class BleScanRequest {
      */
     fun stopScan() {
         isScanning.set(false)
+        cancelScan.set(true)
         scanJob?.cancel()
+        waitScanJob?.cancel(CancellationException(CANCEL_WAIT_SCAN_JOB_MESSAGE))
     }
 }

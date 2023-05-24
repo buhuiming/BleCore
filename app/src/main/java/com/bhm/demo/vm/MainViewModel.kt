@@ -62,11 +62,13 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
 //                .setScanDeviceAddress("70:86:CE:88:7A:AF")
 //                .setScanDeviceAddresses(arrayListOf("70:86:CE:88:7A:AF", "5B:AE:65:88:59:5E", "B8:8C:29:8B:BE:07"))
 //                .isContainScanDeviceName(false)
-                .setEnableLog(true)
-                .setScanMillisTimeOut(6000)
-                .setScanRetryCountAndInterval(2, 1000)//未调试
+//                .setEnableLog(true)
+//                .setScanMillisTimeOut(4000)
+                //这个机制是：不会因为扫描的次数导致上一次扫描到的数据被清空，也就是onStart和onScanComplete
+                //都只会回调一次，而且扫描到的数据是所有扫描次数的总和
+//                .setScanRetryCountAndInterval(3, 1000)
                 .setConnectMillisTimeOut(10000)//未调试
-                .setConnectRetryCountAndInterval(2, 5000)//未调试
+                .setConnectRetryCountAndInterval(0, 1000)//未调试
                 .setAutoConnect(false)//未调试
                 .setOperateMillisTimeOut(6000)//未调试
                 .setWriteInterval(80)//未调试
@@ -81,7 +83,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
      */
     private suspend fun hasScanPermission(activity: BaseActivity<*>): Boolean {
         val isBleSupport = BleManager.get().isBleSupport()
-        BleLogger.e("设置是否支持蓝牙: $isBleSupport")
+        BleLogger.e("设备是否支持蓝牙: $isBleSupport")
         if (!isBleSupport) {
             return false
         }
@@ -146,19 +148,22 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                         BleLogger.d("onStart")
                         scanStopMutableStateFlow.value = false
                     }
-                    onLeScan {
-                        it.deviceName?.let { _ ->
-                            listData.add(it)
-                            listMutableStateFlow.value = it
+                    onLeScan { bleDevice, _ ->
+                        //可以根据currentScanCount是否已有清空列表数据
+                        bleDevice.deviceName?.let { _ ->
+                            listData.add(bleDevice)
+                            listMutableStateFlow.value = bleDevice
                         }
                     }
-                    onLeScanDuplicateRemoval {
-                        it.deviceName?.let { _ ->
-                            listDRData.add(it)
-                            listDRMutableStateFlow.value = it
+                    onLeScanDuplicateRemoval { bleDevice, _ ->
+                        BleLogger.d("onStart")
+                        bleDevice.deviceName?.let { _ ->
+                            listDRData.add(bleDevice)
+                            listDRMutableStateFlow.value = bleDevice
                         }
                     }
                     onScanComplete { bleDeviceList, bleDeviceDuplicateRemovalList ->
+                        //扫描到的数据是所有扫描次数的总和
                         bleDeviceList.forEach {
                             it.deviceName?.let { deviceName ->
                                 BleLogger.i("bleDeviceList-> $deviceName, ${it.deviceAddress}")
@@ -178,6 +183,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                         val msg: String = when (it) {
                             is BleScanFailType.UnTypeSupportBle -> "BleScanFailType.UnTypeSupportBle: 设置不支持蓝牙"
                             is BleScanFailType.NoBlePermissionType -> "BleScanFailType.NoBlePermissionType: 权限不足，请检查"
+                            is BleScanFailType.GPSDisable -> "BleScanFailType.BleDisable: 设备未打开GPS定位"
                             is BleScanFailType.BleDisable -> "BleScanFailType.BleDisable: 蓝牙未打开"
                             is BleScanFailType.AlReadyScanning -> "BleScanFailType.AlReadyScanning: 正在扫描"
                             is BleScanFailType.ScanError -> {
@@ -189,9 +195,9 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                         scanStopMutableStateFlow.value = true
                     }
                 }
-                return@launch
+            } else {
+                BleLogger.e("请检查权限、检查GPS开关、检查蓝牙开关")
             }
-            BleLogger.e("请检查权限、检查GPS开关、检查蓝牙开关")
         }
     }
 

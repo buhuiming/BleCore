@@ -25,6 +25,11 @@ sealed class BleScanFailType {
     object BleDisable: BleScanFailType()
 
     /**
+     * 设备未打开GPS定位
+     */
+    object GPSDisable: BleScanFailType()
+
+    /**
      * 未申请权限
      */
     object NoBlePermissionType: BleScanFailType()

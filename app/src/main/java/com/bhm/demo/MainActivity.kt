@@ -42,6 +42,7 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>(){
                 }
             }
         }
+
         lifecycleScope.launch {
             viewModel.listDRStateFlow.collect {
                 if (it.deviceName != null && it.deviceAddress != null) {
@@ -52,14 +53,7 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>(){
                 }
             }
         }
-        leftListAdapter?.addChildClickViewIds(R.id.btnConnect)
-        leftListAdapter?.setOnItemChildClickListener { _, _, _ ->
 
-        }
-        rightListAdapter?.addChildClickViewIds(R.id.btnConnect)
-        rightListAdapter?.setOnItemChildClickListener { _, _, _ ->
-
-        }
         lifecycleScope.launch {
             viewModel.scanStopStateFlow.collect {
                 viewBinding.pbLoading.visibility = if (it) { View.INVISIBLE } else { View.VISIBLE }
@@ -68,6 +62,17 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>(){
                 viewBinding.btnStop.isEnabled = !it
             }
         }
+
+        leftListAdapter?.addChildClickViewIds(R.id.btnConnect)
+        leftListAdapter?.setOnItemChildClickListener { _, _, _ ->
+
+        }
+
+        rightListAdapter?.addChildClickViewIds(R.id.btnConnect)
+        rightListAdapter?.setOnItemChildClickListener { _, _, _ ->
+
+        }
+
         viewBinding.btnStart.setOnClickListener {
             leftListAdapter?.notifyItemRangeRemoved(0, viewModel.listData.size)
             viewModel.listData.clear()
@@ -101,5 +106,10 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>(){
         (viewBinding.recyclerViewRight.itemAnimator as DefaultItemAnimator).supportsChangeAnimations = false
         rightListAdapter = DeviceListAdapter(viewModel.listDRData)
         viewBinding.recyclerViewRight.adapter = rightListAdapter
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.stopScan()
     }
 }

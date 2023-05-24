@@ -28,10 +28,10 @@ object BleUtil {
      * 系统GPS是否打开
      * @return true = 打开
      */
-    fun isGpsOpen(context: Context): Boolean {
-        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+    fun isGpsOpen(context: Context?): Boolean {
+        val locationManager = context?.getSystemService(Context.LOCATION_SERVICE) as LocationManager?
+        return locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true
+                || locationManager?.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == true
     }
 
     /**

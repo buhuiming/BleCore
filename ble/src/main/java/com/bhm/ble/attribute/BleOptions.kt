@@ -179,7 +179,9 @@ class BleOptions private constructor(builder: Builder) {
         }
 
         /**
-         * 设置扫描重试次数，默认为[DEFAULT_SCAN_RETRY_COUNT]次
+         * 这个机制是：不会因为扫描的次数导致上一次扫描到的数据被清空，也就是onStart和onScanComplete
+         * 都只会回调一次，而且扫描到的数据是所有扫描次数的总和
+         * 设置扫描重试次数，默认为[DEFAULT_SCAN_RETRY_COUNT]次，总扫描次数=scanRetryCount+1次
          * 设置扫描重试间隔，默认为[DEFAULT_SCAN_RETRY_INTERVAL]
          */
         fun setScanRetryCountAndInterval(scanRetryCount: Int, scanRetryInterval: Long) = apply {

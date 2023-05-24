@@ -7,9 +7,7 @@ package com.bhm.ble.callback
 
 import com.bhm.ble.data.BleDevice
 import com.bhm.ble.data.BleScanFailType
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 
@@ -23,10 +21,10 @@ class BleScanCallback {
 
     private var start: (() -> Unit)? = null
 
-    private var leScan: ((bleDevice: BleDevice) -> Unit)? = null
+    private var leScan: ((bleDevice: BleDevice, currentScanCount: Int) -> Unit)? = null
 
     //相同设备只会出现一次
-    private var leScanDuplicateRemoval: ((bleDevice: BleDevice) -> Unit)? = null
+    private var leScanDuplicateRemoval: ((bleDevice: BleDevice, currentScanCount: Int) -> Unit)? = null
 
     private var scanFail: ((scanFailType: BleScanFailType) -> Unit)? = null
 
@@ -44,7 +42,7 @@ class BleScanCallback {
      * 扫描过程中所有被扫描到的结果回调(同一个设备会在不同的时间，携带自身不同的状态（比如信号强度等），
      * 出现在这个回调方法中，出现次数取决于周围的设备量及外围设备的广播间隔。)
      */
-    fun onLeScan(value: (bleDevice: BleDevice) -> Unit) {
+    fun onLeScan(value: (bleDevice: BleDevice, currentScanCount: Int) -> Unit) {
         leScan = value
     }
 
@@ -52,7 +50,7 @@ class BleScanCallback {
      * 扫描过程中的所有过滤后的结果回调。与onLeScan区别之处在于：同一个设备只会出现一次；
      * 出现的设备是经过扫描过滤规则过滤后的设备。
      */
-    fun onLeScanDuplicateRemoval(value: (bleDevice: BleDevice) -> Unit) {
+    fun onLeScanDuplicateRemoval(value: (bleDevice: BleDevice, currentScanCount: Int) -> Unit) {
         leScanDuplicateRemoval = value
     }
 
@@ -77,28 +75,24 @@ class BleScanCallback {
         //MainScope是CoroutineScope类型，为协同作用域，子协程取消后，父协程也会取消
         MainScope().launch {
             start?.invoke()
-            cancel(CancellationException("callStart job cancel"))
         }
     }
 
-    internal fun callLeScan(bleDevice: BleDevice) {
+    internal fun callLeScan(bleDevice: BleDevice, currentScanCount: Int) {
         MainScope().launch {
-            leScan?.invoke(bleDevice)
-            cancel(CancellationException("callLeScan job cancel"))
+            leScan?.invoke(bleDevice, currentScanCount)
         }
     }
 
-    internal fun callLeScanDuplicateRemoval(bleDevice: BleDevice) {
+    internal fun callLeScanDuplicateRemoval(bleDevice: BleDevice, currentScanCount: Int) {
         MainScope().launch {
-            leScanDuplicateRemoval?.invoke(bleDevice)
-            cancel(CancellationException("callLeScanDuplicateRemoval job cancel"))
+            leScanDuplicateRemoval?.invoke(bleDevice, currentScanCount)
         }
     }
 
     internal fun callScanFail(scanFailType: BleScanFailType) {
         MainScope().launch {
             scanFail?.invoke(scanFailType)
-            cancel(CancellationException("callScanFail job cancel"))
         }
     }
 
@@ -106,7 +100,6 @@ class BleScanCallback {
                                   bleDeviceDuplicateRemovalList: MutableList<BleDevice>) {
         MainScope().launch {
             scanComplete?.invoke(bleDeviceList, bleDeviceDuplicateRemovalList)
-            cancel(CancellationException("callScanComplete job cancel"))
         }
     }
 }
