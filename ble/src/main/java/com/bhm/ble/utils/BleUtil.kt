@@ -13,7 +13,6 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
 import com.bhm.ble.data.BleDevice
-import com.bhm.ble.data.BleScanFailType
 
 
 /**
@@ -40,6 +39,14 @@ object BleUtil {
      */
     private fun isPermission(context: Context?, permission: String): Boolean {
         return context?.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+    }
+
+    /**
+     * 设备是否支持蓝牙
+     *  @return true = 支持
+     */
+    fun isBleSupport(context: Context?): Boolean {
+        return context?.packageManager?.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)?: false
     }
 
     /**

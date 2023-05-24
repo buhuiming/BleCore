@@ -1,4 +1,4 @@
-package com.bhm.demo
+package com.bhm.demo.ui
 
 import android.view.View
 import androidx.lifecycle.lifecycleScope
@@ -6,17 +6,22 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bhm.ble.data.BleDevice
+import com.bhm.demo.BaseActivity
+import com.bhm.demo.R
 import com.bhm.demo.adapter.DeviceListAdapter
 import com.bhm.demo.databinding.ActivityMainBinding
 import com.bhm.demo.vm.MainViewModel
-import com.bhm.support.sdk.common.BaseVBActivity
 import com.bhm.support.sdk.core.AppTheme
 import com.bhm.support.sdk.utils.ViewUtil
 import kotlinx.coroutines.launch
 import leakcanary.LeakCanary
 
-
-class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>(){
+/**
+ * 主页面
+ * @author Buhuiming
+ * @date :2023/5/24 15:39
+ */
+class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
 
     private var leftListAdapter: DeviceListAdapter? = null
 

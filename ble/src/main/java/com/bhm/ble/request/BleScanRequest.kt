@@ -9,7 +9,6 @@ import android.annotation.SuppressLint
 import android.bluetooth.le.*
 import android.os.ParcelUuid
 import com.bhm.ble.BleManager
-import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.attribute.BleOptions.Companion.DEFAULT_SCAN_MILLIS_TIMEOUT
 import com.bhm.ble.attribute.BleOptions.Companion.DEFAULT_SCAN_RETRY_INTERVAL
 import com.bhm.ble.callback.BleScanCallback
@@ -49,8 +48,6 @@ internal class BleScanRequest {
 
     private val duplicateRemovalResults: MutableList<BleDevice> = arrayListOf()
 
-    private var bleOptions: BleOptions? = null
-
     private var currentReyCount = 0
 
     /**
@@ -65,7 +62,7 @@ internal class BleScanRequest {
      */
     private fun initScannerAndStart(bleScanCallback: BleScanCallback) {
         this.bleScanCallback = bleScanCallback
-        val bleManager = BleManager.get()
+        val bleManager = getBleManager()
         if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext)) {
             bleScanCallback.callScanFail(BleScanFailType.NoBlePermissionType)
             return
@@ -89,8 +86,7 @@ internal class BleScanRequest {
         duplicateRemovalResults.clear()
         results.clear()
         val scanFilters = arrayListOf<ScanFilter>()
-        bleOptions = bleManager.getOptions()
-        bleOptions?.let { options ->
+        getBleOptions()?.let { options ->
             try {
                 //设置过滤条件-ServiceUuid
                 options.scanServiceUuids.forEach { serviceUuid ->
@@ -140,7 +136,7 @@ internal class BleScanRequest {
         BleLogger.d("开始第${currentReyCount + 1}次扫描")
         isScanning.set(true)
         cancelScan.set(false)
-        var scanTime = bleOptions?.scanMillisTimeOut?: DEFAULT_SCAN_MILLIS_TIMEOUT
+        var scanTime = getBleOptions()?.scanMillisTimeOut?: DEFAULT_SCAN_MILLIS_TIMEOUT
         //不支持无限扫描，可以设置scanMillisTimeOut + setScanRetryCountAndInterval
         if (scanTime <= 0) {
             scanTime = DEFAULT_SCAN_MILLIS_TIMEOUT
@@ -161,7 +157,7 @@ internal class BleScanRequest {
      */
     private fun ifContinueScan(): Boolean {
         if (!cancelScan.get()) {
-            var retryCount = bleOptions?.scanRetryCount?: 0
+            var retryCount = getBleOptions()?.scanRetryCount?: 0
             if (retryCount < 0) {
                 retryCount = 0
             }
@@ -182,7 +178,7 @@ internal class BleScanRequest {
         isScanning.set(false)
         scanner?.stopScan(scanCallback)
         if (ifContinueScan()) {
-            val retryInterval = bleOptions?.scanRetryInterval?: DEFAULT_SCAN_RETRY_INTERVAL
+            val retryInterval = getBleOptions()?.scanRetryInterval?: DEFAULT_SCAN_RETRY_INTERVAL
             waitScanJob = CoroutineScope(Dispatchers.Default).launch {
                 delay(retryInterval)
                 currentReyCount ++
@@ -224,11 +220,11 @@ internal class BleScanRequest {
                 BleLogger.d(bleDevice.toString())
                 if (bleDevice.deviceName == null) {
                     filterData(bleDevice)
-                } else if (bleOptions?.scanDeviceNames?.isEmpty() == true) {
+                } else if (getBleOptions()?.scanDeviceNames?.isEmpty() == true) {
                     filterData(bleDevice)
                 } else {
-                    bleOptions?.scanDeviceNames?.forEach { scanDeviceName ->
-                        if ((bleOptions?.containScanDeviceName == true &&
+                    getBleOptions()?.scanDeviceNames?.forEach { scanDeviceName ->
+                        if ((getBleOptions()?.containScanDeviceName == true &&
                                     bleDevice.deviceName.uppercase().contains(scanDeviceName.uppercase())) ||
                             bleDevice.deviceName.uppercase() == scanDeviceName.uppercase() ) {
                             filterData(bleDevice)
@@ -299,4 +295,9 @@ internal class BleScanRequest {
         scanJob?.cancel()
         waitScanJob?.cancel(CancellationException(CANCEL_WAIT_SCAN_JOB_MESSAGE))
     }
+
+    private fun getBleManager() = BleManager.get()
+
+    private fun getBleOptions() = getBleManager().getOptions()
+
 }
