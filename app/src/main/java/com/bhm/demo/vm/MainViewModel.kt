@@ -66,13 +66,13 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
 //                //这个机制是：不会因为扫描的次数导致上一次扫描到的数据被清空，也就是onStart和onScanComplete
 //                //都只会回调一次，而且扫描到的数据是所有扫描次数的总和
 //                .setScanRetryCountAndInterval(3, 1000)
-                .setConnectMillisTimeOut(10000)//未调试
-                .setConnectRetryCountAndInterval(0, 1000)//未调试
-                .setAutoConnect(false)//未调试
-                .setOperateMillisTimeOut(6000)//未调试
-                .setWriteInterval(80)//未调试
-                .setMaxConnectNum(5)//未调试
-                .setMtu(500)//未调试
+                .setConnectMillisTimeOut(10000)//实现中
+                .setConnectRetryCountAndInterval(0, 1000)//实现中
+                .setAutoConnect(false)//实现中
+                .setOperateMillisTimeOut(6000)//实现中
+                .setWriteInterval(80)//实现中
+                .setMaxConnectNum(5)//实现中
+                .setMtu(500)//实现中
                 .build()
         BleManager.get().init(application, options)
     }

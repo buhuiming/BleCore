@@ -1,4 +1,4 @@
-# SupportCore
+# BleCore Android蓝牙低功耗(BLE)快速开发框架
 
 ### 用法
 
@@ -49,6 +49,8 @@
                 .setAutoConnect(false)
                 .setEnableLog(true)
                 .setScanMillisTimeOut(12000)
+                //这个机制是：不会因为扫描的次数导致上一次扫描到的数据被清空，也就是onStart和onScanComplete
+                //都只会回调一次，而且扫描到的数据是所有扫描次数的总和
                 .setScanRetryCountAndInterval(2, 1000)
                 .setConnectMillisTimeOut(10000)
                 .setConnectRetryCountAndInterval(2, 5000)
@@ -74,7 +76,7 @@
             //可以根据currentScanCount是否已有清空列表数据
         }
         onLeScanDuplicateRemoval { bleDevice, currentScanCount ->
-
+            //与onLeScan区别之处在于：同一个设备只会出现一次
         }
         onScanComplete { bleDeviceList, bleDeviceDuplicateRemovalList ->
             //扫描到的数据是所有扫描次数的总和
@@ -95,7 +97,22 @@
         }
     }
 
-    停止扫描：BleManager.get().stopScan()
+#### 3、停止扫描
+    BleManager.get().stopScan()
+
+#### 4、连接
+    BleManager.get().connect(device) {
+
+    }
+
+#### 5、断开连接
+    BleManager.get().disConnect(device)
+
+
+
+
+
+
 
 ## License
 
