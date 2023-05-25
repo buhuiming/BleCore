@@ -87,14 +87,14 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
 //                //都只会回调一次，而且扫描到的数据是所有扫描次数的总和
                 .setScanRetryCountAndInterval(viewBinding.etScanRetryCount.text.toString().toInt(),
                     viewBinding.etScanRetryInterval.text.toString().toLong())
-                .setConnectMillisTimeOut(viewBinding.etConnectOutTime.text.toString().toLong())//实现中
+                .setConnectMillisTimeOut(viewBinding.etConnectOutTime.text.toString().toLong())
                 .setConnectRetryCountAndInterval(viewBinding.etConnectRetryCount.text.toString().toInt(),
-                    viewBinding.etConnectRetryInterval.text.toString().toLong())//实现中
-                .setAutoConnect(viewBinding.cbAutoConnect.isChecked)//实现中
-                .setOperateMillisTimeOut(viewBinding.etOperateMillisTimeOut.text.toString().toLong())//实现中
-                .setWriteInterval(viewBinding.etWriteInterval.text.toString().toLong())//实现中
-                .setMaxConnectNum(viewBinding.etMaxConnectNum.text.toString().toInt())//实现中
-                .setMtu(viewBinding.etMTU.text.toString().toInt())//实现中
+                    viewBinding.etConnectRetryInterval.text.toString().toLong())
+                .setAutoConnect(viewBinding.cbAutoConnect.isChecked)
+                .setOperateMillisTimeOut(viewBinding.etOperateMillisTimeOut.text.toString().toLong())
+                .setWriteInterval(viewBinding.etWriteInterval.text.toString().toLong())
+                .setMaxConnectNum(viewBinding.etMaxConnectNum.text.toString().toInt())
+                .setMtu(viewBinding.etMTU.text.toString().toInt())
                 .build()
             BleManager.get().init(application, builder.build())
             finish()

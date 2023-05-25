@@ -3,6 +3,7 @@ package com.bhm.demo.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.bhm.ble.data.BleDevice
+import com.bhm.demo.R
 import com.bhm.demo.databinding.LayoutRecyclerItemBinding
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.viewholder.BaseViewHolder
@@ -34,6 +35,16 @@ class DeviceListAdapter(data: MutableList<BleDevice>?
             append(", ")
             append(item.deviceAddress)
         }
-        holder.binding.btnRssi.text = "${item.rssi ?: 0}"
+//        holder.binding.btnRssi.text = "${item.rssi ?: 0}"
+        val rssi = item.rssi ?: 0
+        if (rssi >= -65) {
+            holder.binding.ivRssi.setImageResource(R.drawable.adddevice_device_signal_four_icon)
+        } else if (rssi >= -75) {
+            holder.binding.ivRssi.setImageResource(R.drawable.adddevice_device_signal_three_icon)
+        } else if (rssi >= -85) {
+            holder.binding.ivRssi.setImageResource(R.drawable.adddevice_device_signal_two_icon)
+        } else {
+            holder.binding.ivRssi.setImageResource(R.drawable.adddevice_device_signal_one_icon)
+        }
     }
 }
