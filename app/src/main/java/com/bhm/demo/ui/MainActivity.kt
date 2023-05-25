@@ -1,5 +1,6 @@
 package com.bhm.demo.ui
 
+import android.content.Intent
 import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -64,6 +65,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
                 viewBinding.pbLoading.visibility = if (it) { View.INVISIBLE } else { View.VISIBLE }
                 viewBinding.btnStart.text = if (it) { "开启扫描" } else { "扫描中..." }
                 viewBinding.btnStart.isEnabled = it
+                viewBinding.btnSetting.isEnabled = it
                 viewBinding.btnStop.isEnabled = !it
             }
         }
@@ -84,6 +86,13 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
             }
             val bleDevice: BleDevice? = adapter.data[position] as BleDevice?
             viewModel.disConnect(bleDevice)
+        }
+
+        viewBinding.btnSetting.setOnClickListener {
+            if (ViewUtil.isInvalidClick(it)) {
+                return@setOnClickListener
+            }
+            startActivity(Intent(this@MainActivity, OptionSettingActivity::class.java))
         }
 
         viewBinding.btnStart.setOnClickListener {

@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:orientation="vertical"
+        tools:context=".ui.MainActivity">
+
+    <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingHorizontal="15dp">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginVertical="20dp"
+                android:orientation="vertical">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="扫描服务UUID："
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="12dp"/>
+
+                <EditText
+                        android:id="@+id/etScanServiceUuid"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="设置扫描过滤服务UUID，多个以英文逗号分开，默认空"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#999999"
+                        android:maxLines="4"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_marginVertical="@dimen/dp_10"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="扫描设备名称："
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="12dp"/>
+
+                <EditText
+                        android:id="@+id/etScanDeviceName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="设置扫描过滤设备名称，多个以英文逗号分开，默认空"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#999999"
+                        android:maxLines="4"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_marginVertical="@dimen/dp_10"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="扫描设备地址："
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="12dp"/>
+
+                <EditText
+                        android:id="@+id/etScanDeviceAddress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="设置扫描过设备地址，多个以英文逗号分开，默认空"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#999999"
+                        android:maxLines="4"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_marginVertical="@dimen/dp_10"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="扫描超时时间："
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="12dp"/>
+
+                <EditText
+                        android:id="@+id/etScanOutTime"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="默认10000毫秒，单位毫秒"
+                        android:text="10000"
+                        android:textSize="16sp"
+                        android:inputType="number"
+                        android:textColor="@color/black"
+                        android:textColorHint="#999999"
+                        android:maxLines="4"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_marginVertical="@dimen/dp_10"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="扫描重试次数和间隔："
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="12dp"/>
+
+                <EditText
+                        android:id="@+id/etScanRetryCount"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:hint="默认0次"
+                        android:text="0"
+                        android:inputType="number"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#999999"
+                        android:maxLines="4"/>
+
+                <EditText
+                        android:id="@+id/etScanRetryInterval"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:hint="默认1000毫秒，单位毫秒"
+                        android:text="1000"
+                        android:inputType="number"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#999999"
+                        android:maxLines="4"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_marginVertical="@dimen/dp_10"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="连接超时时间："
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="12dp"/>
+
+                <EditText
+                        android:id="@+id/etConnectOutTime"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="默认10000毫秒，单位毫秒"
+                        android:text="10000"
+                        android:inputType="number"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#999999"
+                        android:maxLines="4"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_marginVertical="@dimen/dp_10"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="连接重试次数和间隔："
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="12dp"/>
+
+                <EditText
+                        android:id="@+id/etConnectRetryCount"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:hint="默认0次"
+                        android:text="0"
+                        android:inputType="number"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#999999"
+                        android:maxLines="4"/>
+
+                <EditText
+                        android:id="@+id/etConnectRetryInterval"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:hint="默认1000毫秒，单位毫秒"
+                        android:text="1000"
+                        android:inputType="number"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#999999"
+                        android:maxLines="4"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_marginVertical="@dimen/dp_10"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="交互超时时间："
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="12dp"/>
+
+                <EditText
+                        android:id="@+id/etOperateMillisTimeOut"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="默认5000毫秒，单位毫秒"
+                        android:inputType="number"
+                        android:text="5000"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#999999"
+                        android:maxLines="4"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_marginVertical="@dimen/dp_10"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="写数据间隔时间："
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="12dp"/>
+
+                <EditText
+                        android:id="@+id/etWriteInterval"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="默认100毫秒，单位毫秒"
+                        android:text="100"
+                        android:inputType="number"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#999999"
+                        android:maxLines="4"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_marginVertical="@dimen/dp_10"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="最大连接设备数："
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="12dp"/>
+
+                <EditText
+                        android:id="@+id/etMaxConnectNum"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="默认7个"
+                        android:inputType="number"
+                        android:text="7"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#999999"
+                        android:maxLines="4"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_marginVertical="@dimen/dp_10"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="MTU值："
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="12dp"/>
+
+                <EditText
+                        android:id="@+id/etMTU"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="默认20"
+                        android:text="20"
+                        android:inputType="number"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#999999"
+                        android:maxLines="4"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_marginVertical="@dimen/dp_10"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="是否模糊匹配设备名称："
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="12dp"/>
+
+                <CheckBox
+                        android:id="@+id/cbContainScanDeviceName"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:checked="false"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_marginVertical="@dimen/dp_10"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="是否日志输出："
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="12dp"/>
+
+                <CheckBox
+                        android:id="@+id/cbLogger"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:checked="true"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="@dimen/dp_10"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="扫描后是否自动连接："
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:layout_marginEnd="12dp"/>
+
+                <CheckBox
+                        android:id="@+id/cbAutoConnect"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:checked="false"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="*扫描后是否自动连接，当扫描到多个设备时，自动连接第一个设备："
+                    android:textSize="13sp"
+                    android:textColor="#ff0000"
+                    android:layout_marginEnd="12dp"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="20dp"
+            android:gravity="center">
+
+        <Button
+                android:id="@+id/btnReSet"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="40dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginEnd="10dp"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:textSize="14sp"
+                android:padding="0dp"
+                android:background="@color/purple_500"
+                android:text="重置"/>
+
+        <Button
+                android:id="@+id/btnSave"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="40dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:textSize="14sp"
+                android:padding="0dp"
+                android:background="@color/purple_500"
+                android:text="保存"/>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</androidx.appcompat.widget.LinearLayoutCompat>

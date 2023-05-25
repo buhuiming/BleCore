@@ -48,31 +48,31 @@ class BleOptions private constructor(builder: Builder) {
 
     companion object {
 
-        internal const val CONTAIN_SCAN_DEVICE_NAME = false
+        const val CONTAIN_SCAN_DEVICE_NAME = false
 
-        internal const val AUTO_CONNECT = false
+        const val AUTO_CONNECT = false
 
-        internal const val ENABLE_LOG = true
+        const val ENABLE_LOG = true
 
-        internal const val DEFAULT_SCAN_MILLIS_TIMEOUT: Long = 10000
+        const val DEFAULT_SCAN_MILLIS_TIMEOUT: Long = 10000
 
-        internal const val DEFAULT_SCAN_RETRY_COUNT: Int = 0
+        const val DEFAULT_SCAN_RETRY_COUNT: Int = 0
 
-        internal const val DEFAULT_SCAN_RETRY_INTERVAL: Long = 1000
+        const val DEFAULT_SCAN_RETRY_INTERVAL: Long = 1000
 
-        internal const val DEFAULT_CONNECT_MILLIS_TIMEOUT: Long = 10000
+        const val DEFAULT_CONNECT_MILLIS_TIMEOUT: Long = 10000
 
-        internal const val DEFAULT_CONNECT_RETRY_COUNT: Int = 0
+        const val DEFAULT_CONNECT_RETRY_COUNT: Int = 0
 
-        internal const val DEFAULT_CONNECT_RETRY_INTERVAL: Long = 1000
+        const val DEFAULT_CONNECT_RETRY_INTERVAL: Long = 1000
 
-        internal const val DEFAULT_OPERATE_MILLIS_TIMEOUT: Long = 5000
+        const val DEFAULT_OPERATE_MILLIS_TIMEOUT: Long = 5000
 
-        internal const val DEFAULT_WRITE_INTERVAL: Long = 100
+        const val DEFAULT_WRITE_INTERVAL: Long = 100
 
-        internal const val DEFAULT_MAX_CONNECT_NUM: Int = 7
+        const val DEFAULT_MAX_CONNECT_NUM: Int = 7
 
-        internal const val DEFAULT_MTU: Int = 20
+        const val DEFAULT_MTU: Int = 20
 
         @JvmStatic
         fun getDefaultBleOptions() : BleOptions = BleOptions(Builder())
@@ -118,8 +118,7 @@ class BleOptions private constructor(builder: Builder) {
         /**
          * 设置扫描过滤规则：只查询对应ServiceUuid的设备
          */
-        fun setScanServiceUuid(scanServiceUuid: String, vararg scanServiceUuids: String) = apply {
-            this.scanServiceUuids.add(scanServiceUuid)
+        fun setScanServiceUuid(vararg scanServiceUuids: String) = apply {
             scanServiceUuids.forEach {
                 this.scanServiceUuids.add(it)
             }
@@ -128,8 +127,7 @@ class BleOptions private constructor(builder: Builder) {
         /**
          * 设置扫描过滤规则：只查询对应设备名的设备
          */
-        fun setScanDeviceName(scanDeviceName: String, vararg scanDeviceNames: String) = apply {
-            this.scanDeviceNames.add(scanDeviceName)
+        fun setScanDeviceName(vararg scanDeviceNames: String) = apply {
             scanDeviceNames.forEach {
                 this.scanDeviceNames.add(it)
             }
@@ -138,8 +136,7 @@ class BleOptions private constructor(builder: Builder) {
         /**
          * 设置扫描过滤规则：只查询对应设备Mac的设备
          */
-        fun setScanDeviceAddress(scanDeviceAddress: String, vararg scanDeviceAddresses: String) = apply {
-            this.scanDeviceAddresses.add(scanDeviceAddress)
+        fun setScanDeviceAddress(vararg scanDeviceAddresses: String) = apply {
             scanDeviceAddresses.forEach {
                 this.scanDeviceAddresses.add(it)
             }

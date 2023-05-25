@@ -8,6 +8,7 @@ package com.bhm.ble.request
 import android.annotation.SuppressLint
 import android.bluetooth.le.*
 import android.os.ParcelUuid
+import android.text.TextUtils
 import com.bhm.ble.BleManager
 import com.bhm.ble.attribute.BleOptions.Companion.DEFAULT_SCAN_MILLIS_TIMEOUT
 import com.bhm.ble.attribute.BleOptions.Companion.DEFAULT_SCAN_RETRY_INTERVAL
@@ -90,10 +91,12 @@ internal class BleScanRequest {
             try {
                 //设置过滤条件-ServiceUuid
                 options.scanServiceUuids.forEach { serviceUuid ->
-                    val scanFilter = ScanFilter.Builder()
-                        .setServiceUuid(ParcelUuid(UUID.fromString(serviceUuid)))
-                        .build()
-                    scanFilters.add(scanFilter)
+                    if (!TextUtils.isEmpty(serviceUuid)) {
+                        val scanFilter = ScanFilter.Builder()
+                            .setServiceUuid(ParcelUuid(UUID.fromString(serviceUuid)))
+                            .build()
+                        scanFilters.add(scanFilter)
+                    }
                 }
                 //设置过滤条件-设备广播名称
                 //这里先不过滤，扫描到后再根据条件过滤
@@ -104,10 +107,12 @@ internal class BleScanRequest {
 //                scanFilters.add(scanFilter)
 //            }
                 options.scanDeviceAddresses.forEach { deviceAddress ->
-                    val scanFilter = ScanFilter.Builder()
-                        .setDeviceAddress(deviceAddress)
-                        .build()
-                    scanFilters.add(scanFilter)
+                    if (!TextUtils.isEmpty(deviceAddress)) {
+                        val scanFilter = ScanFilter.Builder()
+                            .setDeviceAddress(deviceAddress)
+                            .build()
+                        scanFilters.add(scanFilter)
+                    }
                 }
             } catch (e: IllegalArgumentException) {
                 bleScanCallback.callScanFail(BleScanFailType.ScanError(-1, e))
@@ -224,9 +229,11 @@ internal class BleScanRequest {
                     filterData(bleDevice)
                 } else {
                     getBleOptions()?.scanDeviceNames?.forEach { scanDeviceName ->
-                        if ((getBleOptions()?.containScanDeviceName == true &&
-                                    bleDevice.deviceName.uppercase().contains(scanDeviceName.uppercase())) ||
-                            bleDevice.deviceName.uppercase() == scanDeviceName.uppercase() ) {
+                        if (!TextUtils.isEmpty(scanDeviceName) && ((getBleOptions()?.containScanDeviceName == true &&
+                                    bleDevice.deviceName.uppercase()
+                                        .contains(scanDeviceName.uppercase())) ||
+                                    bleDevice.deviceName.uppercase() == scanDeviceName.uppercase())
+                        ) {
                             filterData(bleDevice)
                         }
                     }
