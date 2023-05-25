@@ -14,37 +14,37 @@ package com.bhm.ble.attribute
  */
 class BleOptions private constructor(builder: Builder) {
 
-    internal var scanServiceUuids = builder.scanServiceUuids
+    var scanServiceUuids = builder.scanServiceUuids
 
-    internal var scanDeviceNames = builder.scanDeviceNames
+    var scanDeviceNames = builder.scanDeviceNames
 
-    internal var scanDeviceAddresses = builder.scanDeviceAddresses
+    var scanDeviceAddresses = builder.scanDeviceAddresses
 
-    internal var containScanDeviceName = builder.containScanDeviceName
+    var containScanDeviceName = builder.containScanDeviceName
 
-    internal var autoConnect = builder.autoConnect
+    var autoConnect = builder.autoConnect
 
-    internal var enableLog = builder.enableLog
+    var enableLog = builder.enableLog
 
-    internal var scanMillisTimeOut = builder.scanMillisTimeOut
+    var scanMillisTimeOut = builder.scanMillisTimeOut
 
-    internal var scanRetryCount = builder.scanRetryCount
+    var scanRetryCount = builder.scanRetryCount
 
-    internal var scanRetryInterval = builder.scanRetryInterval
+    var scanRetryInterval = builder.scanRetryInterval
 
-    internal var connectMillisTimeOut = builder.connectMillisTimeOut
+    var connectMillisTimeOut = builder.connectMillisTimeOut
 
-    internal var connectRetryCount = builder.connectRetryCount
+    var connectRetryCount = builder.connectRetryCount
 
-    internal var connectRetryInterval = builder.connectRetryInterval
+    var connectRetryInterval = builder.connectRetryInterval
 
-    internal var operateMillisTimeOut = builder.operateMillisTimeOut
+    var operateMillisTimeOut = builder.operateMillisTimeOut
 
-    internal var writeInterval = builder.writeInterval
+    var writeInterval = builder.writeInterval
 
-    internal var maxConnectNum = builder.maxConnectNum
+    var maxConnectNum = builder.maxConnectNum
 
-    internal var mtu = builder.mtu
+    var mtu = builder.mtu
 
     companion object {
 
@@ -120,7 +120,9 @@ class BleOptions private constructor(builder: Builder) {
          */
         fun setScanServiceUuid(vararg scanServiceUuids: String) = apply {
             scanServiceUuids.forEach {
-                this.scanServiceUuids.add(it)
+                if (it.isNotEmpty()) {
+                    this.scanServiceUuids.add(it)
+                }
             }
         }
 
@@ -129,7 +131,9 @@ class BleOptions private constructor(builder: Builder) {
          */
         fun setScanDeviceName(vararg scanDeviceNames: String) = apply {
             scanDeviceNames.forEach {
-                this.scanDeviceNames.add(it)
+                if (it.isNotEmpty()) {
+                    this.scanDeviceNames.add(it)
+                }
             }
         }
 
@@ -138,7 +142,9 @@ class BleOptions private constructor(builder: Builder) {
          */
         fun setScanDeviceAddress(vararg scanDeviceAddresses: String) = apply {
             scanDeviceAddresses.forEach {
-                this.scanDeviceAddresses.add(it)
+                if (it.isNotEmpty()) {
+                    this.scanDeviceAddresses.add(it)
+                }
             }
         }
 

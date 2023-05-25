@@ -1,47 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="40dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
-    tools:ignore="UseCompoundDrawables">
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        tools:ignore="UseCompoundDrawables">
 
     <TextView
-        android:id="@+id/tvName"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="40dp"
-        android:textColor="@color/black"
-        android:layout_marginStart="@dimen/dp_10"
-        android:layout_marginEnd="@dimen/dp_4"
-        android:textSize="10sp"
-        android:gravity="center_vertical"
-        android:ellipsize="end"
-        android:maxLines="3"
-        android:text="设备名称"/>
+            android:id="@+id/tvName"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="40dp"
+            android:textColor="@color/black"
+            android:layout_marginStart="@dimen/dp_10"
+            android:layout_marginEnd="@dimen/dp_4"
+            android:textSize="10sp"
+            android:textIsSelectable="true"
+            android:gravity="center_vertical"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:text="设备名称"/>
 
     <ImageView
-        android:id="@+id/ivRssi"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="12dp"
-        android:gravity="center"/>
+            android:id="@+id/ivRssi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="12dp"
+            android:gravity="center"/>
 
     <Button
-        android:id="@+id/btnConnect"
-        android:layout_width="50dp"
-        android:layout_height="28dp"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="10dp"
-        android:textColor="@color/white"
-        android:gravity="center"
-        android:textSize="10sp"
-        android:padding="0dp"
-        android:background="@color/purple_500"
-        android:text="连接"/>
+            android:id="@+id/btnConnect"
+            android:layout_width="50dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:textSize="10sp"
+            android:padding="0dp"
+            android:background="@color/purple_500"
+            android:text="连接"/>
 
     <Button
             android:id="@+id/btnOperate"

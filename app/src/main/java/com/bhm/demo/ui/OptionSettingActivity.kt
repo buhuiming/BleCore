@@ -28,6 +28,55 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
     override fun initData() {
         super.initData()
         AppTheme.setStatusBarColor(this, R.color.purple_500)
+        val options = BleManager.get().getOptions()
+        options?.let {
+            val etScanServiceUuidText = StringBuilder()
+            options.scanServiceUuids.forEach { string ->
+                if (string.isNotEmpty()) {
+                    etScanServiceUuidText.append(string)
+                    etScanServiceUuidText.append(",")
+                }
+            }
+            if (etScanServiceUuidText.isNotEmpty()) {
+                etScanServiceUuidText.delete(etScanServiceUuidText.length - 1, etScanServiceUuidText.length)
+            }
+            val etScanDeviceNameText = StringBuilder()
+            options.scanDeviceNames.forEach { string ->
+                if (string.isNotEmpty()) {
+                    etScanDeviceNameText.append(string)
+                    etScanDeviceNameText.append(",")
+                }
+            }
+            if (etScanDeviceNameText.isNotEmpty()) {
+                etScanDeviceNameText.delete(etScanDeviceNameText.length - 1, etScanDeviceNameText.length)
+            }
+            val etScanDeviceAddressText = StringBuilder()
+            options.scanDeviceAddresses.forEach { string ->
+                if (string.isNotEmpty()) {
+                    etScanDeviceAddressText.append(string)
+                    etScanDeviceAddressText.append(",")
+                }
+            }
+            if (etScanDeviceAddressText.isNotEmpty()) {
+                etScanDeviceAddressText.delete(etScanDeviceAddressText.length - 1, etScanDeviceAddressText.length)
+            }
+            viewBinding.etScanServiceUuid.setText(etScanServiceUuidText.toString())
+            viewBinding.etScanDeviceName.setText(etScanDeviceNameText.toString())
+            viewBinding.etScanDeviceAddress.setText(etScanDeviceAddressText.toString())
+            viewBinding.etScanOutTime.setText(it.scanMillisTimeOut.toString())
+            viewBinding.etScanRetryCount.setText(it.scanRetryCount.toString())
+            viewBinding.etScanRetryInterval.setText(it.scanRetryInterval.toString())
+            viewBinding.etConnectOutTime.setText(it.connectMillisTimeOut.toString())
+            viewBinding.etConnectRetryCount.setText(it.connectRetryCount.toString())
+            viewBinding.etConnectRetryInterval.setText(it.connectRetryInterval.toString())
+            viewBinding.etOperateMillisTimeOut.setText(it.operateMillisTimeOut.toString())
+            viewBinding.etWriteInterval.setText(it.writeInterval.toString())
+            viewBinding.etMaxConnectNum.setText(it.maxConnectNum.toString())
+            viewBinding.etMTU.setText(it.mtu.toString())
+            viewBinding.cbContainScanDeviceName.isChecked = it.containScanDeviceName
+            viewBinding.cbLogger.isChecked = it.enableLog
+            viewBinding.cbAutoConnect.isChecked = it.autoConnect
+        }
     }
 
     override fun initEvent() {
@@ -95,7 +144,6 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
                 .setWriteInterval(viewBinding.etWriteInterval.text.toString().toLong())
                 .setMaxConnectNum(viewBinding.etMaxConnectNum.text.toString().toInt())
                 .setMtu(viewBinding.etMTU.text.toString().toInt())
-                .build()
             BleManager.get().init(application, builder.build())
             finish()
         }

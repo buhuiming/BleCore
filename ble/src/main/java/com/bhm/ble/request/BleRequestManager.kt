@@ -37,21 +37,22 @@ internal class BleRequestManager {
      * 根据Request类型获取该对象
      */
     fun <T> getRequest(mClass: Class<T>): T {
+        if (!mRequestMap.containsKey(mClass)) {
+            init(mClass)
+        }
         return mRequestMap[mClass] as T
     }
 
     /**
-     * 初始化所有Request对象
+     * 初始化Request对象
      */
-    fun init(mClasses: Array<Class<*>>) {
-        mClasses.forEach { mClass ->
-            try {
-                mRequestMap[mClass] = mClass.newInstance()
-            } catch (instantiationException: InstantiationException) {
-                BleLogger.e(instantiationException.stackTraceToString())
-            } catch (illegalAccessException: IllegalAccessException) {
-                BleLogger.e(illegalAccessException.stackTraceToString())
-            }
+    private fun init(mClass: Class<*>) {
+        try {
+            mRequestMap[mClass] = mClass.newInstance()
+        } catch (instantiationException: InstantiationException) {
+            BleLogger.e(instantiationException.stackTraceToString())
+        } catch (illegalAccessException: IllegalAccessException) {
+            BleLogger.e(illegalAccessException.stackTraceToString())
         }
     }
 }

@@ -50,7 +50,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
      * 初始化蓝牙组件
      */
     fun initBle() {
-     BleManager.get().init(application)
+        BleManager.get().init(application)
 //        val options =
 //            BleOptions.builder()
 ////                .setScanServiceUuid("0000ff80-0000-1000-8000-00805f9b34fb", "0000ff90-0000-1000-8000-00805f9b34fb")
@@ -146,7 +146,6 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                         }
                     }
                     onLeScanDuplicateRemoval { bleDevice, _ ->
-                        BleLogger.d("onStart")
                         bleDevice.deviceName?.let { _ ->
                             listDRData.add(bleDevice)
                             listDRMutableStateFlow.value = bleDevice

@@ -91,12 +91,10 @@ internal class BleScanRequest {
             try {
                 //设置过滤条件-ServiceUuid
                 options.scanServiceUuids.forEach { serviceUuid ->
-                    if (!TextUtils.isEmpty(serviceUuid)) {
-                        val scanFilter = ScanFilter.Builder()
-                            .setServiceUuid(ParcelUuid(UUID.fromString(serviceUuid)))
-                            .build()
-                        scanFilters.add(scanFilter)
-                    }
+                    val scanFilter = ScanFilter.Builder()
+                        .setServiceUuid(ParcelUuid(UUID.fromString(serviceUuid)))
+                        .build()
+                    scanFilters.add(scanFilter)
                 }
                 //设置过滤条件-设备广播名称
                 //这里先不过滤，扫描到后再根据条件过滤
@@ -107,12 +105,10 @@ internal class BleScanRequest {
 //                scanFilters.add(scanFilter)
 //            }
                 options.scanDeviceAddresses.forEach { deviceAddress ->
-                    if (!TextUtils.isEmpty(deviceAddress)) {
-                        val scanFilter = ScanFilter.Builder()
-                            .setDeviceAddress(deviceAddress)
-                            .build()
-                        scanFilters.add(scanFilter)
-                    }
+                    val scanFilter = ScanFilter.Builder()
+                        .setDeviceAddress(deviceAddress)
+                        .build()
+                    scanFilters.add(scanFilter)
                 }
             } catch (e: IllegalArgumentException) {
                 bleScanCallback.callScanFail(BleScanFailType.ScanError(-1, e))
@@ -229,10 +225,10 @@ internal class BleScanRequest {
                     filterData(bleDevice)
                 } else {
                     getBleOptions()?.scanDeviceNames?.forEach { scanDeviceName ->
-                        if (!TextUtils.isEmpty(scanDeviceName) && ((getBleOptions()?.containScanDeviceName == true &&
+                        if ((getBleOptions()?.containScanDeviceName == true &&
                                     bleDevice.deviceName.uppercase()
                                         .contains(scanDeviceName.uppercase())) ||
-                                    bleDevice.deviceName.uppercase() == scanDeviceName.uppercase())
+                            bleDevice.deviceName.uppercase() == scanDeviceName.uppercase()
                         ) {
                             filterData(bleDevice)
                         }

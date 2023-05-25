@@ -44,12 +44,6 @@ internal class BleRequestProxy : InvocationHandler {
      */
     fun bindProxy(paramObject: Any): Any {
         this.target = paramObject
-        BleRequestManager.get().init(
-            arrayOf(
-                BleScanRequest::class.java,
-                BleConnectRequest::class.java,
-            )
-        )
         return Proxy.newProxyInstance(
             paramObject.javaClass.classLoader,
             paramObject.javaClass.interfaces,

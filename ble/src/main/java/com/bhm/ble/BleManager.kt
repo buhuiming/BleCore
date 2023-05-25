@@ -134,9 +134,9 @@ class BleManager private constructor() {
 //
 //    }
 
-    internal fun getContext() = application
+    fun getOptions() = bleOptions
 
-    internal fun getOptions() = bleOptions
+    internal fun getContext() = application
 
     internal fun getBluetoothManager() = bluetoothManager
 }
