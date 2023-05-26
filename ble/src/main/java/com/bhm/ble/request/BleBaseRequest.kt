@@ -3,8 +3,10 @@
  * 不能修改和删除上面的版权声明
  * 此代码属于buhuiming编写，在未经允许的情况下不得传播复制
  */
-package com.bhm.ble.callback
+package com.bhm.ble.request
 
+import com.bhm.ble.callback.BleConnectCallback
+import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.data.BleDevice
 
 

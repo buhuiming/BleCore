@@ -7,8 +7,6 @@ package com.bhm.ble.callback
 
 import com.bhm.ble.data.BleDevice
 import com.bhm.ble.data.BleScanFailType
-import com.bhm.ble.request.BleRequestManager
-import kotlinx.coroutines.launch
 
 
 /**
@@ -17,7 +15,7 @@ import kotlinx.coroutines.launch
  * @author Buhuiming
  * @date 2023年05月22日 09时08分
  */
-class BleScanCallback {
+class BleScanCallback : BleBaseCallback(){
 
     private var start: (() -> Unit)? = null
 
@@ -30,8 +28,6 @@ class BleScanCallback {
 
     private var scanComplete: ((bleDeviceList: MutableList<BleDevice>,
                                 bleDeviceDuplicateRemovalList: MutableList<BleDevice>) -> Unit)? = null
-
-    private val mainScope = BleRequestManager.get().getMainScope()
 
     /**
      * 扫描开始
@@ -75,32 +71,32 @@ class BleScanCallback {
 
     internal fun callScanStart() {
         //MainScope是CoroutineScope类型，为协同作用域，子协程取消后，父协程也会取消
-        mainScope.launch {
+        launchInMainThread {
             start?.invoke()
         }
     }
 
     internal fun callLeScan(bleDevice: BleDevice, currentScanCount: Int) {
-        mainScope.launch {
+        launchInMainThread {
             leScan?.invoke(bleDevice, currentScanCount)
         }
     }
 
     internal fun callLeScanDuplicateRemoval(bleDevice: BleDevice, currentScanCount: Int) {
-        mainScope.launch {
+        launchInMainThread {
             leScanDuplicateRemoval?.invoke(bleDevice, currentScanCount)
         }
     }
 
     internal fun callScanFail(scanFailType: BleScanFailType) {
-        mainScope.launch {
+        launchInMainThread {
             scanFail?.invoke(scanFailType)
         }
     }
 
     internal fun callScanComplete(bleDeviceList: MutableList<BleDevice>,
                                   bleDeviceDuplicateRemovalList: MutableList<BleDevice>) {
-        mainScope.launch {
+        launchInMainThread {
             scanComplete?.invoke(bleDeviceList, bleDeviceDuplicateRemovalList)
         }
     }

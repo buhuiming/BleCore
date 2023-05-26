@@ -24,6 +24,7 @@ internal class BleConnectRequest : Request(){
     /**
      * 连接设备
      */
+    @Synchronized
     fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback) {
         if (bleDevice.deviceInfo == null) {
             BleLogger.e("连接失败：BluetoothDevice为空")

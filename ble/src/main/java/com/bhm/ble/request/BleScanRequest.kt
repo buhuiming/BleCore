@@ -52,6 +52,7 @@ internal class BleScanRequest : Request(){
     /**
      * 开始扫描
      */
+    @Synchronized
     fun startScan(bleScanCallback: BleScanCallback) {
         initScannerAndStart(bleScanCallback)
     }
@@ -295,6 +296,7 @@ internal class BleScanRequest : Request(){
     /**
      * 停止扫描
      */
+    @Synchronized
     fun stopScan() {
         isScanning.set(false)
         cancelScan.set(true)

@@ -16,11 +16,11 @@ import com.bhm.ble.data.BleDevice
  * @author Buhuiming
  * @date 2023年05月24日 14时00分
  */
-class BleConnectCallback {
+class BleConnectCallback : BleBaseCallback(){
 
     private var start: (() -> Unit)? = null
 
-    private var connectSuccessful: ((bleDevice: BleDevice, gatt: BluetoothGatt) -> Unit)? = null
+    private var connectSuccess: ((bleDevice: BleDevice, gatt: BluetoothGatt) -> Unit)? = null
 
     private var connectFail: ((bleDevice: BleDevice, connectFailType: BleConnectFailType) -> Unit)? = null
 
@@ -37,8 +37,8 @@ class BleConnectCallback {
     /**
      * 连接成功
      */
-    fun onConnectSuccessful(value: (bleDevice: BleDevice, gatt: BluetoothGatt) -> Unit) {
-        connectSuccessful = value
+    fun onConnectSuccess(value: (bleDevice: BleDevice, gatt: BluetoothGatt) -> Unit) {
+        connectSuccess = value
     }
 
     /**
@@ -67,8 +67,8 @@ class BleConnectCallback {
         connectFail?.invoke(bleDevice, connectFailType)
     }
 
-    internal fun callConnectSuccessful(bleDevice: BleDevice, gatt: BluetoothGatt) {
-        connectSuccessful?.invoke(bleDevice, gatt)
+    internal fun callConnectSuccess(bleDevice: BleDevice, gatt: BluetoothGatt) {
+        connectSuccess?.invoke(bleDevice, gatt)
     }
 
     internal fun callDisConnected(isActiveDisConnected: Boolean, bleDevice: BleDevice,

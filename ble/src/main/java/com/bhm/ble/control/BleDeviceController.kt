@@ -5,7 +5,11 @@
  */
 package com.bhm.ble.control
 
+import android.bluetooth.BluetoothGatt
+import android.os.Looper
 import com.bhm.ble.callback.BleConnectCallback
+import com.bhm.ble.callback.BleMtuChangedCallback
+import com.bhm.ble.callback.BleRssiCallback
 import com.bhm.ble.data.BleDevice
 
 
@@ -18,9 +22,35 @@ import com.bhm.ble.data.BleDevice
  */
 internal class BleDeviceController(val bleDevice: BleDevice) {
 
+    private var bleConnectCallback: BleConnectCallback? = null
+
+    private val bleRssiCallback: BleRssiCallback? = null
+
+    private val bleMtuChangedCallback: BleMtuChangedCallback? = null
+
+//    private val bleNotifyCallbackHashMap: HashMap<String, BleNotifyCallback> =
+//        HashMap<String, BleNotifyCallback>()
+//
+//    private val bleIndicateCallbackHashMap: HashMap<String, BleIndicateCallback> =
+//        HashMap<String, BleIndicateCallback>()
+//
+//    private val bleWriteCallbackHashMap: HashMap<String, BleWriteCallback> =
+//        HashMap<String, BleWriteCallback>()
+//
+//    private val bleReadCallbackHashMap: HashMap<String, BleReadCallback> =
+//        HashMap<String, BleReadCallback>()
+//
+//    private val lastState: LastState? = null
+
+    private val isActiveDisconnect = false
+
+    private val bluetoothGatt: BluetoothGatt? = null
+
+    private val connectRetryCount = 0
+
     @Synchronized
     fun connect(bleConnectCallback: BleConnectCallback) {
-
+        this.bleConnectCallback = bleConnectCallback
     }
 
     @Synchronized

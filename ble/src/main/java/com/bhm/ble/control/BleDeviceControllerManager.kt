@@ -52,9 +52,9 @@ internal class BleDeviceControllerManager private constructor() {
      * 移除设备控制器
      */
     @Synchronized
-    fun removeBleDeviceController(bleDeviceController: BleDeviceController) {
-        if (bleLruHashMap.containsKey(bleDeviceController.getKey())) {
-            bleLruHashMap.remove(bleDeviceController.getKey())
+    fun removeBleDeviceController(key: String) {
+        if (bleLruHashMap.containsKey(key)) {
+            bleLruHashMap.remove(key)
         }
     }
 

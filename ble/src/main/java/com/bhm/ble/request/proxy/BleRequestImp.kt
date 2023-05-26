@@ -7,7 +7,7 @@
 
 package com.bhm.ble.request.proxy
 
-import com.bhm.ble.callback.BleBaseRequest
+import com.bhm.ble.request.BleBaseRequest
 import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.data.BleDevice
@@ -22,7 +22,7 @@ import com.bhm.ble.request.BleScanRequest
  * @author Buhuiming
  * @date 2023年05月22日 10时41分
  */
-internal class BleRequestImp private constructor() : BleBaseRequest{
+internal class BleRequestImp private constructor() : BleBaseRequest {
 
     companion object {
 

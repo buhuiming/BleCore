@@ -6,7 +6,7 @@ import android.app.Application
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import com.bhm.ble.attribute.BleOptions
-import com.bhm.ble.callback.BleBaseRequest
+import com.bhm.ble.request.BleBaseRequest
 import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.data.BleDevice
