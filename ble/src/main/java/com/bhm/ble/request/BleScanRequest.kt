@@ -8,7 +8,6 @@ package com.bhm.ble.request
 import android.annotation.SuppressLint
 import android.bluetooth.le.*
 import android.os.ParcelUuid
-import android.text.TextUtils
 import com.bhm.ble.BleManager
 import com.bhm.ble.attribute.BleOptions.Companion.DEFAULT_SCAN_MILLIS_TIMEOUT
 import com.bhm.ble.attribute.BleOptions.Companion.DEFAULT_SCAN_RETRY_INTERVAL
@@ -126,7 +125,7 @@ internal class BleScanRequest {
                 return
             }
         val scanner = bleManager.getBluetoothManager()?.adapter?.bluetoothLeScanner
-        bleScanCallback.callStart()
+        bleScanCallback.callScanStart()
         bleScan(scanner, scanFilters, scanSetting)
     }
 

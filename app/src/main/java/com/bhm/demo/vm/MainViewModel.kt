@@ -6,7 +6,6 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.lifecycle.viewModelScope
 import com.bhm.ble.BleManager
-import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.data.BleDevice
 import com.bhm.ble.data.BleScanFailType
 import com.bhm.ble.utils.BleLogger
@@ -59,7 +58,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
 ////                .isContainScanDeviceName(false)
 ////                .setEnableLog(true)
 //                .setScanMillisTimeOut(5000)
-////                //这个机制是：不会因为扫描的次数导致上一次扫描到的数据被清空，也就是onStart和onScanComplete
+////                //这个机制是：不会因为扫描的次数导致上一次扫描到的数据被清空，也就是onScanStart和onScanComplete
 ////                //都只会回调一次，而且扫描到的数据是所有扫描次数的总和
 ////                .setScanRetryCountAndInterval(3, 1000)
 //                .setConnectMillisTimeOut(10000)//实现中
@@ -134,8 +133,8 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
             val hasScanPermission = hasScanPermission(activity)
             if (hasScanPermission) {
                 BleManager.get().startScan {
-                    onStart {
-                        BleLogger.d("onStart")
+                    onScanStart {
+                        BleLogger.d("onScanStart")
                         scanStopMutableStateFlow.value = false
                     }
                     onLeScan { bleDevice, _ ->

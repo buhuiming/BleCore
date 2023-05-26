@@ -107,6 +107,7 @@ class BleManager private constructor() {
      */
     @Synchronized
     fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit) {
+        stopScan()
         val callback = BleConnectCallback()
         callback.apply(bleConnectCallback)
         bleBaseRequest?.connect(bleDevice, callback)

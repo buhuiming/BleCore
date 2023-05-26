@@ -110,8 +110,8 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
             if (viewBinding.etMaxConnectNum.text.toString().toInt() > 7) {
                 viewBinding.etMaxConnectNum.setText("7")
             }
-            if (viewBinding.etMTU.text.toString().toInt() > 517) {
-                viewBinding.etMTU.setText(517.toString())
+            if (viewBinding.etMTU.text.toString().toInt() > BleOptions.MAX_MTU) {
+                viewBinding.etMTU.setText(BleOptions.MAX_MTU.toString())
             }
 
             val builder = BleOptions.builder()
@@ -132,7 +132,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
                 .isContainScanDeviceName(viewBinding.cbContainScanDeviceName.isChecked)
                 .setEnableLog(viewBinding.cbLogger.isChecked)
                 .setScanMillisTimeOut(viewBinding.etScanOutTime.text.toString().toLong())
-//                //这个机制是：不会因为扫描的次数导致上一次扫描到的数据被清空，也就是onStart和onScanComplete
+//                //这个机制是：不会因为扫描的次数导致上一次扫描到的数据被清空，也就是onScanStart和onScanComplete
 //                //都只会回调一次，而且扫描到的数据是所有扫描次数的总和
                 .setScanRetryCountAndInterval(viewBinding.etScanRetryCount.text.toString().toInt(),
                     viewBinding.etScanRetryInterval.text.toString().toLong())

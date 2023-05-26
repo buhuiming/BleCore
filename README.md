@@ -49,7 +49,7 @@
                 .setAutoConnect(false)
                 .setEnableLog(true)
                 .setScanMillisTimeOut(12000)
-                //这个机制是：不会因为扫描的次数导致上一次扫描到的数据被清空，也就是onStart和onScanComplete
+                //这个机制是：不会因为扫描的次数导致上一次扫描到的数据被清空，也就是onScanStart和onScanComplete
                 //都只会回调一次，而且扫描到的数据是所有扫描次数的总和
                 .setScanRetryCountAndInterval(2, 1000)
                 .setConnectMillisTimeOut(10000)
@@ -69,7 +69,7 @@
     扫描及过滤过程是在工作线程中进行，所以不会影响主线程的UI操作，最终每一个回调结果都会回到主线程。
     开启扫描：
     BleManager.get().startScan {
-        onStart {
+        onScanStart {
 
         }
         onLeScan { bleDevice, currentScanCount ->

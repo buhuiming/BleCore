@@ -76,4 +76,6 @@ data class BleDevice(
             return arrayOfNulls(size)
         }
     }
+
+    fun getKey() = deviceName + deviceAddress
 }

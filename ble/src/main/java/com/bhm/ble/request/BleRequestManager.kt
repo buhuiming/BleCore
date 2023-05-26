@@ -8,6 +8,8 @@
 package com.bhm.ble.request
 
 import com.bhm.ble.utils.BleLogger
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 
 
 /**
@@ -19,6 +21,8 @@ import com.bhm.ble.utils.BleLogger
 internal class BleRequestManager {
 
     private val mRequestMap: HashMap<Class<*>, Any> = HashMap()
+
+    private val mainScope = MainScope()
 
     companion object {
 
@@ -55,4 +59,14 @@ internal class BleRequestManager {
             BleLogger.e(illegalAccessException.stackTraceToString())
         }
     }
+
+    /**
+     * 断开所有连接 释放资源
+     */
+    fun release() {
+        mRequestMap.clear()
+        mainScope.cancel()
+    }
+
+    fun getMainScope() = mainScope
 }

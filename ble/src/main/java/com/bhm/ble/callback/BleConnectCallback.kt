@@ -5,15 +5,14 @@
  */
 package com.bhm.ble.callback
 
+import android.bluetooth.BluetoothGatt
+import com.bhm.ble.data.BleConnectFailType
 import com.bhm.ble.data.BleDevice
-import com.bhm.ble.data.BleScanFailType
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 
 
 /**
  * Ble连接回调
- *
+ * 在某些型号手机上，connectGatt必须在主线程才能有效，所以把连接过程放在主线程，回调也在主线程
  * @author Buhuiming
  * @date 2023年05月24日 14时00分
  */
@@ -21,85 +20,59 @@ class BleConnectCallback {
 
     private var start: (() -> Unit)? = null
 
-    private var leScan: ((bleDevice: BleDevice, currentScanCount: Int) -> Unit)? = null
+    private var connectSuccessful: ((bleDevice: BleDevice, gatt: BluetoothGatt) -> Unit)? = null
 
-    //相同设备只会出现一次
-    private var leScanDuplicateRemoval: ((bleDevice: BleDevice, currentScanCount: Int) -> Unit)? = null
+    private var connectFail: ((bleDevice: BleDevice, connectFailType: BleConnectFailType) -> Unit)? = null
 
-    private var scanFail: ((scanFailType: BleScanFailType) -> Unit)? = null
-
-    private var scanComplete: ((bleDeviceList: MutableList<BleDevice>,
-                                bleDeviceDuplicateRemovalList: MutableList<BleDevice>) -> Unit)? = null
+    private var disConnected: ((isActiveDisConnected: Boolean, bleDevice: BleDevice,
+                                gatt: BluetoothGatt, status: Int) -> Unit)? = null
 
     /**
-     * 扫描开始
+     * 开始连接
      */
-    fun onStart(value: () -> Unit) {
+    fun onConnectStart(value: () -> Unit) {
         start = value
     }
 
     /**
-     * 扫描过程中所有被扫描到的结果回调(同一个设备会在不同的时间，携带自身不同的状态（比如信号强度等），
-     * 出现在这个回调方法中，出现次数取决于周围的设备量及外围设备的广播间隔。)
+     * 连接成功
      */
-    fun onLeScan(value: (bleDevice: BleDevice, currentScanCount: Int) -> Unit) {
-        leScan = value
+    fun onConnectSuccessful(value: (bleDevice: BleDevice, gatt: BluetoothGatt) -> Unit) {
+        connectSuccessful = value
     }
 
     /**
-     * 扫描过程中的所有过滤后的结果回调。与onLeScan区别之处在于：同一个设备只会出现一次；
-     * 出现的设备是经过扫描过滤规则过滤后的设备。
+     * 连接失败
      */
-    fun onLeScanDuplicateRemoval(value: (bleDevice: BleDevice, currentScanCount: Int) -> Unit) {
-        leScanDuplicateRemoval = value
+    fun onConnectFail(value: (bleDevice: BleDevice, connectFailType: BleConnectFailType) -> Unit) {
+        connectFail = value
     }
 
     /**
-     * 扫描失败
+     * 连接断开，特指连接后再断开的情况。在这里可以监控设备的连接状态，一旦连接断开，可以根据自身情况考虑对BleDevice
+     * 对象进行重连操作。需要注意的是，断开和重连之间最好间隔一段时间，否则可能会出现长时间连接不上的情况。此外，
+     * 如果通过调用[com.bhm.ble.BleManager.disConnect]方法，主动断开蓝牙连接的结果也会在这个方法中回调，
+     * 此时isActiveDisConnected将会是true。
      */
-    fun onScanFail(value: (scanFailType: BleScanFailType) -> Unit) {
-        scanFail = value
+    fun onDisConnected(value: (isActiveDisConnected: Boolean, bleDevice: BleDevice,
+                               gatt: BluetoothGatt, status: Int) -> Unit) {
+        disConnected = value
     }
 
-    /**
-     * 扫描完成
-     * bleDeviceList [onLeScan]扫描到的设备之和
-     * bleDeviceDuplicateRemovalList [onLeScanDuplicateRemoval]扫描到的设备之和
-     */
-    fun onScanComplete(value: (bleDeviceList: MutableList<BleDevice>,
-                               bleDeviceDuplicateRemovalList: MutableList<BleDevice>) -> Unit) {
-        scanComplete = value
+    internal fun callConnectStart() {
+        start?.invoke()
     }
 
-    internal fun callStart() {
-        //MainScope是CoroutineScope类型，为协同作用域，子协程取消后，父协程也会取消
-        MainScope().launch {
-            start?.invoke()
-        }
+    internal fun callConnectFail(bleDevice: BleDevice, connectFailType: BleConnectFailType) {
+        connectFail?.invoke(bleDevice, connectFailType)
     }
 
-    internal fun callLeScan(bleDevice: BleDevice, currentScanCount: Int) {
-        MainScope().launch {
-            leScan?.invoke(bleDevice, currentScanCount)
-        }
+    internal fun callConnectSuccessful(bleDevice: BleDevice, gatt: BluetoothGatt) {
+        connectSuccessful?.invoke(bleDevice, gatt)
     }
 
-    internal fun callLeScanDuplicateRemoval(bleDevice: BleDevice, currentScanCount: Int) {
-        MainScope().launch {
-            leScanDuplicateRemoval?.invoke(bleDevice, currentScanCount)
-        }
-    }
-
-    internal fun callScanFail(scanFailType: BleScanFailType) {
-        MainScope().launch {
-            scanFail?.invoke(scanFailType)
-        }
-    }
-
-    internal fun callScanComplete(bleDeviceList: MutableList<BleDevice>,
-                                  bleDeviceDuplicateRemovalList: MutableList<BleDevice>) {
-        MainScope().launch {
-            scanComplete?.invoke(bleDeviceList, bleDeviceDuplicateRemovalList)
-        }
+    internal fun callDisConnected(isActiveDisConnected: Boolean, bleDevice: BleDevice,
+                                  gatt: BluetoothGatt, status: Int) {
+        disConnected?.invoke(isActiveDisConnected, bleDevice, gatt, status)
     }
 }

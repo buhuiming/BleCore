@@ -26,7 +26,7 @@ internal class BleConnectRequest {
     }
 
     /**
-     * 断开连接
+     * 主动断开连接
      */
     fun disConnect(bleDevice: BleDevice) {
         BleLogger.e("断开连接：${bleDevice.deviceAddress}")

@@ -14,7 +14,6 @@ import com.bhm.ble.data.BleDevice
 import com.bhm.ble.request.BleConnectRequest
 import com.bhm.ble.request.BleRequestManager
 import com.bhm.ble.request.BleScanRequest
-import com.bhm.ble.utils.BleLogger
 
 
 /**
@@ -77,6 +76,6 @@ internal class BleRequestImp private constructor() : BleBaseRequest{
      * 断开所有连接 释放资源
      */
     override fun release() {
-
+        BleRequestManager.get().release()
     }
 }
