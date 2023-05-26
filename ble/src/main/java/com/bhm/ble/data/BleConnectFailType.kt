@@ -14,4 +14,23 @@ package com.bhm.ble.data
  */
 sealed class BleConnectFailType {
 
+    /**
+     * BluetoothDevice为空
+     */
+    object NullableBluetoothDevice: BleConnectFailType()
+
+    /**
+     * 设备不支持Ble
+     */
+    object UnTypeSupportBle: BleConnectFailType()
+
+    /**
+     * 设备未打开蓝牙
+     */
+    object BleDisable: BleConnectFailType()
+
+    /**
+     * 未申请权限
+     */
+    object NoBlePermissionType: BleConnectFailType()
 }

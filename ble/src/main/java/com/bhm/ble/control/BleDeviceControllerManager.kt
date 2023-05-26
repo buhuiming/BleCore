@@ -40,11 +40,12 @@ internal class BleDeviceControllerManager private constructor() {
     /**
      * 添加设备控制器
      */
-    @Synchronized
-    fun addBleDeviceController(bleDeviceController: BleDeviceController) {
+    fun buildBleDeviceController(bleDevice: BleDevice): BleDeviceController{
+        val bleDeviceController = BleDeviceController(bleDevice)
         if (!bleLruHashMap.containsKey(bleDeviceController.getKey())) {
             bleLruHashMap[bleDeviceController.getKey()] = bleDeviceController
         }
+        return bleDeviceController
     }
 
     /**
@@ -56,6 +57,5 @@ internal class BleDeviceControllerManager private constructor() {
             bleLruHashMap.remove(bleDeviceController.getKey())
         }
     }
-
 
 }

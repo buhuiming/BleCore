@@ -8,7 +8,6 @@ package com.bhm.ble.request
 import android.annotation.SuppressLint
 import android.bluetooth.le.*
 import android.os.ParcelUuid
-import com.bhm.ble.BleManager
 import com.bhm.ble.attribute.BleOptions.Companion.DEFAULT_SCAN_MILLIS_TIMEOUT
 import com.bhm.ble.attribute.BleOptions.Companion.DEFAULT_SCAN_RETRY_INTERVAL
 import com.bhm.ble.callback.BleScanCallback
@@ -28,7 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @date 2023年05月22日 09时49分
  */
 @SuppressLint("MissingPermission")
-internal class BleScanRequest {
+internal class BleScanRequest : Request(){
 
     companion object {
         const val CANCEL_WAIT_SCAN_JOB_MESSAGE = "cancelWaitScanJobMessage"
@@ -64,22 +63,27 @@ internal class BleScanRequest {
         this.bleScanCallback = bleScanCallback
         val bleManager = getBleManager()
         if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext)) {
+            BleLogger.e("权限不足，请检查")
             bleScanCallback.callScanFail(BleScanFailType.NoBlePermissionType)
             return
         }
         if (!bleManager.isBleSupport()) {
+            BleLogger.e("设备不支持蓝牙")
             bleScanCallback.callScanFail(BleScanFailType.UnTypeSupportBle)
             return
         }
         if (!BleUtil.isGpsOpen(bleManager.getContext()?.applicationContext)) {
+            BleLogger.e("设备未打开GPS定位")
             bleScanCallback.callScanFail(BleScanFailType.GPSDisable)
             return
         }
         if (!bleManager.isBleEnable()) {
+            BleLogger.e("蓝牙未打开")
             bleScanCallback.callScanFail(BleScanFailType.BleDisable)
             return
         }
         if (isScanning.get()) {
+            BleLogger.e("已存在相同扫描")
             bleScanCallback.callScanFail(BleScanFailType.AlReadyScanning)
             return
         }
@@ -297,9 +301,4 @@ internal class BleScanRequest {
         scanJob?.cancel()
         waitScanJob?.cancel(CancellationException(CANCEL_WAIT_SCAN_JOB_MESSAGE))
     }
-
-    private fun getBleManager() = BleManager.get()
-
-    private fun getBleOptions() = getBleManager().getOptions()
-
 }

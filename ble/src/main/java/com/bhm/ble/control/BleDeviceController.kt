@@ -5,6 +5,7 @@
  */
 package com.bhm.ble.control
 
+import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.data.BleDevice
 
 
@@ -17,6 +18,10 @@ import com.bhm.ble.data.BleDevice
  */
 internal class BleDeviceController(val bleDevice: BleDevice) {
 
+    @Synchronized
+    fun connect(bleConnectCallback: BleConnectCallback) {
+
+    }
 
     @Synchronized
     fun disconnect() {
