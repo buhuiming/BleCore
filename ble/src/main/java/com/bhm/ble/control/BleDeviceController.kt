@@ -6,10 +6,8 @@
 package com.bhm.ble.control
 
 import android.bluetooth.BluetoothGatt
-import android.os.Looper
-import com.bhm.ble.callback.BleConnectCallback
-import com.bhm.ble.callback.BleMtuChangedCallback
-import com.bhm.ble.callback.BleRssiCallback
+import com.bhm.ble.callback.*
+import com.bhm.ble.data.BleConnectLastState
 import com.bhm.ble.data.BleDevice
 
 
@@ -28,19 +26,15 @@ internal class BleDeviceController(val bleDevice: BleDevice) {
 
     private val bleMtuChangedCallback: BleMtuChangedCallback? = null
 
-//    private val bleNotifyCallbackHashMap: HashMap<String, BleNotifyCallback> =
-//        HashMap<String, BleNotifyCallback>()
-//
-//    private val bleIndicateCallbackHashMap: HashMap<String, BleIndicateCallback> =
-//        HashMap<String, BleIndicateCallback>()
-//
-//    private val bleWriteCallbackHashMap: HashMap<String, BleWriteCallback> =
-//        HashMap<String, BleWriteCallback>()
-//
-//    private val bleReadCallbackHashMap: HashMap<String, BleReadCallback> =
-//        HashMap<String, BleReadCallback>()
-//
-//    private val lastState: LastState? = null
+    private val bleNotifyCallbackHashMap: HashMap<String, BleNotifyCallback> = HashMap()
+
+    private val bleIndicateCallbackHashMap: HashMap<String, BleIndicateCallback> = HashMap()
+
+    private val bleWriteCallbackHashMap: HashMap<String, BleWriteCallback> = HashMap()
+
+    private val bleReadCallbackHashMap: HashMap<String, BleReadCallback> = HashMap()
+
+    private val lastState: BleConnectLastState? = null
 
     private val isActiveDisconnect = false
 
@@ -59,4 +53,8 @@ internal class BleDeviceController(val bleDevice: BleDevice) {
     }
 
     fun getKey() = bleDevice.getKey()
+
+    fun clearCallbacks() {
+//        bleNotifyCallbackHashMap.clear()
+    }
 }

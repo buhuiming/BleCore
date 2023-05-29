@@ -7,6 +7,7 @@ package com.bhm.ble.callback
 
 import com.bhm.ble.request.BleRequestManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 
@@ -20,8 +21,8 @@ open class BleBaseCallback {
 
     private val mainScope = BleRequestManager.get().getMainScope()
 
-    fun launchInMainThread(block: suspend CoroutineScope.() -> Unit) {
-        mainScope.launch {
+    fun launchInMainThread(block: suspend CoroutineScope.() -> Unit): Job {
+        return mainScope.launch {
             block.invoke(this)
         }
     }

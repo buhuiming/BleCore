@@ -58,4 +58,7 @@ internal class BleDeviceControllerManager private constructor() {
         }
     }
 
+    fun removeAll() {
+        bleLruHashMap.clear()
+    }
 }
