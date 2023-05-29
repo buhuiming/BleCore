@@ -20,12 +20,12 @@ class BleConnectCallback : BleBaseCallback(){
 
     private var start: (() -> Unit)? = null
 
-    private var connectSuccess: ((bleDevice: BleDevice, gatt: BluetoothGatt) -> Unit)? = null
+    private var connectSuccess: ((bleDevice: BleDevice, gatt: BluetoothGatt?) -> Unit)? = null
 
     private var connectFail: ((bleDevice: BleDevice, connectFailType: BleConnectFailType) -> Unit)? = null
 
     private var disConnected: ((isActiveDisConnected: Boolean, bleDevice: BleDevice,
-                                gatt: BluetoothGatt, status: Int) -> Unit)? = null
+                                gatt: BluetoothGatt?, status: Int) -> Unit)? = null
 
     /**
      * 开始连接
@@ -37,7 +37,7 @@ class BleConnectCallback : BleBaseCallback(){
     /**
      * 连接成功
      */
-    fun onConnectSuccess(value: (bleDevice: BleDevice, gatt: BluetoothGatt) -> Unit) {
+    fun onConnectSuccess(value: (bleDevice: BleDevice, gatt: BluetoothGatt?) -> Unit) {
         connectSuccess = value
     }
 
@@ -55,7 +55,7 @@ class BleConnectCallback : BleBaseCallback(){
      * 此时isActiveDisConnected将会是true。
      */
     fun onDisConnected(value: (isActiveDisConnected: Boolean, bleDevice: BleDevice,
-                               gatt: BluetoothGatt, status: Int) -> Unit) {
+                               gatt: BluetoothGatt?, status: Int) -> Unit) {
         disConnected = value
     }
 
@@ -67,12 +67,12 @@ class BleConnectCallback : BleBaseCallback(){
         connectFail?.invoke(bleDevice, connectFailType)
     }
 
-    internal fun callConnectSuccess(bleDevice: BleDevice, gatt: BluetoothGatt) {
+    internal fun callConnectSuccess(bleDevice: BleDevice, gatt: BluetoothGatt?) {
         connectSuccess?.invoke(bleDevice, gatt)
     }
 
     internal fun callDisConnected(isActiveDisConnected: Boolean, bleDevice: BleDevice,
-                                  gatt: BluetoothGatt, status: Int) {
+                                  gatt: BluetoothGatt?, status: Int) {
         disConnected?.invoke(isActiveDisConnected, bleDevice, gatt, status)
     }
 }

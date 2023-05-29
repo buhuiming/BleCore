@@ -32,7 +32,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 internal class BleScanRequest private constructor() : Request(){
 
     companion object {
-        const val CANCEL_WAIT_SCAN_JOB_MESSAGE = "cancelWaitScanJobMessage"
 
         private var instance: BleScanRequest = BleScanRequest()
 
@@ -204,7 +203,7 @@ internal class BleScanRequest private constructor() : Request(){
             waitScanJob?.invokeOnCompletion {
                 //手动取消，等待扫描任务取消后，要返回最终信息
                 //waitScanJob取消后，会导致scanJob被取消
-                if (CANCEL_WAIT_SCAN_JOB_MESSAGE == it?.message) {
+                if (CANCEL_WAIT_JOB_MESSAGE == it?.message) {
                     onCompletion(scanner, scanFilters, scanSetting, it)
                 }
             }
@@ -313,6 +312,6 @@ internal class BleScanRequest private constructor() : Request(){
         isScanning.set(false)
         cancelScan.set(true)
         scanJob?.cancel()
-        waitScanJob?.cancel(CancellationException(CANCEL_WAIT_SCAN_JOB_MESSAGE))
+        waitScanJob?.cancel(CancellationException(CANCEL_WAIT_JOB_MESSAGE))
     }
 }

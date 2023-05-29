@@ -19,3 +19,5 @@ internal open class Request {
 
     fun getBleOptions() = getBleManager().getOptions()
 }
+
+const val CANCEL_WAIT_JOB_MESSAGE = "cancelWaitJobMessage"

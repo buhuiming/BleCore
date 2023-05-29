@@ -51,6 +51,16 @@ internal class BleConnectRequestManager private constructor() {
     }
 
     /**
+     * 获取设备控制器
+     */
+    fun getBleConnectRequest(bleDevice: BleDevice): BleConnectRequest? {
+        if (bleLruHashMap.containsKey(bleDevice.getKey())) {
+            return bleLruHashMap[bleDevice.getKey()]
+        }
+        return null
+    }
+
+    /**
      * 移除设备控制器
      */
     @Synchronized

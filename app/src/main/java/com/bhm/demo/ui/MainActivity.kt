@@ -83,7 +83,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
                     viewModel.connect(bleDevice)
                 }
             } else if (view.id == R.id.btnOperate) {
-
+                viewModel.disConnect(bleDevice)
             }
         }
 
@@ -100,7 +100,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
                     viewModel.connect(bleDevice)
                 }
             } else if (view.id == R.id.btnOperate) {
-
+                viewModel.disConnect(bleDevice)
             }
         }
 

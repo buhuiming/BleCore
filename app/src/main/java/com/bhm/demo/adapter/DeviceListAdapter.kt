@@ -52,7 +52,7 @@ class DeviceListAdapter(data: MutableList<BleDevice>?
             holder.binding.btnOperate.isEnabled = true
         } else {
             holder.binding.btnConnect.text = "连接"
-            holder.binding.btnOperate.isEnabled = false
+            holder.binding.btnOperate.isEnabled = true
         }
     }
 }

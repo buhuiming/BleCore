@@ -6,6 +6,7 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.lifecycle.viewModelScope
 import com.bhm.ble.BleManager
+import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.data.BleDevice
 import com.bhm.ble.data.BleScanFailType
 import com.bhm.ble.utils.BleLogger
@@ -49,7 +50,13 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
      * 初始化蓝牙组件
      */
     fun initBle() {
-        BleManager.get().init(application)
+        BleManager.get().init(application,
+            BleOptions.Builder()
+                .setScanMillisTimeOut(2000)
+                .setConnectMillisTimeOut(4000)
+                .setConnectRetryCountAndInterval(1, 2000)
+                .build()
+        )
     }
 
     /**

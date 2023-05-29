@@ -33,4 +33,19 @@ sealed class BleConnectFailType {
      * 未申请权限
      */
     object NoBlePermissionType: BleConnectFailType()
+
+    /**
+     * 连接异常
+     */
+    object ConnectException: BleConnectFailType()
+
+    /**
+     * 连接超时
+     */
+    object ConnectTimeOut: BleConnectFailType()
+
+    /**
+     * 连接中
+     */
+    object AlreadyConnecting: BleConnectFailType()
 }

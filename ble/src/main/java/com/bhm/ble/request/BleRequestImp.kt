@@ -73,7 +73,9 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      * 断开连接
      */
     override fun disConnect(bleDevice: BleDevice) {
-
+        BleConnectRequestManager.get()
+            .getBleConnectRequest(bleDevice)
+            ?.disConnect()
     }
 
     /**
