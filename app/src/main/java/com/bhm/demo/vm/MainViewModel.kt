@@ -50,26 +50,6 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
      */
     fun initBle() {
         BleManager.get().init(application)
-//        val options =
-//            BleOptions.builder()
-////                .setScanServiceUuid("0000ff80-0000-1000-8000-00805f9b34fb", "0000ff90-0000-1000-8000-00805f9b34fb")
-////                .setScanDeviceName("midea", "BYD BLE3")
-////                .setScanDeviceAddress("70:86:CE:88:7A:AF", "5B:AE:65:88:59:5E", "B8:8C:29:8B:BE:07")
-////                .isContainScanDeviceName(false)
-////                .setEnableLog(true)
-//                .setScanMillisTimeOut(5000)
-////                //这个机制是：不会因为扫描的次数导致上一次扫描到的数据被清空，也就是onScanStart和onScanComplete
-////                //都只会回调一次，而且扫描到的数据是所有扫描次数的总和
-////                .setScanRetryCountAndInterval(3, 1000)
-//                .setConnectMillisTimeOut(10000)//实现中
-//                .setConnectRetryCountAndInterval(0, 1000)//实现中
-//                .setAutoConnect(false)//实现中
-//                .setOperateMillisTimeOut(6000)//实现中
-//                .setWriteInterval(80)//实现中
-//                .setMaxConnectNum(5)//实现中
-//                .setMtu(500)//实现中
-//                .build()
-//        BleManager.get().init(application, options)
     }
 
     /**
@@ -195,6 +175,11 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
     fun stopScan() {
         BleManager.get().stopScan()
     }
+
+    /**
+     * 是否已连接
+     */
+    fun isConnected(bleDevice: BleDevice?) = BleManager.get().isConnected(bleDevice)
 
     /**
      * 开始连接

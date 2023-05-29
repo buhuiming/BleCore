@@ -3,6 +3,8 @@
  * 不能修改和删除上面的版权声明
  * 此代码属于buhuiming编写，在未经允许的情况下不得传播复制
  */
+@file:Suppress("SENSELESS_COMPARISON")
+
 package com.bhm.ble.request
 
 import android.annotation.SuppressLint
@@ -27,10 +29,20 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @date 2023年05月22日 09时49分
  */
 @SuppressLint("MissingPermission")
-internal class BleScanRequest : Request(){
+internal class BleScanRequest private constructor() : Request(){
 
     companion object {
         const val CANCEL_WAIT_SCAN_JOB_MESSAGE = "cancelWaitScanJobMessage"
+
+        private var instance: BleScanRequest = BleScanRequest()
+
+        @Synchronized
+        fun get(): BleScanRequest {
+            if (instance == null) {
+                instance = BleScanRequest()
+            }
+            return instance
+        }
     }
 
     private val isScanning = AtomicBoolean(false)

@@ -5,15 +5,13 @@
  */
 @file:Suppress("SENSELESS_COMPARISON")
 
-package com.bhm.ble.request.proxy
+package com.bhm.ble.request
 
-import com.bhm.ble.request.BleBaseRequest
 import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.data.BleDevice
-import com.bhm.ble.request.BleConnectRequest
-import com.bhm.ble.request.BleRequestManager
-import com.bhm.ble.request.BleScanRequest
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 
 
 /**
@@ -23,6 +21,8 @@ import com.bhm.ble.request.BleScanRequest
  * @date 2023年05月22日 10时41分
  */
 internal class BleRequestImp private constructor() : BleBaseRequest {
+
+    private val mainScope = MainScope()
 
     companion object {
 
@@ -37,45 +37,49 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         }
     }
 
+    fun getMainScope() = mainScope
+
     /**
      * 开始扫描
      */
     override fun startScan(bleScanCallback: BleScanCallback) {
-        BleRequestManager.get().getRequest(BleScanRequest::class.java).startScan(bleScanCallback)
+        BleScanRequest.get().startScan(bleScanCallback)
     }
 
     /**
      * 是否扫描中
      */
     override fun isScanning(): Boolean {
-        return BleRequestManager.get().getRequest(BleScanRequest::class.java).isScanning()
+        return BleScanRequest.get().isScanning()
     }
 
     /**
      * 停止扫描
      */
     override fun stopScan() {
-        BleRequestManager.get().getRequest(BleScanRequest::class.java).stopScan()
+        BleScanRequest.get().stopScan()
     }
 
     /**
      * 开始连接
      */
     override fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback) {
-        BleRequestManager.get().getRequest(BleConnectRequest::class.java).connect(bleDevice, bleConnectCallback)
+        BleConnectRequestManager.get()
+            .buildBleConnectRequest(bleDevice)
+            ?.connect(bleConnectCallback)
     }
 
     /**
      * 断开连接
      */
     override fun disConnect(bleDevice: BleDevice) {
-        BleRequestManager.get().getRequest(BleConnectRequest::class.java).disConnect(bleDevice)
+
     }
 
     /**
      * 断开所有连接 释放资源
      */
     override fun release() {
-        BleRequestManager.get().release()
+        mainScope.cancel()
     }
 }

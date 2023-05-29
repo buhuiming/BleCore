@@ -70,22 +70,38 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
             }
         }
 
-        leftListAdapter?.addChildClickViewIds(R.id.btnConnect)
+        leftListAdapter?.addChildClickViewIds(R.id.btnConnect, R.id.btnOperate)
         leftListAdapter?.setOnItemChildClickListener { adapter, view, position ->
             if (ViewUtil.isInvalidClick(view)) {
                 return@setOnItemChildClickListener
             }
             val bleDevice: BleDevice? = adapter.data[position] as BleDevice?
-            viewModel.connect(bleDevice)
+            if (view.id == R.id.btnConnect) {
+                if (viewModel.isConnected(bleDevice)) {
+                    viewModel.disConnect(bleDevice)
+                } else {
+                    viewModel.connect(bleDevice)
+                }
+            } else if (view.id == R.id.btnOperate) {
+
+            }
         }
 
-        rightListAdapter?.addChildClickViewIds(R.id.btnConnect)
+        rightListAdapter?.addChildClickViewIds(R.id.btnConnect, R.id.btnOperate)
         rightListAdapter?.setOnItemChildClickListener { adapter, view, position ->
             if (ViewUtil.isInvalidClick(view)) {
                 return@setOnItemChildClickListener
             }
             val bleDevice: BleDevice? = adapter.data[position] as BleDevice?
-            viewModel.disConnect(bleDevice)
+            if (view.id == R.id.btnConnect) {
+                if (viewModel.isConnected(bleDevice)) {
+                    viewModel.disConnect(bleDevice)
+                } else {
+                    viewModel.connect(bleDevice)
+                }
+            } else if (view.id == R.id.btnOperate) {
+
+            }
         }
 
         viewBinding.btnSetting.setOnClickListener {

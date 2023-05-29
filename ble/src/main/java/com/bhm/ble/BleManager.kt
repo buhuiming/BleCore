@@ -2,16 +2,17 @@
 
 package com.bhm.ble
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothProfile
 import android.content.Context
 import com.bhm.ble.attribute.BleOptions
-import com.bhm.ble.request.BleBaseRequest
 import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.data.BleDevice
-import com.bhm.ble.request.proxy.BleRequestImp
-import com.bhm.ble.request.proxy.BleRequestProxy
+import com.bhm.ble.request.BleBaseRequest
+import com.bhm.ble.request.BleRequestImp
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 
@@ -53,7 +54,7 @@ class BleManager private constructor() {
         if (bleOptions == null) {
             bleOptions = BleOptions.getDefaultBleOptions()
         }
-        bleBaseRequest = BleRequestProxy.get().bindProxy(BleRequestImp.get()) as BleBaseRequest
+        bleBaseRequest = BleRequestImp.get()
         bluetoothManager = application?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?
         BleLogger.isLogger = bleOptions?.enableLog?: false
         BleLogger.d("ble Successful initialization")
@@ -100,6 +101,18 @@ class BleManager private constructor() {
     @Synchronized
     fun stopScan() {
         bleBaseRequest?.stopScan()
+    }
+
+    /**
+     * 是否已连接
+     */
+    @SuppressLint("MissingPermission")
+    fun isConnected(bleDevice: BleDevice?): Boolean {
+        bleDevice?.let {
+            return bluetoothManager?.getConnectionState(it.deviceInfo, BluetoothProfile.GATT) ==
+                    BluetoothProfile.STATE_CONNECTED
+        }
+        return false
     }
 
     /**

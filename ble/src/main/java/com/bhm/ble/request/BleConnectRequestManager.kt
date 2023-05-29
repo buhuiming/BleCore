@@ -5,33 +5,34 @@
  */
 @file:Suppress("SENSELESS_COMPARISON")
 
-package com.bhm.ble.control
+package com.bhm.ble.request
 
 import com.bhm.ble.BleManager
 import com.bhm.ble.attribute.BleOptions
+import com.bhm.ble.control.BleLruHashMap
 import com.bhm.ble.data.BleDevice
 
 
 /**
- * 连接设备BleDeviceController管理池
+ * 连接设备BleConnectRequest管理池
  *
  * @author Buhuiming
  * @date 2023年05月26日 08时54分
  */
-internal class BleDeviceControllerManager private constructor() {
+internal class BleConnectRequestManager private constructor() {
 
-    private val bleLruHashMap: BleLruHashMap<String, BleDeviceController> =
+    private val bleLruHashMap: BleLruHashMap<String, BleConnectRequest?> =
         BleLruHashMap(BleManager.get().getOptions()?.maxConnectNum
             ?: BleOptions.DEFAULT_MAX_CONNECT_NUM)
 
     companion object {
 
-        private var instance: BleDeviceControllerManager = BleDeviceControllerManager()
+        private var instance: BleConnectRequestManager = BleConnectRequestManager()
 
         @Synchronized
-        fun get(): BleDeviceControllerManager {
+        fun get(): BleConnectRequestManager {
             if (instance == null) {
-                instance = BleDeviceControllerManager()
+                instance = BleConnectRequestManager()
             }
             return instance
         }
@@ -40,19 +41,20 @@ internal class BleDeviceControllerManager private constructor() {
     /**
      * 添加设备控制器
      */
-    fun buildBleDeviceController(bleDevice: BleDevice): BleDeviceController{
-        val bleDeviceController = BleDeviceController(bleDevice)
-        if (!bleLruHashMap.containsKey(bleDeviceController.getKey())) {
-            bleLruHashMap[bleDeviceController.getKey()] = bleDeviceController
+    fun buildBleConnectRequest(bleDevice: BleDevice): BleConnectRequest? {
+        if (bleLruHashMap.containsKey(bleDevice.getKey())) {
+            return bleLruHashMap[bleDevice.getKey()]
         }
-        return bleDeviceController
+        val bleConnectRequest = BleConnectRequest(bleDevice)
+        bleLruHashMap[bleDevice.getKey()] = bleConnectRequest
+        return bleConnectRequest
     }
 
     /**
      * 移除设备控制器
      */
     @Synchronized
-    fun removeBleDeviceController(key: String) {
+    fun removeBleConnectRequest(key: String) {
         if (bleLruHashMap.containsKey(key)) {
             bleLruHashMap.remove(key)
         }

@@ -2,6 +2,7 @@ package com.bhm.demo.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import com.bhm.ble.BleManager
 import com.bhm.ble.data.BleDevice
 import com.bhm.demo.R
 import com.bhm.demo.databinding.LayoutRecyclerItemBinding
@@ -45,6 +46,13 @@ class DeviceListAdapter(data: MutableList<BleDevice>?
             holder.binding.ivRssi.setImageResource(R.drawable.adddevice_device_signal_two_icon)
         } else {
             holder.binding.ivRssi.setImageResource(R.drawable.adddevice_device_signal_one_icon)
+        }
+        if (BleManager.get().isConnected(item)) {
+            holder.binding.btnConnect.text = "断开"
+            holder.binding.btnOperate.isEnabled = true
+        } else {
+            holder.binding.btnConnect.text = "连接"
+            holder.binding.btnOperate.isEnabled = false
         }
     }
 }

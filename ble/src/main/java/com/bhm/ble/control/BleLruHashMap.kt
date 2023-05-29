@@ -5,11 +5,12 @@
  */
 package com.bhm.ble.control
 
+import com.bhm.ble.request.BleConnectRequest
 import kotlin.math.ceil
 
 
 /**
- * 存放BleDeviceController的容器
+ * 存放BleConnectRequest的容器
  *
  * @author Buhuiming
  * @date 2023年05月26日 08时59分
@@ -21,8 +22,8 @@ class BleLruHashMap<K, V>(saveSize: Int) : LinkedHashMap<K, V>(
 
     override fun removeEldestEntry(eldest: MutableMap.MutableEntry<K, V>?): Boolean {
         eldest?.let {
-            if (size > maxSize && it.value is BleDeviceController) {
-                (it.value as BleDeviceController).disconnect()
+            if (size > maxSize && it.value is BleConnectRequest) {
+                (it.value as BleConnectRequest).disConnect()
             }
         }
         return size > maxSize
