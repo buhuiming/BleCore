@@ -37,7 +37,7 @@ sealed class BleConnectFailType {
     /**
      * 连接异常
      */
-    object ConnectException: BleConnectFailType()
+    class ConnectException(val throwable: Throwable): BleConnectFailType()
 
     /**
      * 连接超时

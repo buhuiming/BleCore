@@ -44,6 +44,11 @@ internal interface BleBaseRequest {
     fun disConnect(bleDevice: BleDevice)
 
     /**
+     * 是否已连接
+     */
+    fun isConnected(bleDevice: BleDevice): Boolean
+
+    /**
      * 断开所有连接 释放资源
      */
     fun release()

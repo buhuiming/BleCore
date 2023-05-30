@@ -67,27 +67,32 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     fun connect(bleConnectCallback: BleConnectCallback) {
         if (bleDevice.deviceInfo == null) {
             BleLogger.e("连接失败：BluetoothDevice为空")
+            BleConnectRequestManager.get().removeBleConnectRequest(bleDevice.getKey())
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.NullableBluetoothDevice)
             return
         }
         val bleManager = getBleManager()
         if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext)) {
             BleLogger.e("权限不足，请检查")
+            BleConnectRequestManager.get().removeBleConnectRequest(bleDevice.getKey())
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.NoBlePermissionType)
             return
         }
         if (!bleManager.isBleSupport()) {
             BleLogger.e("设备不支持蓝牙")
+            BleConnectRequestManager.get().removeBleConnectRequest(bleDevice.getKey())
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.UnTypeSupportBle)
             return
         }
         if (!bleManager.isBleEnable()) {
             BleLogger.e("蓝牙未打开")
+            BleConnectRequestManager.get().removeBleConnectRequest(bleDevice.getKey())
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.BleDisable)
             return
         }
         if (lastState == BleConnectLastState.Connecting) {
             BleLogger.e("连接中")
+            BleConnectRequestManager.get().removeBleConnectRequest(bleDevice.getKey())
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.AlreadyConnecting)
             return
         }
@@ -175,7 +180,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                         connectFail()
                         bleConnectCallback?.callConnectFail(
                             bleDevice,
-                            BleConnectFailType.ConnectException
+                            BleConnectFailType.ConnectException(it)
                         )
                         connectJob?.cancel(null)
                         waitConnectJob?.cancel(null)
@@ -190,16 +195,50 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
      */
     @Synchronized
     fun disConnect() {
+        if (bleDevice.deviceInfo == null) {
+            BleLogger.e("断开失败：BluetoothDevice为空")
+            bleConnectCallback?.callConnectFail(bleDevice, BleConnectFailType.NullableBluetoothDevice)
+            return
+        }
+        val bleManager = getBleManager()
+        if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext)) {
+            BleLogger.e("权限不足，请检查")
+            bleConnectCallback?.callConnectFail(bleDevice, BleConnectFailType.NoBlePermissionType)
+            return
+        }
+        if (!bleManager.isBleSupport()) {
+            BleLogger.e("设备不支持蓝牙")
+            bleConnectCallback?.callConnectFail(bleDevice, BleConnectFailType.UnTypeSupportBle)
+            return
+        }
+        if (!bleManager.isBleEnable()) {
+            BleLogger.e("蓝牙未打开")
+            bleConnectCallback?.callConnectFail(bleDevice, BleConnectFailType.BleDisable)
+            return
+        }
         isActiveDisconnect.set(true)
-        val throwable = ActiveDisConnectedThrowable()
-        connectJob?.cancel(throwable)
-        waitConnectJob?.cancel(throwable)
-        if (lastState == BleConnectLastState.Connecting) {
+        if (lastState == BleConnectLastState.ConnectIdle ||
+            lastState == BleConnectLastState.Connecting) {
+            val throwable = ActiveDisConnectedThrowable()
+            connectJob?.cancel(throwable)
+            waitConnectJob?.cancel(throwable)
             //连接过程中断开
-            refreshDeviceCache()
-            closeBluetoothGatt()
             //进入判断是否重连
             onCompletion(Throwable("连接过程中断开"))
+        } else {
+            lastState = BleConnectLastState.Disconnect
+            disConnectGatt()
+            refreshDeviceCache()
+            closeBluetoothGatt()
+            BleConnectRequestManager.get()
+                .removeBleConnectRequest(bleDevice.getKey())
+            removeRssiCallback()
+            removeMtuChangedCallback()
+            clearCharacterCallback()
+            bleConnectCallback?.callDisConnected(
+                isActiveDisconnect.get(),
+                bleDevice, bluetoothGatt, BluetoothGatt.GATT_SUCCESS
+            )
         }
     }
 
@@ -237,11 +276,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                     }
                     //所有断开连接的情况
                     BleConnectLastState.Connected -> {
-                        if (!isActiveDisconnect.get() && autoConnect) {
-                            //如果不是主动断开，则进入重连
-                            checkIfContinueConnect(Throwable("已连接非主动断开"))
-                        } else {
-                            //主动断开，则直接返回结果
+                        if (!isActiveDisconnect.get()) {
                             lastState = BleConnectLastState.Disconnect
                             refreshDeviceCache()
                             closeBluetoothGatt()
@@ -281,6 +316,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                 retryCount = 0
             }
             if (retryCount > 0 && currentConnectRetryCount < retryCount) {
+                BleLogger.i("满足重连条件：currentConnectRetryCount = $currentConnectRetryCount")
                 return true
             }
         }

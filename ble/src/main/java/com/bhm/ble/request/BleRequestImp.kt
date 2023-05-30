@@ -79,6 +79,13 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
+     * 是否已连接
+     */
+    override fun isConnected(bleDevice: BleDevice): Boolean {
+        return BleConnectRequestManager.get().isContainDevice(bleDevice)
+    }
+
+    /**
      * 断开所有连接 释放资源
      */
     override fun release() {

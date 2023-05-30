@@ -105,12 +105,13 @@ class BleManager private constructor() {
 
     /**
      * 是否已连接
+     * 操作断开连接后，getConnectionState马上回去到的状态还是连接状态，所以需要bleBaseRequest?.isConnected判断
      */
     @SuppressLint("MissingPermission")
     fun isConnected(bleDevice: BleDevice?): Boolean {
         bleDevice?.let {
             return bluetoothManager?.getConnectionState(it.deviceInfo, BluetoothProfile.GATT) ==
-                    BluetoothProfile.STATE_CONNECTED
+                    BluetoothProfile.STATE_CONNECTED && bleBaseRequest?.isConnected(it) == true
         }
         return false
     }

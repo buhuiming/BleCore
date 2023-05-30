@@ -50,7 +50,7 @@ class BleOptions private constructor(builder: Builder) {
 
         const val CONTAIN_SCAN_DEVICE_NAME = false
 
-        const val AUTO_CONNECT = false
+        const val AUTO_CONNECT = true
 
         const val ENABLE_LOG = true
 
@@ -158,7 +158,7 @@ class BleOptions private constructor(builder: Builder) {
         }
 
         /**
-         * 扫描后是否自动连接，当扫描到多个设备时，自动连接第一个设备
+         * 非主动断开后是否自动连接，默认为[AUTO_CONNECT]
          */
         fun setAutoConnect(autoConnect: Boolean) = apply {
             this.autoConnect = autoConnect

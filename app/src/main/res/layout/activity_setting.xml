@@ -415,7 +415,7 @@
                 <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="扫描后是否自动连接："
+                        android:text="非主动断开后是否自动连接："
                         android:textSize="16sp"
                         android:textColor="@color/black"
                         android:layout_marginEnd="12dp"/>
@@ -428,13 +428,6 @@
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="*扫描后是否自动连接，当扫描到多个设备时，自动连接第一个设备："
-                    android:textSize="13sp"
-                    android:textColor="#ff0000"
-                    android:layout_marginEnd="12dp"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
 
     </androidx.core.widget.NestedScrollView>

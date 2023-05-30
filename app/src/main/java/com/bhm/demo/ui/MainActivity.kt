@@ -6,7 +6,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bhm.ble.BleManager
 import com.bhm.ble.data.BleDevice
 import com.bhm.ble.utils.BleLogger
 import com.bhm.demo.BaseActivity
@@ -63,13 +62,15 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
 
         lifecycleScope.launch {
             viewModel.refreshStateFlow.collect {
+                delay(300)
+                dismissLoading()
                 it?.bleDevice?.let { bleDevice ->
                     val position = listAdapter?.data?.indexOf(bleDevice) ?: -1
                     if (position >= 0) {
                         listAdapter?.notifyItemChanged(position)
                     }
+                    BleLogger.i("item isConnected: ${viewModel.isConnected(bleDevice)}")
                 }
-                dismissLoading()
             }
         }
 

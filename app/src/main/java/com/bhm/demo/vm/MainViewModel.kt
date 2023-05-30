@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.lifecycle.viewModelScope
 import com.bhm.ble.BleManager
 import com.bhm.ble.attribute.BleOptions
+import com.bhm.ble.data.BleConnectFailType
 import com.bhm.ble.data.BleDevice
 import com.bhm.ble.data.BleScanFailType
 import com.bhm.ble.utils.BleLogger
@@ -41,7 +42,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
     val scanStopStateFlow: StateFlow<Boolean> = scanStopMutableStateFlow
 
     private val refreshMutableStateFlow = MutableStateFlow(
-        RefreshBleDevice(null, false)
+        RefreshBleDevice(null, null)
     )
 
     val refreshStateFlow: StateFlow<RefreshBleDevice?> = refreshMutableStateFlow
@@ -217,16 +218,27 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                     BleLogger.e("-----onConnectStart")
                 }
                 onConnectFail { _, connectFailType ->
-                    BleLogger.e("-----onConnectFail: $connectFailType")
-                    refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, false)
+                    val msg: String = when (connectFailType) {
+                        is BleConnectFailType.UnTypeSupportBle -> "BleConnectFailType.UnTypeSupportBle：设备不支持蓝牙"
+                        is BleConnectFailType.NoBlePermissionType -> "BleConnectFailType.NoBlePermissionType: 权限不足，请检查"
+                        is BleConnectFailType.NullableBluetoothDevice -> "BleConnectFailType.NullableBluetoothDevice: 设备为空"
+                        is BleConnectFailType.BleDisable -> "BleConnectFailType.BleDisable: 蓝牙未打开"
+                        is BleConnectFailType.ConnectException -> "BleConnectFailType.ConnectException: " +
+                                "连接异常(${connectFailType.throwable.message})"
+                        is BleConnectFailType.ConnectTimeOut -> "BleConnectFailType.ConnectTimeOut: 连接超时"
+                        is BleConnectFailType.AlreadyConnecting -> "BleConnectFailType.AlreadyConnecting: 连接中"
+                    }
+                    BleLogger.e(msg)
+                    Toast.makeText(application, msg, Toast.LENGTH_SHORT).show()
+                    refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
                 }
                 onDisConnected { isActiveDisConnected, bleDevice, _, _ ->
                     BleLogger.e("-----onDisConnected: $isActiveDisConnected")
-                    refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, false)
+                    refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
                 }
                 onConnectSuccess { bleDevice, _ ->
                     BleLogger.e("-----onConnectSuccess")
-                    refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, true)
+                    refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
                 }
             }
         }
