@@ -26,6 +26,7 @@ data class BleDevice(
     val rssi: Int?, //被扫描到时候的信号强度
     val timestampNanos: Long?, //当扫描记录被观察到时，返回自启动以来的时间戳。
     val scanRecord: ScanRecord?, // 被扫描到时候携带的广播数据
+    var tag: Int? = 0 //预留字段
 ) : Parcelable{
 
     constructor(parcel: Parcel) : this(
@@ -35,6 +36,7 @@ data class BleDevice(
         parcel.readValue(Int::class.java.classLoader) as? Int,
         parcel.readValue(Long::class.java.classLoader) as? Long,
         parcel.readValue(ScanRecord::class.java.classLoader) as? ScanRecord,
+        parcel.readValue(Int::class.java.classLoader) as? Int,
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -43,6 +45,7 @@ data class BleDevice(
         parcel.writeString(deviceAddress)
         parcel.writeValue(rssi)
         parcel.writeValue(timestampNanos)
+        parcel.writeValue(tag)
     }
 
     override fun describeContents(): Int {
@@ -78,4 +81,5 @@ data class BleDevice(
     }
 
     fun getKey() = deviceName + deviceAddress
+
 }

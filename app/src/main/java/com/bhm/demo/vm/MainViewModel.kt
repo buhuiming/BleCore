@@ -13,6 +13,7 @@ import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.constants.LOCATION_PERMISSION
+import com.bhm.demo.entity.RefreshBleDevice
 import com.bhm.support.sdk.common.BaseViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,13 +29,6 @@ import kotlin.coroutines.suspendCoroutine
  */
 class MainViewModel(private val application: Application) : BaseViewModel(application) {
 
-    private val listMutableStateFlow = MutableStateFlow(BleDevice(null,
-        null, null, null, null, null))
-
-    val listStateFlow: StateFlow<BleDevice> = listMutableStateFlow
-
-    val listData = mutableListOf<BleDevice>()
-
     private val listDRMutableStateFlow = MutableStateFlow(BleDevice(null,
         null, null, null, null, null))
 
@@ -46,15 +40,41 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
 
     val scanStopStateFlow: StateFlow<Boolean> = scanStopMutableStateFlow
 
+    private val refreshMutableStateFlow = MutableStateFlow(
+        RefreshBleDevice(null, false)
+    )
+
+    val refreshStateFlow: StateFlow<RefreshBleDevice?> = refreshMutableStateFlow
+
     /**
      * 初始化蓝牙组件
      */
     fun initBle() {
+//        val options =
+//            BleOptions.builder()
+//                .setScanServiceUuid("0000ff80-0000-1000-8000-00805f9b34fb")
+//                .setScanDeviceName("midea")
+//                .setScanDeviceAddress("70:86:CE:88:7A:AF")
+//                .isContainScanDeviceName(true)
+//                .setEnableLog(true)
+//                .setScanMillisTimeOut(4000)
+//                //这个机制是：不会因为扫描的次数导致上一次扫描到的数据被清空，也就是onStart和onScanComplete
+//                //都只会回调一次，而且扫描到的数据是所有扫描次数的总和
+//                .setScanRetryCountAndInterval(2, 1000)
+//                .setConnectMillisTimeOut(10000)
+//                .setConnectRetryCountAndInterval(0, 1000)
+//                .setAutoConnect(false)//实现中
+//                .setOperateMillisTimeOut(6000)//实现中
+//                .setWriteInterval(80)//实现中
+//                .setMaxConnectNum(5)//实现中
+//                .setMtu(500)//实现中
+//                .build()
         BleManager.get().init(application,
             BleOptions.Builder()
                 .setScanMillisTimeOut(2000)
-                .setConnectMillisTimeOut(4000)
-                .setConnectRetryCountAndInterval(1, 2000)
+                .setConnectMillisTimeOut(5000)
+                .setMaxConnectNum(3)
+                .setConnectRetryCountAndInterval(1, 1000)
                 .build()
         )
     }
@@ -127,8 +147,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                     onLeScan { bleDevice, _ ->
                         //可以根据currentScanCount是否已有清空列表数据
                         bleDevice.deviceName?.let { _ ->
-                            listData.add(bleDevice)
-                            listMutableStateFlow.value = bleDevice
+
                         }
                     }
                     onLeScanDuplicateRemoval { bleDevice, _ ->
@@ -150,7 +169,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                             }
                         }
                         scanStopMutableStateFlow.value = true
-                        if (listData.isEmpty()) {
+                        if (listDRData.isEmpty()) {
                             Toast.makeText(application, "没有扫描到数据", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -194,7 +213,21 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
     fun connect(bleDevice: BleDevice?) {
         bleDevice?.let { device ->
             BleManager.get().connect(device) {
-
+                onConnectStart {
+                    BleLogger.e("-----onConnectStart")
+                }
+                onConnectFail { _, connectFailType ->
+                    BleLogger.e("-----onConnectFail: $connectFailType")
+                    refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, false)
+                }
+                onDisConnected { isActiveDisConnected, bleDevice, _, _ ->
+                    BleLogger.e("-----onDisConnected: $isActiveDisConnected")
+                    refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, false)
+                }
+                onConnectSuccess { bleDevice, _ ->
+                    BleLogger.e("-----onConnectSuccess")
+                    refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, true)
+                }
             }
         }
     }

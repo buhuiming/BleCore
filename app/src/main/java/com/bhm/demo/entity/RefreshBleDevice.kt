@@ -3,13 +3,13 @@
  * 不能修改和删除上面的版权声明
  * 此代码属于buhuiming编写，在未经允许的情况下不得传播复制
  */
-package com.bhm.ble.control
+package com.bhm.demo.entity
+
+import com.bhm.ble.data.BleDevice
 
 
 /**
- * 完成时抛出的Throwable
- *
  * @author Buhuiming
- * @date 2023年05月29日 16时18分
+ * @date 2023年05月30日 11时57分
  */
-internal class CompleteThrowable : Throwable()
+data class RefreshBleDevice(val bleDevice: BleDevice?, var connected: Boolean = false)
