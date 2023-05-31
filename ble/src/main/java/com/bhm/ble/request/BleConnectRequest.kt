@@ -60,6 +60,8 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
 
     private val autoConnect = getBleOptions()?.autoConnect?: BleOptions.AUTO_CONNECT
 
+    private val waitTime = 100L
+
     /**
      * 连接设备
      */
@@ -91,7 +93,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.BleDisable)
             return
         }
-        if (lastState == BleConnectLastState.Connecting) {
+        if (lastState == BleConnectLastState.Connecting || lastState == BleConnectLastState.ConnectIdle) {
             BleLogger.e("连接中")
             BleConnectRequestManager.get().removeBleConnectRequest(bleDevice.getKey())
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.AlreadyConnecting)
@@ -121,14 +123,14 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         connectJob = bleConnectCallback?.launchInMainThread {
             withTimeout(connectTime) {
                 //每次连接之前确保和上一次操作间隔一定时间
-                delay(100)
+                delay(waitTime)
                 bluetoothGatt = bleDevice.deviceInfo?.connectGatt(getBleManager().getContext(),
                     autoConnect, coreGattCallback, BluetoothDevice.TRANSPORT_LE)
                 BleLogger.d("${bleDevice.deviceAddress} -> 开始第${currentConnectRetryCount + 1}次连接")
                 if (bluetoothGatt == null) {
                     cancel(CancellationException("连接异常：bluetoothGatt == null"))
                 } else {
-                    delay(connectTime)
+                    delay(connectTime + waitTime * 6) //需要加上等待发现服务的时间
                 }
             }
         }
@@ -141,7 +143,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
      * 处理连接结果，是否重连、或者显示结果
      */
     private fun onCompletion(throwable: Throwable?) {
-        if (isContinueConnect()) {
+        if (isContinueConnect(throwable)) {
             val retryInterval = getBleOptions()?.connectRetryInterval?: BleOptions.DEFAULT_CONNECT_RETRY_INTERVAL
             waitConnectJob = bleConnectCallback?.launchInMainThread {
                 delay(retryInterval)
@@ -159,7 +161,6 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                 when (it) {
                     //连接超时
                     is TimeoutCancellationException -> {
-                        lastState = BleConnectLastState.ConnectFailure
                         connectFail()
                         bleConnectCallback?.callConnectFail(
                             bleDevice,
@@ -168,8 +169,8 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                     }
                     //连接成功
                     is CompleteThrowable -> {
-                        //连接完成
-                        bleConnectCallback?.callConnectSuccess(bleDevice, bluetoothGatt)
+                        //发现服务
+                        findService()
                     }
                     //主动断开
                     is ActiveDisConnectedThrowable -> {
@@ -177,7 +178,6 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                     }
                     //连接失败
                     else -> {
-                        lastState = BleConnectLastState.ConnectFailure
                         connectFail()
                         bleConnectCallback?.callConnectFail(
                             bleDevice,
@@ -220,12 +220,9 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         isActiveDisconnect.set(true)
         if (lastState == BleConnectLastState.ConnectIdle ||
             lastState == BleConnectLastState.Connecting) {
-            val throwable = ActiveDisConnectedThrowable()
+            val throwable = ActiveDisConnectedThrowable("连接过程中断开")
             connectJob?.cancel(throwable)
             waitConnectJob?.cancel(throwable)
-            //连接过程中断开
-            //进入判断是否重连
-            onCompletion(Throwable("连接过程中断开"))
         } else {
             lastState = BleConnectLastState.Disconnect
             disConnectGatt()
@@ -252,6 +249,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                     status: $status
                     newState: $newState
                     currentThread: ${Thread.currentThread().name}
+                    bleAddress: ${bleDevice.deviceAddress}
                     lastState: $lastState
                     """.trimIndent()
             )
@@ -259,12 +257,13 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 //连接成功
-                currentConnectRetryCount = 0
-                lastState = BleConnectLastState.Connected
-                isActiveDisconnect.set(false)
-                val throwable = CompleteThrowable()
-                connectJob?.cancel(throwable)
-                waitConnectJob?.cancel(throwable)
+                if (connectJob?.isActive == true || waitConnectJob?.isActive == true) {
+                    val throwable = CompleteThrowable()
+                    connectJob?.cancel(throwable)
+                    waitConnectJob?.cancel(throwable)
+                } else {
+                    findService()
+                }
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 when (lastState) {
                     BleConnectLastState.ConnectIdle -> {
@@ -276,7 +275,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                         checkIfContinueConnect(Throwable("连接过程中断开"))
                     }
                     //所有断开连接的情况
-                    BleConnectLastState.Connected -> {
+                    else -> {
                         if (!isActiveDisconnect.get()) {
                             lastState = BleConnectLastState.Disconnect
                             refreshDeviceCache()
@@ -292,8 +291,43 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                             )
                         }
                     }
-                    else -> {}
                 }
+            }
+        }
+
+        override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
+            super.onServicesDiscovered(gatt, status)
+            bluetoothGatt = gatt
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                BleLogger.e("2---------${System.currentTimeMillis()}")
+                BleLogger.i("连接成功，发现服务")
+                currentConnectRetryCount = 0
+                lastState = BleConnectLastState.Connected
+                isActiveDisconnect.set(false)
+                bleConnectCallback?.callConnectSuccess(bleDevice, bluetoothGatt)
+            } else {
+                connectFail()
+                bleConnectCallback?.callConnectFail(
+                    bleDevice,
+                    BleConnectFailType.ConnectException(Throwable("发现服务失败"))
+                )
+            }
+        }
+    }
+
+    /**
+     * 发现服务
+     */
+    private fun findService() {
+        bleConnectCallback?.launchInMainThread {
+            delay(waitTime * 5)
+            BleLogger.e("1---------${System.currentTimeMillis()}")
+            if (bluetoothGatt == null || bluetoothGatt?.discoverServices() == false) {
+                connectFail()
+                bleConnectCallback?.callConnectFail(
+                    bleDevice,
+                    BleConnectFailType.ConnectException(Throwable("发现服务失败"))
+                )
             }
         }
     }
@@ -310,7 +344,10 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     /**
      * 是否继续连接
      */
-    private fun isContinueConnect(): Boolean {
+    private fun isContinueConnect(throwable: Throwable?): Boolean {
+        if (throwable is ActiveDisConnectedThrowable || throwable is CompleteThrowable) {
+            return false
+        }
         if (!isActiveDisconnect.get() && lastState != BleConnectLastState.Connected) {
             var retryCount = getBleOptions()?.connectRetryCount?: 0
             if (retryCount < 0) {
@@ -328,6 +365,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
      * 连接失败 更改状态和释放资源
      */
     private fun connectFail() {
+        lastState = BleConnectLastState.ConnectFailure
         refreshDeviceCache()
         closeBluetoothGatt()
         BleConnectRequestManager.get().removeBleConnectRequest(bleDevice.getKey())
@@ -367,18 +405,68 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     }
 
     @Synchronized
+    fun removeBleConnectCallback() {
+        bleConnectCallback = null
+    }
+
+    @Synchronized
+    fun addNotifyCallback(uuid: String?, bleNotifyCallback: BleNotifyCallback?) {
+        bleNotifyCallbackHashMap[uuid!!] = bleNotifyCallback!!
+    }
+
+    @Synchronized
+    fun addIndicateCallback(uuid: String?, bleIndicateCallback: BleIndicateCallback?) {
+        bleIndicateCallbackHashMap[uuid!!] = bleIndicateCallback!!
+    }
+
+    @Synchronized
+    fun addWriteCallback(uuid: String?, bleWriteCallback: BleWriteCallback?) {
+        bleWriteCallbackHashMap[uuid!!] = bleWriteCallback!!
+    }
+
+    @Synchronized
+    fun addReadCallback(uuid: String?, bleReadCallback: BleReadCallback?) {
+        bleReadCallbackHashMap[uuid!!] = bleReadCallback!!
+    }
+
+    @Synchronized
+    fun removeNotifyCallback(uuid: String?) {
+        if (bleNotifyCallbackHashMap.containsKey(uuid)) bleNotifyCallbackHashMap.remove(uuid)
+    }
+
+    @Synchronized
+    fun removeIndicateCallback(uuid: String?) {
+        if (bleIndicateCallbackHashMap.containsKey(uuid)) bleIndicateCallbackHashMap.remove(uuid)
+    }
+
+    @Synchronized
+    fun removeWriteCallback(uuid: String?) {
+        if (bleWriteCallbackHashMap.containsKey(uuid)) bleWriteCallbackHashMap.remove(uuid)
+    }
+
+    @Synchronized
+    fun removeReadCallback(uuid: String?) {
+        if (bleReadCallbackHashMap.containsKey(uuid)) bleReadCallbackHashMap.remove(uuid)
+    }
+
+    @Synchronized
+    fun addRssiCallback(callback: BleRssiCallback) {
+        bleRssiCallback = callback
+    }
+
+    @Synchronized
     fun removeRssiCallback() {
         bleRssiCallback = null
     }
 
     @Synchronized
-    fun removeMtuChangedCallback() {
-        bleMtuChangedCallback = null
+    fun addMtuChangedCallback(callback: BleMtuChangedCallback) {
+        bleMtuChangedCallback = callback
     }
 
     @Synchronized
-    fun removeBleConnectCallback() {
-        bleConnectCallback = null
+    fun removeMtuChangedCallback() {
+        bleMtuChangedCallback = null
     }
 
     @Synchronized

@@ -22,4 +22,4 @@ internal class CompleteThrowable : CancellationException()
  * @author Buhuiming
  * @date 2023年05月29日 16时18分
  */
-internal class ActiveDisConnectedThrowable : CancellationException()
+internal class ActiveDisConnectedThrowable(msg: String) : CancellationException(msg)
