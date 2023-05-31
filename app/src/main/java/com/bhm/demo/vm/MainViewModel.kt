@@ -233,10 +233,13 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                     refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
                 }
                 onDisConnected { isActiveDisConnected, bleDevice, _, _ ->
+                    Toast.makeText(application, "断开连接(${bleDevice.deviceAddress}，isActiveDisConnected: " +
+                            "$isActiveDisConnected)", Toast.LENGTH_SHORT).show()
                     BleLogger.e("-----onDisConnected: $isActiveDisConnected")
                     refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
                 }
                 onConnectSuccess { bleDevice, _ ->
+                    Toast.makeText(application, "连接成功(${bleDevice.deviceAddress})", Toast.LENGTH_SHORT).show()
                     BleLogger.e("-----onConnectSuccess")
                     refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
                 }

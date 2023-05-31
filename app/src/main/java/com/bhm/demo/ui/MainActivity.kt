@@ -79,12 +79,13 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
             if (ViewUtil.isInvalidClick(view)) {
                 return@setOnItemChildClickListener
             }
-            showLoading()
             val bleDevice: BleDevice? = adapter.data[position] as BleDevice?
             if (view.id == R.id.btnConnect) {
                 if (viewModel.isConnected(bleDevice)) {
+                    showLoading("断开中...")
                     viewModel.disConnect(bleDevice)
                 } else {
+                    showLoading("连接中...")
                     viewModel.connect(bleDevice)
                 }
             } else if (view.id == R.id.btnOperate) {

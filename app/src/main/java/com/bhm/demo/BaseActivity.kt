@@ -60,7 +60,7 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewBinding> : HttpActivity(
 
     lateinit var rootView: View
 
-    private lateinit var httpOptions: HttpOptions
+    private var httpOptions: HttpOptions? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         BackgroundLibrary.inject(this)
@@ -68,10 +68,6 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewBinding> : HttpActivity(
         AppTheme.fitSystemWindow(this)
         ActivityUtil.addActivity(this)
         EventBus.getDefault().register(this)
-        httpOptions = HttpOptions.create(this)
-            .setLoadingDialog(HttpLoadingDialog())
-            .setDialogAttribute(true, cancelable = false, dialogDismissInterruptRequest = true)
-            .build()
         init()
         viewBinding = ViewUtil.inflateWithGeneric(this, layoutInflater)
         rootView = viewBinding.root
@@ -80,12 +76,19 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewBinding> : HttpActivity(
         initEvent()
     }
 
-    fun showLoading() {
-        httpOptions.dialog?.showLoading(httpOptions)
+    fun showLoading(msg: String? = "") {
+        httpOptions = HttpOptions.create(this)
+            .setLoadingDialog(HttpLoadingDialog())
+            .setLoadingTitle(msg)
+            .setDialogAttribute(true, cancelable = false, dialogDismissInterruptRequest = true)
+            .build()
+        httpOptions?.let {
+            it.dialog?.showLoading(it)
+        }
     }
 
     fun dismissLoading() {
-        httpOptions.dialog?.dismissLoading(this)
+        httpOptions?.dialog?.dismissLoading(this)
     }
 
     protected open fun initData() {}

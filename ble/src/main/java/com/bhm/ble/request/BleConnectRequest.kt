@@ -65,6 +65,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
      */
     @Synchronized
     fun connect(bleConnectCallback: BleConnectCallback) {
+        this.bleConnectCallback = bleConnectCallback
         if (bleDevice.deviceInfo == null) {
             BleLogger.e("连接失败：BluetoothDevice为空")
             BleConnectRequestManager.get().removeBleConnectRequest(bleDevice.getKey())
@@ -96,12 +97,12 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.AlreadyConnecting)
             return
         }
-        if (lastState ==  BleConnectLastState.Connected) {
+        if (bleManager.isConnected(bleDevice)) {
+            lastState =  BleConnectLastState.Connected
             BleLogger.e("已连接")
             bleConnectCallback.callConnectSuccess(bleDevice, bluetoothGatt)
             return
         }
-        this.bleConnectCallback = bleConnectCallback
         bleConnectCallback.callConnectStart()
         startConnectJob()
     }

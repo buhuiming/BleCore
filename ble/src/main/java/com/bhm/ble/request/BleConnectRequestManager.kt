@@ -70,6 +70,9 @@ internal class BleConnectRequestManager private constructor() {
         }
     }
 
+    /**
+     * 是否存在该设备
+     */
     @Synchronized
     fun isContainDevice(bleDevice: BleDevice): Boolean {
         return bleLruHashMap.containsKey(bleDevice.getKey())

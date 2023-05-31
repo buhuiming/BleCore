@@ -60,19 +60,27 @@ class BleConnectCallback : BleBaseCallback(){
     }
 
     internal fun callConnectStart() {
-        start?.invoke()
+        launchInMainThread {
+            start?.invoke()
+        }
     }
 
     internal fun callConnectFail(bleDevice: BleDevice, connectFailType: BleConnectFailType) {
-        connectFail?.invoke(bleDevice, connectFailType)
+        launchInMainThread {
+            connectFail?.invoke(bleDevice, connectFailType)
+        }
     }
 
     internal fun callConnectSuccess(bleDevice: BleDevice, gatt: BluetoothGatt?) {
-        connectSuccess?.invoke(bleDevice, gatt)
+        launchInMainThread {
+            connectSuccess?.invoke(bleDevice, gatt)
+        }
     }
 
     internal fun callDisConnected(isActiveDisConnected: Boolean, bleDevice: BleDevice,
                                   gatt: BluetoothGatt?, status: Int) {
-        disConnected?.invoke(isActiveDisConnected, bleDevice, gatt, status)
+        launchInMainThread {
+            disConnected?.invoke(isActiveDisConnected, bleDevice, gatt, status)
+        }
     }
 }
