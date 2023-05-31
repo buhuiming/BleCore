@@ -111,6 +111,22 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
+     * stop notify
+     */
+    override fun stopNotify(
+        bleDevice: BleDevice,
+        serviceUUID: String,
+        notifyUUID: String,
+        useCharacteristicDescriptor: Boolean
+    ): Boolean {
+        val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
+        request?.let {
+            return it.disableCharacteristicNotify(serviceUUID, notifyUUID, useCharacteristicDescriptor)
+        }
+        return false
+    }
+
+    /**
      * 断开所有连接 释放资源
      */
     override fun release() {

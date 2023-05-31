@@ -181,6 +181,19 @@ class BleManager private constructor() {
     }
 
     /**
+     * stop notify
+     */
+    fun stopNotify(
+        bleDevice: BleDevice,
+        serviceUUID: String,
+        notifyUUID: String,
+        useCharacteristicDescriptor: Boolean = false
+    ): Boolean? {
+        checkInitialize()
+        return bleBaseRequest?.stopNotify(bleDevice, serviceUUID, notifyUUID, useCharacteristicDescriptor)
+    }
+
+    /**
      * 断开所有连接 释放资源
      */
     @Synchronized

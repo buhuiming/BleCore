@@ -434,6 +434,24 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         }
     }
 
+    /**
+     * stop notify
+     */
+    @Synchronized
+    fun disableCharacteristicNotify(serviceUUID: String,
+                                   notifyUUID: String,
+                                   userCharacteristicDescriptor: Boolean): Boolean {
+        val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
+        val characteristic = gattService?.getCharacteristic(UUID.fromString(notifyUUID))
+        if (bluetoothGatt != null && gattService != null && characteristic != null &&
+            (characteristic.properties or BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0
+        ) {
+            cancelNotifyJob(null)
+            return setCharacteristicNotify(characteristic, userCharacteristicDescriptor, false, null)
+        }
+        return false
+    }
+
     @Synchronized
     fun removeBleConnectCallback() {
         bleConnectCallback = null
@@ -626,12 +644,12 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     private fun setCharacteristicNotify(characteristic: BluetoothGattCharacteristic,
                                         useCharacteristicDescriptor: Boolean,
                                         enable: Boolean,
-                                        bleNotifyCallback: BleNotifyCallback ): Boolean {
+                                        bleNotifyCallback: BleNotifyCallback?): Boolean {
         val setSuccess = bluetoothGatt?.setCharacteristicNotification(characteristic, enable)
         if (setSuccess != true) {
             val exception = NotifyFailException.SetCharacteristicNotificationFailException
             cancelNotifyJob(exception)
-            bleNotifyCallback.callNotifyFail(exception)
+            bleNotifyCallback?.callNotifyFail(exception)
             return false
         }
         val descriptor = if (useCharacteristicDescriptor) {
@@ -642,7 +660,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         if (descriptor == null) {
             val exception = NotifyFailException.SetCharacteristicNotificationFailException
             cancelNotifyJob(exception)
-            bleNotifyCallback.callNotifyFail(exception)
+            bleNotifyCallback?.callNotifyFail(exception)
             return false
         }
         val success: Boolean
@@ -667,7 +685,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         if (!success) {
             val exception = NotifyFailException.DescriptorException
             cancelNotifyJob(exception)
-            bleNotifyCallback.callNotifyFail(exception)
+            bleNotifyCallback?.callNotifyFail(exception)
             return false
         }
         return true

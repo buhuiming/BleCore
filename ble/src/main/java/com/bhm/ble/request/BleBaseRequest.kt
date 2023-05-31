@@ -64,6 +64,14 @@ internal interface BleBaseRequest {
                useCharacteristicDescriptor: Boolean = false)
 
     /**
+     * stop notify
+     */
+    fun stopNotify(bleDevice: BleDevice,
+               serviceUUID: String,
+               notifyUUID: String,
+               useCharacteristicDescriptor: Boolean = false): Boolean
+
+    /**
      * 断开所有连接 释放资源
      */
     fun release()
