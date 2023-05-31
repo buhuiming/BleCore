@@ -21,9 +21,17 @@ open class BleBaseCallback {
 
     private val mainScope = BleRequestImp.get().getMainScope()
 
+    private var key: String? = null
+
     fun launchInMainThread(block: suspend CoroutineScope.() -> Unit): Job {
         return mainScope.launch {
             block.invoke(this)
         }
     }
+
+    fun setKey(key: String) {
+        this.key = key
+    }
+
+    fun getKey() = key
 }

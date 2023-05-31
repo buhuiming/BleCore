@@ -6,6 +6,7 @@
 package com.bhm.ble.request
 
 import com.bhm.ble.callback.BleConnectCallback
+import com.bhm.ble.callback.BleNotifyCallback
 import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.data.BleDevice
 
@@ -52,6 +53,15 @@ internal interface BleBaseRequest {
      * 移除该设备的连接回调
      */
     fun removeBleConnectCallback(bleDevice: BleDevice)
+
+    /**
+     * notify
+     */
+    fun notify(bleDevice: BleDevice,
+               serviceUUID: String,
+               notifyUUID: String,
+               bleNotifyCallback: BleNotifyCallback,
+               useCharacteristicDescriptor: Boolean = false)
 
     /**
      * 断开所有连接 释放资源

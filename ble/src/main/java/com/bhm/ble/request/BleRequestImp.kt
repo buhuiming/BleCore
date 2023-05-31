@@ -8,7 +8,9 @@
 package com.bhm.ble.request
 
 import com.bhm.ble.callback.BleConnectCallback
+import com.bhm.ble.callback.BleNotifyCallback
 import com.bhm.ble.callback.BleScanCallback
+import com.bhm.ble.control.NotifyFailException
 import com.bhm.ble.data.BleDevice
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -90,6 +92,22 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      */
     override fun removeBleConnectCallback(bleDevice: BleDevice) {
         BleConnectRequestManager.get().getBleConnectRequest(bleDevice)?.removeBleConnectCallback()
+    }
+
+    /**
+     * notify
+     */
+    override fun notify(bleDevice: BleDevice,
+                        serviceUUID: String,
+                        notifyUUID: String,
+                        bleNotifyCallback: BleNotifyCallback,
+                        useCharacteristicDescriptor: Boolean) {
+        val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
+        request?.let {
+            it.enableCharacteristicNotify(bleNotifyCallback, serviceUUID, notifyUUID, useCharacteristicDescriptor)
+            return
+        }
+        bleNotifyCallback.callNotifyFail(NotifyFailException.UnConnectedException)
     }
 
     /**

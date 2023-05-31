@@ -76,6 +76,10 @@ class BleOptions private constructor(builder: Builder) {
 
         const val MAX_MTU: Int = 517
 
+        //系统提供接受通知自带的UUID
+        const val UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR =
+            "00002902-0000-1000-8000-00805f9b34fb"
+
         @JvmStatic
         fun getDefaultBleOptions() : BleOptions = BleOptions(Builder())
 

@@ -23,3 +23,17 @@ internal class CompleteThrowable : CancellationException()
  * @date 2023年05月29日 16时18分
  */
 internal class ActiveDisConnectedThrowable(msg: String) : CancellationException(msg)
+
+/**
+ * 设置Notify失败
+ */
+sealed class NotifyFailException(message: String): CancellationException(message) {
+
+    object DescriptorException : NotifyFailException("设置Notify失败，Descriptor写数据失败")
+
+    object UnConnectedException : NotifyFailException("设置Notify失败，设备未连接")
+
+    object UnSupportNotifyException : NotifyFailException("设置Notify失败，此特性不支持Notify")
+
+    object SetCharacteristicNotificationFailException : NotifyFailException("设置Notify失败，SetCharacteristicNotificationFail")
+}

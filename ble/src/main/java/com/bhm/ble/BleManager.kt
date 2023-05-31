@@ -9,10 +9,10 @@ import android.bluetooth.BluetoothProfile
 import android.content.Context
 import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.callback.BleConnectCallback
+import com.bhm.ble.callback.BleNotifyCallback
 import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.data.BleDevice
 import com.bhm.ble.request.BleBaseRequest
-import com.bhm.ble.request.BleConnectRequestManager
 import com.bhm.ble.request.BleRequestImp
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
@@ -85,6 +85,7 @@ class BleManager private constructor() {
     fun startScan(bleScanCallback: BleScanCallback.() -> Unit) {
         val callback = BleScanCallback()
         callback.apply(bleScanCallback)
+        checkInitialize()
         bleBaseRequest?.startScan(callback)
     }
 
@@ -93,6 +94,7 @@ class BleManager private constructor() {
      * @return true = 扫描中
      */
     fun isScanning(): Boolean {
+        checkInitialize()
         return bleBaseRequest?.isScanning()?: false
     }
 
@@ -101,6 +103,7 @@ class BleManager private constructor() {
      */
     @Synchronized
     fun stopScan() {
+        checkInitialize()
         bleBaseRequest?.stopScan()
     }
 
@@ -110,6 +113,7 @@ class BleManager private constructor() {
      */
     @SuppressLint("MissingPermission")
     fun isConnected(bleDevice: BleDevice?): Boolean {
+        checkInitialize()
         bleDevice?.let {
             return bluetoothManager?.getConnectionState(it.deviceInfo, BluetoothProfile.GATT) ==
                     BluetoothProfile.STATE_CONNECTED && bleBaseRequest?.isConnected(it) == true
@@ -122,6 +126,7 @@ class BleManager private constructor() {
      */
     @Synchronized
     fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit) {
+        checkInitialize()
         stopScan()
         val callback = BleConnectCallback()
         callback.apply(bleConnectCallback)
@@ -141,6 +146,7 @@ class BleManager private constructor() {
      */
     @Synchronized
     fun disConnect(bleDevice: BleDevice) {
+        checkInitialize()
         bleBaseRequest?.disConnect(bleDevice)
     }
 
@@ -157,7 +163,21 @@ class BleManager private constructor() {
      */
     @Synchronized
     fun removeBleConnectCallback(bleDevice: BleDevice) {
+        checkInitialize()
         bleBaseRequest?.removeBleConnectCallback(bleDevice)
+    }
+
+    /**
+     * notify
+     */
+    @Synchronized
+    fun notify(bleDevice: BleDevice,
+               serviceUUID: String,
+               notifyUUID: String,
+               bleNotifyCallback: BleNotifyCallback,
+               useCharacteristicDescriptor: Boolean = false) {
+        checkInitialize()
+        bleBaseRequest?.notify(bleDevice, serviceUUID, notifyUUID, bleNotifyCallback, useCharacteristicDescriptor)
     }
 
     /**
@@ -165,6 +185,7 @@ class BleManager private constructor() {
      */
     @Synchronized
     fun release() {
+        checkInitialize()
         bleBaseRequest?.release()
     }
 
@@ -179,6 +200,12 @@ class BleManager private constructor() {
     internal fun getContext() = application
 
     internal fun getBluetoothManager() = bluetoothManager
+
+    private fun checkInitialize() {
+        if (bleBaseRequest == null) {
+            BleLogger.e("未初始化，请调用BleManager.init()")
+        }
+    }
 
     /**
      * 通过设备地址构建BleDevice对象
