@@ -100,17 +100,38 @@
 #### 3、停止扫描
     BleManager.get().stopScan()
 
-#### 4、连接
-    BleManager.get().connect(device) {
+#### 4、是否扫描中
+    BleManager.get().isScanning()
 
-    }
+#### 5、连接
+    BleManager.get().connect(device)
+    BleManager.get().connect(deviceAddress)
 
-#### 5、断开连接
+#### 6、断开连接
     BleManager.get().disConnect(device)
+    BleManager.get().disConnect(deviceAddress)
 
+#### 7、是否已连接
+    BleManager.get().isConnected(device)
 
+#### 8、移除该设备的连接回调
+    BleManager.get().removeBleConnectCallback(device)
 
+#### 9、设置通知
+    BleManager.get().notify(bleDevice: BleDevice,
+                                  serviceUUID: String,
+                                  notifyUUID: String,
+                                  bleNotifyCallback: BleNotifyCallback,
+                                  useCharacteristicDescriptor: Boolean = false)
 
+#### 10、取消通知
+    BleManager.get().stopNotify(bleDevice: BleDevice,
+                                  serviceUUID: String,
+                                  notifyUUID: String,
+                                  useCharacteristicDescriptor: Boolean = false)
+
+#### 11、断开所有连接 释放资源
+    BleManager.get().release()
 
 
 
