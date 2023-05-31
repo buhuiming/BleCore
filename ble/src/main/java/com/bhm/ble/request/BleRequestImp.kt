@@ -86,9 +86,17 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
+     * 移除该设备的连接回调
+     */
+    override fun removeBleConnectCallback(bleDevice: BleDevice) {
+        BleConnectRequestManager.get().getBleConnectRequest(bleDevice)?.removeBleConnectCallback()
+    }
+
+    /**
      * 断开所有连接 释放资源
      */
     override fun release() {
         mainScope.cancel()
+        BleConnectRequestManager.get().release()
     }
 }

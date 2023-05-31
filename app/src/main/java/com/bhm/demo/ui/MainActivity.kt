@@ -132,5 +132,6 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
     override fun onDestroy() {
         super.onDestroy()
         viewModel.stopScan()
+        viewModel.release()
     }
 }

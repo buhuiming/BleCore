@@ -78,7 +78,14 @@ internal class BleConnectRequestManager private constructor() {
         return bleLruHashMap.containsKey(bleDevice.getKey())
     }
 
-    fun removeAll() {
+    /**
+     * 断开所有连接 释放资源
+     */
+    @Synchronized
+    fun release() {
+        bleLruHashMap.values.forEach {
+            it?.release()
+        }
         bleLruHashMap.clear()
     }
 }

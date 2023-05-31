@@ -377,10 +377,30 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     }
 
     @Synchronized
+    fun removeBleConnectCallback() {
+        bleConnectCallback = null
+    }
+
+    @Synchronized
     fun clearCharacterCallback() {
         bleNotifyCallbackHashMap.clear()
         bleIndicateCallbackHashMap.clear()
         bleWriteCallbackHashMap.clear()
         bleReadCallbackHashMap.clear()
+    }
+
+    /**
+     * 断开所有连接 释放资源
+     */
+    @Synchronized
+    fun release() {
+        lastState = BleConnectLastState.ConnectIdle
+        disConnectGatt()
+        refreshDeviceCache()
+        closeBluetoothGatt()
+        removeBleConnectCallback()
+        removeRssiCallback()
+        removeMtuChangedCallback()
+        clearCharacterCallback()
     }
 }

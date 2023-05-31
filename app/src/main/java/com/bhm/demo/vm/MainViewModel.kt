@@ -64,7 +64,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
 //                .setScanRetryCountAndInterval(2, 1000)
 //                .setConnectMillisTimeOut(10000)
 //                .setConnectRetryCountAndInterval(0, 1000)
-//                .setAutoConnect(false)//实现中
+//                .setAutoConnect(false)
 //                .setOperateMillisTimeOut(6000)//实现中
 //                .setWriteInterval(80)//实现中
 //                .setMaxConnectNum(5)//实现中
@@ -254,5 +254,12 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
         bleDevice?.let { device ->
             BleManager.get().disConnect(device)
         }
+    }
+
+    /**
+     * 断开所有连接 释放资源
+     */
+    fun release() {
+        BleManager.get().release()
     }
 }

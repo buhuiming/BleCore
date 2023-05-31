@@ -12,6 +12,7 @@ import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.data.BleDevice
 import com.bhm.ble.request.BleBaseRequest
+import com.bhm.ble.request.BleConnectRequestManager
 import com.bhm.ble.request.BleRequestImp
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
@@ -117,7 +118,7 @@ class BleManager private constructor() {
     }
 
     /**
-     * 开始连接
+     * 连接
      */
     @Synchronized
     fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit) {
@@ -128,11 +129,35 @@ class BleManager private constructor() {
     }
 
     /**
+     * 通过地址连接
+     */
+    @Synchronized
+    fun connect(address: String, bleConnectCallback: BleConnectCallback.() -> Unit) {
+        connect(buildBleDeviceByDeviceAddress(address), bleConnectCallback)
+    }
+
+    /**
      * 断开连接
      */
     @Synchronized
     fun disConnect(bleDevice: BleDevice) {
         bleBaseRequest?.disConnect(bleDevice)
+    }
+
+    /**
+     * 通过地址断开连接
+     */
+    @Synchronized
+    fun disConnect(address: String) {
+        disConnect(buildBleDeviceByDeviceAddress(address))
+    }
+
+    /**
+     * 移除该设备的连接回调
+     */
+    @Synchronized
+    fun removeBleConnectCallback(bleDevice: BleDevice) {
+        bleBaseRequest?.removeBleConnectCallback(bleDevice)
     }
 
     /**
@@ -154,4 +179,12 @@ class BleManager private constructor() {
     internal fun getContext() = application
 
     internal fun getBluetoothManager() = bluetoothManager
+
+    /**
+     * 通过设备地址构建BleDevice对象
+     */
+    fun buildBleDeviceByDeviceAddress(deviceAddress: String): BleDevice {
+        val deviceInfo = bluetoothManager?.adapter?.getRemoteDevice(deviceAddress)
+        return BleDevice(deviceInfo, "", deviceAddress, 0, 0, null, 0)
+    }
 }
