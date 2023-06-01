@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingVertical="10dp"
+        android:gravity="center_vertical">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:gravity="center_vertical">
+
+        <TextView
+                android:id="@+id/tvCharacteristicName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/color_main"
+                android:textSize="14sp"
+                android:textIsSelectable="true"
+                android:gravity="center_vertical"
+                android:ellipsize="end"
+                android:maxLines="3"
+                tools:text="特征值名称"/>
+
+        <TextView
+                android:id="@+id/tvCharacteristicUUID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#666666"
+                android:layout_marginTop="@dimen/dp_4"
+                android:textSize="12sp"
+                android:textIsSelectable="true"
+                android:gravity="center_vertical"
+                android:ellipsize="end"
+                android:maxLines="3"
+                tools:text="特征值名称"/>
+
+        <TextView
+                android:id="@+id/tvCharacteristicProperties"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#666666"
+                android:layout_marginTop="@dimen/dp_4"
+                android:textSize="12sp"
+                android:textIsSelectable="true"
+                android:gravity="center_vertical"
+                android:ellipsize="end"
+                android:maxLines="3"
+                tools:text="特征值属性"/>
+
+        <TextView
+                android:id="@+id/tvCharacteristicValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#666666"
+                android:layout_marginTop="@dimen/dp_4"
+                android:textSize="12sp"
+                android:textIsSelectable="true"
+                android:gravity="center_vertical"
+                android:ellipsize="end"
+                android:maxLines="3"
+                tools:text="特征值value"/>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <CheckBox
+            android:id="@+id/cbRead"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="读"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:visibility="gone"
+            android:layout_marginEnd="10dp"
+            android:checked="false"/>
+
+    <CheckBox
+            android:id="@+id/cbWrite"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="写"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:visibility="gone"
+            android:layout_marginEnd="10dp"
+            android:checked="false"/>
+
+    <CheckBox
+            android:id="@+id/cbNotify"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="Notify"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:visibility="gone"
+            android:layout_marginEnd="10dp"
+            android:checked="false"/>
+
+    <CheckBox
+            android:id="@+id/cbIndicate"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="Indicate"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:visibility="gone"
+            android:layout_marginEnd="10dp"
+            android:checked="false"/>
+</LinearLayout>

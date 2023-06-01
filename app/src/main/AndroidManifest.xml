@@ -13,7 +13,7 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.BleCore" >
         <activity
-                android:name=".ui.MainActivity"
+                android:name=".ui.DetailOperateActivity"
                 android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,7 +22,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.bhm.demo.ui.OptionSettingActivity" />
-        <activity android:name="com.bhm.demo.ui.DetailOperateActivity" />
+<!--        <activity android:name="com.bhm.demo.ui.DetailOperateActivity" />-->
     </application>
 
 </manifest>

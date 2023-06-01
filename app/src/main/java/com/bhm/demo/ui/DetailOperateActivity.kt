@@ -6,13 +6,19 @@
 package com.bhm.demo.ui
 
 import android.os.Build
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.bhm.ble.data.BleDevice
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.R
+import com.bhm.demo.adapter.DetailsExpandAdapter
 import com.bhm.demo.databinding.ActivityDetailBinding
+import com.bhm.demo.entity.CharacteristicNode
+import com.bhm.demo.entity.ServiceNode
 import com.bhm.demo.vm.DetailViewModel
 import com.bhm.support.sdk.core.AppTheme
 import com.bhm.support.sdk.entity.MessageEvent
+import com.chad.library.adapter.base.entity.node.BaseNode
 
 
 /**
@@ -27,6 +33,8 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
 
     private var bleDevice: BleDevice? = null
 
+    private var expandAdapter: DetailsExpandAdapter? = null
+
     override fun initData() {
         super.initData()
         AppTheme.setStatusBarColor(this, R.color.purple_500)
@@ -37,14 +45,47 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
             intent.getParcelableExtra("data")
         }
 
-        if (bleDevice == null) {
-            finish()
-            return
-        }
+//        if (bleDevice == null) {
+//            finish()
+//            return
+//        }
         viewBinding.tvName.text = buildString {
             append(bleDevice?.deviceName)
             append("(${bleDevice?.deviceAddress})")
         }
+        initList()
+    }
+
+    private fun test(): MutableList<BaseNode> {
+        val list: MutableList<BaseNode> = arrayListOf()
+        for (i in 0..4) {
+            val childList: MutableList<BaseNode> = arrayListOf()
+            for (k in 0..6) {
+                val characteristicNode = CharacteristicNode(
+                    "CharacteristicName($k): TextName",
+                    "CharacteristicUUID($k): 0000ff${k}0-0000-1000-8000-00805f9b34fb",
+                    "CharacteristicUUID($k): Read, Write, Notify, Indicate",
+                    "CharacteristicUUID($k): 0x0{$k}"
+                )
+                childList.add(characteristicNode)
+            }
+            val serviceNode = ServiceNode(
+                "ServiceName($i): TextName",
+                "ServiceUUID($i): 0000ff80-0000-1000-8000-00805f9b34fb",
+                childList
+            )
+            list.add(serviceNode)
+        }
+        return list
+    }
+
+    private fun initList() {
+        val layoutManager = LinearLayoutManager(this)
+        layoutManager.orientation = LinearLayoutManager.VERTICAL
+        viewBinding.recyclerView.layoutManager = layoutManager
+        viewBinding.recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+        expandAdapter = DetailsExpandAdapter(test())
+        viewBinding.recyclerView.adapter = expandAdapter
     }
 
     /**
