@@ -457,6 +457,14 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         bleConnectCallback = null
     }
 
+    /**
+     * 获取设备的BluetoothGatt对象
+     */
+    @Synchronized
+    fun getBluetoothGatt(): BluetoothGatt? {
+        return bluetoothGatt
+    }
+
     @Synchronized
     fun addNotifyCallback(uuid: String?, bleNotifyCallback: BleNotifyCallback?) {
         bleNotifyCallbackHashMap[uuid!!] = bleNotifyCallback!!

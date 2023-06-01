@@ -18,7 +18,7 @@ import com.chad.library.adapter.base.entity.node.BaseNode
 class CharacteristicNode(var characteristicName: String?,
                               var characteristicUUID: String?,
                               var characteristicProperties: String?,
-                              var characteristicValue: String?,
+                              var characteristicIntProperties: Int,
 )  : BaseExpandNode() {
 
     init {

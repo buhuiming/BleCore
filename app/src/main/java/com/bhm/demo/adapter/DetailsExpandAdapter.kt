@@ -5,6 +5,7 @@
  */
 package com.bhm.demo.adapter
 
+import android.bluetooth.BluetoothGattCharacteristic
 import android.view.View
 import android.widget.CheckBox
 import com.bhm.demo.R
@@ -53,8 +54,8 @@ class DetailsExpandAdapter(nodeList: MutableList<BaseNode>,
 
         override fun convert(helper: BaseViewHolder, item: BaseNode) {
             val node = item as ServiceNode
-            helper.setText(R.id.tvServiceName, node.serviceName)
-            helper.setText(R.id.tvServiceUUID, node.serviceUUID)
+            helper.setText(R.id.tvServiceName, "服务: (${node.serviceName})")
+            helper.setText(R.id.tvServiceUUID, "ServiceUUID: ${node.serviceUUID}")
             helper.setVisible(R.id.ivExpand, node.childNode?.isNotEmpty() == true)
             if (node.isExpanded) {
                 helper.setImageResource(R.id.ivExpand, R.drawable.icon_down)
@@ -81,19 +82,22 @@ class DetailsExpandAdapter(nodeList: MutableList<BaseNode>,
 
         override fun convert(helper: BaseViewHolder, item: BaseNode) {
             val node = item as CharacteristicNode
-            helper.setText(R.id.tvCharacteristicName, node.characteristicName)
-            helper.setText(R.id.tvCharacteristicUUID, node.characteristicUUID)
-            helper.setText(R.id.tvCharacteristicProperties, node.characteristicProperties)
-            helper.setText(R.id.tvCharacteristicValue, node.characteristicValue)
+            helper.setText(R.id.tvCharacteristicName, "特征(${node.characteristicName})")
+            helper.setText(R.id.tvCharacteristicUUID, "CharacteristicUUID: ${node.characteristicUUID}")
+            helper.setText(R.id.tvCharacteristicProperties, "CharacteristicProperties: ${node.characteristicProperties}")
+            helper.setGone(R.id.tvCharacteristicProperties, node.characteristicProperties?.isNotEmpty() != true)
 
             val cbWrite = helper.getView<CheckBox>(R.id.cbWrite)
             val cbRead = helper.getView<CheckBox>(R.id.cbRead)
             val cbNotify = helper.getView<CheckBox>(R.id.cbNotify)
             val cbIndicate = helper.getView<CheckBox>(R.id.cbIndicate)
-            helper.setVisible(R.id.cbWrite, true)
-            helper.setVisible(R.id.cbRead, true)
-            helper.setVisible(R.id.cbNotify, true)
-            helper.setVisible(R.id.cbIndicate, true)
+
+            val charaProp: Int = node.characteristicIntProperties
+            helper.setGone(R.id.cbRead, charaProp and BluetoothGattCharacteristic.PROPERTY_READ <= 0)
+            helper.setGone(R.id.cbWrite, charaProp and BluetoothGattCharacteristic.PROPERTY_WRITE <= 0 &&
+                    charaProp and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE <= 0)
+            helper.setGone(R.id.cbNotify, charaProp and BluetoothGattCharacteristic.PROPERTY_NOTIFY <= 0)
+            helper.setGone(R.id.cbIndicate, charaProp and BluetoothGattCharacteristic.PROPERTY_INDICATE <= 0)
 
             cbWrite.setOnCheckedChangeListener { buttonView, isChecked ->
                 operateCallback?.invoke(buttonView as CheckBox, OperateType.Write, isChecked, node)

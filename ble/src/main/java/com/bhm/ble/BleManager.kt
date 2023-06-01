@@ -4,6 +4,7 @@ package com.bhm.ble
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
@@ -165,6 +166,15 @@ class BleManager private constructor() {
     fun removeBleConnectCallback(bleDevice: BleDevice) {
         checkInitialize()
         bleBaseRequest?.removeBleConnectCallback(bleDevice)
+    }
+
+    /**
+     * 获取设备的BluetoothGatt对象
+     */
+    @Synchronized
+    fun getBluetoothGatt(bleDevice: BleDevice): BluetoothGatt? {
+        checkInitialize()
+        return bleBaseRequest?.getBluetoothGatt(bleDevice)
     }
 
     /**

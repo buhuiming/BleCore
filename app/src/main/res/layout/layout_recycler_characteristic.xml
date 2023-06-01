@@ -17,7 +17,7 @@
 
         <TextView
                 android:id="@+id/tvCharacteristicName"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/color_main"
                 android:textSize="14sp"
@@ -29,7 +29,7 @@
 
         <TextView
                 android:id="@+id/tvCharacteristicUUID"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#666666"
                 android:layout_marginTop="@dimen/dp_4"
@@ -42,7 +42,7 @@
 
         <TextView
                 android:id="@+id/tvCharacteristicProperties"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#666666"
                 android:layout_marginTop="@dimen/dp_4"
@@ -52,19 +52,6 @@
                 android:ellipsize="end"
                 android:maxLines="3"
                 tools:text="特征值属性"/>
-
-        <TextView
-                android:id="@+id/tvCharacteristicValue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#666666"
-                android:layout_marginTop="@dimen/dp_4"
-                android:textSize="12sp"
-                android:textIsSelectable="true"
-                android:gravity="center_vertical"
-                android:ellipsize="end"
-                android:maxLines="3"
-                tools:text="特征值value"/>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 

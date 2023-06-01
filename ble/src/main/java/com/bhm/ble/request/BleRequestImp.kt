@@ -7,6 +7,7 @@
 
 package com.bhm.ble.request
 
+import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.callback.BleNotifyCallback
 import com.bhm.ble.callback.BleScanCallback
@@ -92,6 +93,13 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      */
     override fun removeBleConnectCallback(bleDevice: BleDevice) {
         BleConnectRequestManager.get().getBleConnectRequest(bleDevice)?.removeBleConnectCallback()
+    }
+
+    /**
+     * 获取设备的BluetoothGatt对象
+     */
+    override fun getBluetoothGatt(bleDevice: BleDevice): BluetoothGatt? {
+        return BleConnectRequestManager.get().getBleConnectRequest(bleDevice)?.getBluetoothGatt()
     }
 
     /**

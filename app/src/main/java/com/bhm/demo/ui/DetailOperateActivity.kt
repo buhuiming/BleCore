@@ -5,10 +5,13 @@
  */
 package com.bhm.demo.ui
 
+import android.bluetooth.BluetoothGattCharacteristic
 import android.os.Build
+import android.view.View
 import android.widget.Toast
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bhm.ble.BleManager
 import com.bhm.ble.data.BleDevice
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.R
@@ -47,40 +50,17 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
             intent.getParcelableExtra("data")
         }
 
-//        if (bleDevice == null) {
-//            finish()
-//            return
-//        }
+        if (bleDevice == null) {
+            finish()
+            return
+        }
         viewBinding.tvName.text = buildString {
+            append("设备广播名：")
             append(bleDevice?.deviceName)
-            append("(${bleDevice?.deviceAddress})")
+            append("\r\n")
+            append("地址：${bleDevice?.deviceAddress}")
         }
         initList()
-    }
-
-    private fun test(): MutableList<BaseNode> {
-        val list: MutableList<BaseNode> = arrayListOf()
-        for (i in 0..4) {
-            val childList: MutableList<BaseNode> = arrayListOf()
-            if (i != 3) {
-                for (k in 0..6) {
-                    val characteristicNode = CharacteristicNode(
-                        "CharacteristicName($k): TextName",
-                        "CharacteristicUUID($k): 0000ff${k}0-0000-1000-8000-00805f9b34fb",
-                        "CharacteristicUUID($k): Read, Write, Notify, Indicate",
-                        "CharacteristicUUID($k): 0x0{$k}"
-                    )
-                    childList.add(characteristicNode)
-                }
-            }
-            val serviceNode = ServiceNode(
-                "ServiceName($i): TextName",
-                "ServiceUUID($i): 0000ff80-0000-1000-8000-00805f9b34fb",
-                childList
-            )
-            list.add(serviceNode)
-        }
-        return list
     }
 
     private fun initList() {
@@ -88,7 +68,7 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         viewBinding.recyclerView.layoutManager = layoutManager
         viewBinding.recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
-        expandAdapter = DetailsExpandAdapter(test()) {
+        expandAdapter = DetailsExpandAdapter(getListData()) {
                 _, operateType, isChecked, node ->
 
             val msg: String = when (operateType) {
@@ -124,6 +104,64 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         }
         viewBinding.recyclerView.adapter = expandAdapter
+        expandAdapter?.expand(0)
+    }
+
+    private fun getListData(): MutableList<BaseNode> {
+        val gatt = BleManager.get().getBluetoothGatt(bleDevice!!)
+        val list: MutableList<BaseNode> = arrayListOf()
+        gatt?.services?.forEachIndexed { index, service ->
+            val childList: MutableList<BaseNode> = arrayListOf()
+            service.characteristics?.forEachIndexed { position, characteristics ->
+                val characteristicNode = CharacteristicNode(
+                    position.toString(),
+                    characteristics.uuid.toString(),
+                    getOperateType(characteristics),
+                    characteristics.properties
+                )
+                childList.add(characteristicNode)
+            }
+            val serviceNode = ServiceNode(
+                index.toString(),
+                service.uuid.toString(),
+                childList
+            )
+            list.add(serviceNode)
+        }
+        return list
+    }
+
+    private fun getOperateType(characteristic: BluetoothGattCharacteristic): String {
+        val property = StringBuilder()
+        val charaProp: Int = characteristic.properties
+        if (charaProp and BluetoothGattCharacteristic.PROPERTY_READ > 0) {
+            property.append("Read")
+            property.append(" , ")
+        }
+        if (charaProp and BluetoothGattCharacteristic.PROPERTY_WRITE > 0) {
+            property.append("Write")
+            property.append(" , ")
+        }
+        if (charaProp and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE > 0) {
+            property.append("Write No Response")
+            property.append(" , ")
+        }
+        if (charaProp and BluetoothGattCharacteristic.PROPERTY_NOTIFY > 0) {
+            property.append("Notify")
+            property.append(" , ")
+        }
+        if (charaProp and BluetoothGattCharacteristic.PROPERTY_INDICATE > 0) {
+            property.append("Indicate")
+            property.append(" , ")
+        }
+        if (property.length > 1) {
+            property.delete(property.length - 2, property.length - 1)
+        }
+        return if (property.isNotEmpty()) {
+            property.toString()
+        } else {
+            ""
+        }
     }
 
     /**

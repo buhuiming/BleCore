@@ -5,6 +5,7 @@
  */
 package com.bhm.ble.request
 
+import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.callback.BleNotifyCallback
 import com.bhm.ble.callback.BleScanCallback
@@ -53,6 +54,11 @@ internal interface BleBaseRequest {
      * 移除该设备的连接回调
      */
     fun removeBleConnectCallback(bleDevice: BleDevice)
+
+    /**
+     * 获取设备的BluetoothGatt对象
+     */
+    fun getBluetoothGatt(bleDevice: BleDevice): BluetoothGatt?
 
     /**
      * notify
