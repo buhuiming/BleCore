@@ -89,7 +89,9 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
                     viewModel.connect(bleDevice)
                 }
             } else if (view.id == R.id.btnOperate) {
-                viewModel.disConnect(bleDevice)
+                val intent = Intent(this@MainActivity, DetailOperateActivity::class.java)
+                intent.putExtra("data", bleDevice)
+                startActivity(intent)
             }
         }
 

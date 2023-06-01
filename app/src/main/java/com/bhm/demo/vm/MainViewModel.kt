@@ -16,10 +16,12 @@ import com.bhm.demo.BaseActivity
 import com.bhm.demo.constants.LOCATION_PERMISSION
 import com.bhm.demo.entity.RefreshBleDevice
 import com.bhm.support.sdk.common.BaseViewModel
+import com.bhm.support.sdk.entity.MessageEvent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.greenrobot.eventbus.EventBus
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -237,6 +239,10 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                             "$isActiveDisConnected)", Toast.LENGTH_SHORT).show()
                     BleLogger.e("-----onDisConnected: $isActiveDisConnected")
                     refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
+                    //发送断开的通知
+                    val message = MessageEvent()
+                    message.data = device
+                    EventBus.getDefault().post(message)
                 }
                 onConnectSuccess { bleDevice, _ ->
                     Toast.makeText(application, "连接成功(${bleDevice.deviceAddress})", Toast.LENGTH_SHORT).show()
