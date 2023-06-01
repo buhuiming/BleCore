@@ -5,25 +5,25 @@
  */
 package com.bhm.demo.ui
 
-import android.bluetooth.BluetoothGattCharacteristic
 import android.os.Build
-import android.view.View
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bhm.ble.BleManager
 import com.bhm.ble.data.BleDevice
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.R
 import com.bhm.demo.adapter.DetailsExpandAdapter
+import com.bhm.demo.adapter.LoggerListAdapter
 import com.bhm.demo.databinding.ActivityDetailBinding
-import com.bhm.demo.entity.CharacteristicNode
+import com.bhm.demo.entity.LogEntity
 import com.bhm.demo.entity.OperateType
-import com.bhm.demo.entity.ServiceNode
 import com.bhm.demo.vm.DetailViewModel
 import com.bhm.support.sdk.core.AppTheme
 import com.bhm.support.sdk.entity.MessageEvent
-import com.chad.library.adapter.base.entity.node.BaseNode
+import kotlinx.coroutines.launch
+import java.util.logging.Level
 
 
 /**
@@ -39,6 +39,8 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
     private var bleDevice: BleDevice? = null
 
     private var expandAdapter: DetailsExpandAdapter? = null
+
+    private var loggerListAdapter: LoggerListAdapter? = null
 
     override fun initData() {
         super.initData()
@@ -69,42 +71,72 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
         viewBinding.recyclerView.layoutManager = layoutManager
         viewBinding.recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
         expandAdapter = DetailsExpandAdapter(viewModel.getListData(bleDevice!!)) {
-                _, operateType, isChecked, node ->
-
-            val msg: String = when (operateType) {
+                checkBox, operateType, isChecked, node ->
+            var logEntity: LogEntity? = null
+            when (operateType) {
                 is OperateType.Write -> {
                     if (isChecked) {
-                        "写： ${node.characteristicName}"
+                        if (viewBinding.btnSend.isEnabled) {
+                            checkBox.isChecked = false
+                            Toast.makeText(this, "请取消其他特征值写操作", Toast.LENGTH_SHORT).show()
+                            return@DetailsExpandAdapter
+                        }
+                        viewBinding.btnSend.isEnabled = true
+                        viewBinding.etContent.isEnabled = true
+                        logEntity = LogEntity(Level.INFO, "写： ${node.characteristicUUID}")
                     } else {
-                        "取消写： ${node.characteristicName}"
+                        viewBinding.btnSend.isEnabled = false
+                        viewBinding.etContent.isEnabled = false
+                        logEntity = LogEntity(Level.OFF, "取消写： ${node.characteristicUUID}")
                     }
                 }
                 is OperateType.Read -> {
                     if (isChecked) {
-                        "读： ${node.characteristicName}"
+                        logEntity = LogEntity(Level.INFO, "读： ${node.characteristicUUID}")
                     } else {
-                        "取消读： ${node.characteristicName}"
+                        logEntity = LogEntity(Level.OFF, "取消读： ${node.characteristicUUID}")
                     }
                 }
                 is OperateType.Notify -> {
                     if (isChecked) {
-                        "Notify： ${node.characteristicName}"
+                        logEntity = LogEntity(Level.INFO, "Notify： ${node.characteristicUUID}")
                     } else {
-                        "取消Notify： ${node.characteristicName}"
+                        logEntity = LogEntity(Level.WARNING, "取消Notify： ${node.characteristicUUID}")
                     }
                 }
                 is OperateType.Indicate -> {
                     if (isChecked) {
-                        "Indicate： ${node.characteristicName}"
+                        logEntity = LogEntity(Level.INFO, "Indicate： ${node.characteristicUUID}")
                     } else {
-                        "取消Indicate： ${node.characteristicName}"
+                        logEntity = LogEntity(Level.WARNING, "取消Indicate： ${node.characteristicUUID}")
                     }
                 }
             }
-            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            viewModel.addLogMsg(logEntity)
         }
         viewBinding.recyclerView.adapter = expandAdapter
         expandAdapter?.expand(0)
+
+        val logLayoutManager = LinearLayoutManager(this)
+        logLayoutManager.orientation = LinearLayoutManager.VERTICAL
+        viewBinding.logRecyclerView.setHasFixedSize(true)
+        viewBinding.logRecyclerView.layoutManager = logLayoutManager
+        (viewBinding.recyclerView.itemAnimator as DefaultItemAnimator).supportsChangeAnimations = false
+        loggerListAdapter = LoggerListAdapter(viewModel.listLogData)
+        viewBinding.logRecyclerView.adapter = loggerListAdapter
+
+    }
+
+    override fun initEvent() {
+        super.initEvent()
+        lifecycleScope.launch {
+            viewModel.listLogStateFlow.collect {
+                viewModel.listLogData.add(it)
+                val position = viewModel.listLogData.size - 1
+                loggerListAdapter?.notifyItemInserted(position)
+                viewBinding.logRecyclerView.smoothScrollToPosition(position)
+            }
+        }
     }
 
     /**

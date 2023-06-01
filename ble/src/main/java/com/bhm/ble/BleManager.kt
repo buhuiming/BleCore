@@ -210,6 +210,7 @@ class BleManager private constructor() {
     fun release() {
         checkInitialize()
         bleBaseRequest?.release()
+        BleLogger.e("资源释放完毕，BleCore SDK退出")
     }
 
 

@@ -10,9 +10,13 @@ import android.bluetooth.BluetoothGattCharacteristic
 import com.bhm.ble.BleManager
 import com.bhm.ble.data.BleDevice
 import com.bhm.demo.entity.CharacteristicNode
+import com.bhm.demo.entity.LogEntity
 import com.bhm.demo.entity.ServiceNode
 import com.bhm.support.sdk.common.BaseViewModel
 import com.chad.library.adapter.base.entity.node.BaseNode
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import java.util.logging.Level
 
 
 /**
@@ -21,6 +25,12 @@ import com.chad.library.adapter.base.entity.node.BaseNode
  * @date 2023年06月01日 09时18分
  */
 class DetailViewModel(private val application: Application) : BaseViewModel(application) {
+
+    private val listLogMutableStateFlow = MutableStateFlow(LogEntity(Level.INFO, "数据适配完毕"))
+
+    val listLogStateFlow: StateFlow<LogEntity> = listLogMutableStateFlow
+
+    val listLogData = mutableListOf<LogEntity>()
 
     /**
      * 根据bleDevice拿到服务特征值数据
@@ -49,6 +59,9 @@ class DetailViewModel(private val application: Application) : BaseViewModel(appl
         return list
     }
 
+    /**
+     * 获取特征值的属性
+     */
     private fun getOperateType(characteristic: BluetoothGattCharacteristic): String {
         val property = StringBuilder()
         val charaProp: Int = characteristic.properties
@@ -80,5 +93,12 @@ class DetailViewModel(private val application: Application) : BaseViewModel(appl
         } else {
             ""
         }
+    }
+
+    /**
+     * 添加日志显示
+     */
+    fun addLogMsg(logEntity: LogEntity) {
+        listLogMutableStateFlow.value = logEntity
     }
 }
