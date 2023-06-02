@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bhm.ble.callback.BleRssiCallback
 import com.bhm.ble.control.BleTask
-import com.bhm.ble.data.BleDevice
 import com.bhm.ble.control.BleTaskQueue
+import com.bhm.ble.data.BleDevice
 import com.bhm.ble.utils.BleLogger
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.R
@@ -107,10 +107,10 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
                 return@setOnClickListener
             }
 //            startActivity(Intent(this@MainActivity, OptionSettingActivity::class.java))
-            BleTaskQueue.get().sendTask(BleTask(callInMainThread = false, autoDoNextTask = true) {
+            BleTaskQueue.get().addTask(BleTask(callInMainThread = false, autoDoNextTask = true) {
                 testJob(1)
             })
-            BleTaskQueue.get().sendTask(BleTask(callInMainThread = false) {
+            BleTaskQueue.get().addTask(BleTask(callInMainThread = false, autoDoNextTask = true) {
                 testJob(2)
             })
         }

@@ -22,16 +22,16 @@ import java.util.concurrent.CopyOnWriteArrayList
  * @author Buhuiming
  * @date 2023年06月02日 08时32分
  */
-class BleTaskQueue {
+ class BleTaskQueue1 {
 
     companion object {
 
-        private var instance: BleTaskQueue = BleTaskQueue()
+        private var instance: BleTaskQueue1 = BleTaskQueue1()
 
         @Synchronized
-        fun get(): BleTaskQueue {
+        fun get(): BleTaskQueue1 {
             if (instance == null) {
-                instance = BleTaskQueue()
+                instance = BleTaskQueue1()
             }
             return instance
         }
@@ -64,18 +64,16 @@ class BleTaskQueue {
         try {
             task.setMutexLock(mLock)
             mLock.lock()
-            BleLogger.i("开始执行任务：$task")
-            task.doTask()
-            taskList.removeFirst()
-            BleLogger.i("任务结束完毕，剩下${taskList.size}个任务")
-            if (task.autoDoNextTask) {
-                sendTask(taskList.firstOrNull())
-                task.doNextTask()
+            if (task.callInMainThread) {
+                withContext(Dispatchers.Main) {
+                    task.doTask()
+                }
+            } else {
+                task.doTask()
             }
         } catch (e: Exception) {
             BleLogger.i("任务执行中断：$task")
-            taskList.removeFirst()
-            sendTask(taskList.firstOrNull())
+            e.printStackTrace()
             task.doNextTask()
         }
     }
@@ -84,30 +82,30 @@ class BleTaskQueue {
      * 开始任务
      * @param task ITask
      */
-    @Synchronized
-    fun addTask(task: BleTask) {
+    fun sendTask(task: BleTask) {
         if (mCoroutineScope == null && mChannel == null) {
             initLoop()
         }
+
         BleLogger.i("当前任务数量：${taskList.size}, 添加任务：$task")
         taskList.add(task)
-        if (taskList.size == 1) {
-            sendTask(task)
+
+        mCoroutineScope?.launch {
+//            if (taskList.size == 1) {
+                mChannel?.send(task)
+//            }
         }
     }
 
     /**
-     * 发送执行任务
+     * 给任务开启超时计时器
      */
-    @Synchronized
-    private fun sendTask(task: BleTask?) {
-        if (task == null) {
-            BleLogger.i("所有任务执行完毕")
-            return
-        }
-        mCoroutineScope?.launch {
-            mChannel?.send(task)
-        }
+    private fun initTask() {
+
+    }
+
+    fun cancelTask(task: BleTask) {
+//        task.cancelTask()
     }
 
     /**

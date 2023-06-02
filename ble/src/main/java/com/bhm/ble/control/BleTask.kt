@@ -6,19 +6,25 @@
 package com.bhm.ble.control
 
 import com.bhm.ble.utils.BleLogger
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 
 
 /**
  * Ble任务，主要是用来处理rssi、mtu、write、read、notify、indicate操作
+ * durationTimeMillis Long 任务执行的时间，0：表示任务执行时间不固定
  * autoDoNextTask = true自动执行下一个任务，= false，则需要调用doNextTask()执行下一个任务
  * @author Buhuiming
  * @date 2023年06月02日 11时01分
  */
-class BleTask(val callInMainThread: Boolean = true,
-              private val autoDoNextTask: Boolean = false,
-              private val block: suspend BleTask.() -> Unit
+class BleTask(val durationTimeMillis: Long = 0,
+              val callInMainThread: Boolean = true,
+              val autoDoNextTask: Boolean = false,
+              private val block: suspend BleTask.() -> Unit,
+//              private val callback: ((throwable: Throwable?) -> Unit)? = null
 ) {
+
+    private var task: Job? = null
 
     /**
      * 用于执行task时，挂起当前coroutine
@@ -33,11 +39,12 @@ class BleTask(val callInMainThread: Boolean = true,
      * 执行任务
      */
     suspend fun doTask() {
-        BleLogger.i("开始执行任务：$this")
-        block.invoke(this)
-        BleLogger.i("任务结束完毕：$this")
-        if (autoDoNextTask) {
-            doNextTask()
+        if (callInMainThread) {
+            MainScope().launch {
+                block.invoke(this@BleTask)
+            }
+        } else {
+            block.invoke(this@BleTask)
         }
     }
 
