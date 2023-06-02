@@ -18,10 +18,7 @@ import com.bhm.demo.databinding.ActivityMainBinding
 import com.bhm.demo.vm.MainViewModel
 import com.bhm.support.sdk.core.AppTheme
 import com.bhm.support.sdk.utils.ViewUtil
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import leakcanary.LeakCanary
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -107,45 +104,93 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
                 return@setOnClickListener
             }
 //            startActivity(Intent(this@MainActivity, OptionSettingActivity::class.java))
-            BleTaskQueue.get().addTask(BleTask(callInMainThread = false, autoDoNextTask = true) {
-                testJob(1)
-            })
-            BleTaskQueue.get().addTask(BleTask(callInMainThread = false, autoDoNextTask = true) {
-                testJob(2)
-            })
+            jobs.clear()
+            BleTaskQueue.get().addTask(testTask1)
+            BleTaskQueue.get().addTask(testTask2)
+            BleTaskQueue.get().addTask(testTask3)
         }
 
         viewBinding.btnStart.setOnClickListener {
             if (ViewUtil.isInvalidClick(it)) {
                 return@setOnClickListener
             }
-            listAdapter?.notifyItemRangeRemoved(0, viewModel.listDRData.size)
-            viewModel.listDRData.clear()
-            viewModel.startScan(this@MainActivity)
+//            listAdapter?.notifyItemRangeRemoved(0, viewModel.listDRData.size)
+//            viewModel.listDRData.clear()
+//            viewModel.startScan(this@MainActivity)
+//            jobs[0].cancel("手动测试取消")
+            BleTaskQueue.get().removeRunningTask()
         }
 
+        viewBinding.btnStop.isEnabled = true
         viewBinding.btnStop.setOnClickListener {
             if (ViewUtil.isInvalidClick(it)) {
                 return@setOnClickListener
             }
-            viewModel.stopScan()
+//            viewModel.stopScan()
+            BleTaskQueue.get().removeTask(testTask2)
         }
     }
 
+    private var jobs: MutableList<Job> = arrayListOf()
+
+    private val testTask1 = BleTask(callInMainThread = true,
+        autoDoNextTask = true,
+        block = {
+            testJob(1)
+        }, interrupt = {
+            jobs[0].cancel("手动测试取消")
+        }
+    )
+
+    private val testTask2 = BleTask(callInMainThread = true,
+        autoDoNextTask = true,
+        block = {
+            testJob(2)
+        }, interrupt = {
+            jobs[1].cancel("手动测试取消")
+        }
+    )
+
+    private val testTask3 = BleTask(callInMainThread = true,
+        autoDoNextTask = true,
+        block = {
+            testJob(3)
+        }, interrupt = {
+            jobs[2].cancel("手动测试取消")
+        }
+    )
+
     private suspend fun testJob(i: Int) {
-        var result: Boolean = suspendCoroutine { continuation ->
+        suspendCoroutine { continuation ->
             val callback = BleRssiCallback()
-            CoroutineScope(Dispatchers.IO).launch {
+            val job = CoroutineScope(Dispatchers.IO).launch {
                 repeat(5) {
                     BleLogger.e("${i}执行子任务：$it")
+                    if (i == 2 && it == 3) {
+//                        continuation.resumeWithException(Throwable("测试取消"))
+                        cancel(CancellationException("自动测试取消"))
+                    }
                     delay(1000)
                 }
-                delay(500)
                 callback.callRssiSuccess(100)
                 BleLogger.e("testJob${i}任务完成")
-                continuation.resume(true)
             }
+            job.invokeOnCompletion {
+                BleLogger.e("${it?.message}")
+                continuation.resume(it == null)
+            }
+            jobs.add(job)
         }
+
+//        repeat(5) {
+//            BleLogger.e("${i}执行子任务：$it")
+//            if (i == 2 && it == 3) {
+////                        continuation.resumeWithException(Throwable("测试取消"))
+//                return
+//            }
+//            delay(1000)
+//        }
+//        BleLogger.e("testJob${i}任务完成")
     }
 
     private fun initList() {

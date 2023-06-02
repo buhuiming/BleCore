@@ -59,6 +59,9 @@ class BleTaskQueue {
         }
     }
 
+    /**
+     * 从队列中取任务处理任务
+     */
     private suspend fun tryHandleTask(task: BleTask) {
         //防止有task抛出异常，用CoroutineExceptionHandler捕获异常之后父coroutine关闭了，之后的send的Task不执行了
         try {
@@ -66,22 +69,22 @@ class BleTaskQueue {
             mLock.lock()
             BleLogger.i("开始执行任务：$task")
             task.doTask()
-            taskList.removeFirst()
+            taskList.removeFirstOrNull()
             BleLogger.i("任务结束完毕，剩下${taskList.size}个任务")
             if (task.autoDoNextTask) {
                 sendTask(taskList.firstOrNull())
                 task.doNextTask()
             }
         } catch (e: Exception) {
-            BleLogger.i("任务执行中断：$task")
-            taskList.removeFirst()
+            BleLogger.i("任务执行中断：$task，\r\n ${e.message}")
+            taskList.removeFirstOrNull()
             sendTask(taskList.firstOrNull())
             task.doNextTask()
         }
     }
 
     /**
-     * 开始任务
+     * 添加任务
      * @param task ITask
      */
     @Synchronized
@@ -94,6 +97,28 @@ class BleTaskQueue {
         if (taskList.size == 1) {
             sendTask(task)
         }
+    }
+
+    /**
+     * 移除任务
+     */
+    @Synchronized
+    fun removeTask(task: BleTask?) {
+        if (taskList.contains(task)) {
+            if (task?.getMutexLock() != null) {
+                //正在执行
+                BleLogger.e("取消正在执行的任务：$this")
+                task.remove()
+            } else {
+                BleLogger.e("取消队列中的任务：${task}")
+                taskList.remove(task)
+            }
+        }
+    }
+
+    @Synchronized
+    fun removeRunningTask() {
+        removeTask(taskList.firstOrNull())
     }
 
     /**

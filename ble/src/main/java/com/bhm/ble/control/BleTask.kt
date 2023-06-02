@@ -5,7 +5,6 @@
  */
 package com.bhm.ble.control
 
-import com.bhm.ble.utils.BleLogger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 
@@ -21,10 +20,8 @@ class BleTask(val durationTimeMillis: Long = 0,
               val callInMainThread: Boolean = true,
               val autoDoNextTask: Boolean = false,
               private val block: suspend BleTask.() -> Unit,
-//              private val callback: ((throwable: Throwable?) -> Unit)? = null
+              private val interrupt: ((throwable: Throwable?) -> Unit)? = null
 ) {
-
-    private var task: Job? = null
 
     /**
      * 用于执行task时，挂起当前coroutine
@@ -35,17 +32,26 @@ class BleTask(val durationTimeMillis: Long = 0,
         this.mutex = mutex
     }
 
+    fun getMutexLock() = mutex
+
     /**
      * 执行任务
      */
     suspend fun doTask() {
         if (callInMainThread) {
-            MainScope().launch {
+            withContext(SupervisorJob() + Dispatchers.Main) {
                 block.invoke(this@BleTask)
             }
         } else {
             block.invoke(this@BleTask)
         }
+    }
+
+    /**
+     * 中断任务
+     */
+    fun remove() {
+        interrupt?.invoke(CancellationException())
     }
 
     /**
