@@ -6,7 +6,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bhm.ble.callback.BleRssiCallback
+import com.bhm.ble.control.BleTask
 import com.bhm.ble.data.BleDevice
+import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.utils.BleLogger
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.R
@@ -15,9 +18,13 @@ import com.bhm.demo.databinding.ActivityMainBinding
 import com.bhm.demo.vm.MainViewModel
 import com.bhm.support.sdk.core.AppTheme
 import com.bhm.support.sdk.utils.ViewUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import leakcanary.LeakCanary
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * 主页面
@@ -99,7 +106,13 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
             if (ViewUtil.isInvalidClick(it)) {
                 return@setOnClickListener
             }
-            startActivity(Intent(this@MainActivity, OptionSettingActivity::class.java))
+//            startActivity(Intent(this@MainActivity, OptionSettingActivity::class.java))
+            BleTaskQueue.get().sendTask(BleTask(callInMainThread = false, autoDoNextTask = true) {
+                testJob(1)
+            })
+            BleTaskQueue.get().sendTask(BleTask(callInMainThread = false) {
+                testJob(2)
+            })
         }
 
         viewBinding.btnStart.setOnClickListener {
@@ -116,6 +129,22 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
                 return@setOnClickListener
             }
             viewModel.stopScan()
+        }
+    }
+
+    private suspend fun testJob(i: Int) {
+        var result: Boolean = suspendCoroutine { continuation ->
+            val callback = BleRssiCallback()
+            CoroutineScope(Dispatchers.IO).launch {
+                repeat(5) {
+                    BleLogger.e("${i}执行子任务：$it")
+                    delay(1000)
+                }
+                delay(500)
+                callback.callRssiSuccess(100)
+                BleLogger.e("testJob${i}任务完成")
+                continuation.resume(true)
+            }
         }
     }
 

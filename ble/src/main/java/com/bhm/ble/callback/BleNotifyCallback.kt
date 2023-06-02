@@ -13,7 +13,7 @@ package com.bhm.ble.callback
  * @author Buhuiming
  * @date 2023年05月29日 08时47分
  */
-class BleNotifyCallback : BleBaseCallback(){
+open class BleNotifyCallback : BleBaseCallback(){
 
     private var notifySuccess: (() -> Unit)? = null
 
@@ -33,19 +33,19 @@ class BleNotifyCallback : BleBaseCallback(){
         characteristicChanged = value
     }
 
-    internal fun callNotifyFail(throwable: Throwable) {
+    open fun callNotifyFail(throwable: Throwable) {
         launchInMainThread {
             notifyFail?.invoke(throwable)
         }
     }
 
-    internal fun callNotifySuccess() {
+    open fun callNotifySuccess() {
         launchInMainThread {
             notifySuccess?.invoke()
         }
     }
 
-    internal fun callCharacteristicChanged(data: ByteArray) {
+    open fun callCharacteristicChanged(data: ByteArray) {
         //数据处理放在非主线程
         characteristicChanged?.invoke(data)
     }

@@ -23,7 +23,7 @@ internal interface BleBaseRequest {
     /**
      * 开始扫描
      */
-    fun startScan(bleScanCallback: BleScanCallback)
+    fun startScan(bleScanCallback: BleScanCallback.() -> Unit)
 
     /**
      * 是否扫描中
@@ -38,7 +38,7 @@ internal interface BleBaseRequest {
     /**
      * 开始连接
      */
-    fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback)
+    fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit)
 
     /**
      * 断开连接
@@ -66,8 +66,8 @@ internal interface BleBaseRequest {
     fun notify(bleDevice: BleDevice,
                serviceUUID: String,
                notifyUUID: String,
-               bleNotifyCallback: BleNotifyCallback,
-               useCharacteristicDescriptor: Boolean = false)
+               useCharacteristicDescriptor: Boolean = false,
+               bleNotifyCallback: BleNotifyCallback.() -> Unit)
 
     /**
      * stop notify

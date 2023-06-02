@@ -399,10 +399,10 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
      * notify
      */
     @Synchronized
-    fun enableCharacteristicNotify(bleNotifyCallback: BleNotifyCallback,
-                                   serviceUUID: String,
+    fun enableCharacteristicNotify(serviceUUID: String,
                                    notifyUUID: String,
-                                   userCharacteristicDescriptor: Boolean) {
+                                   userCharacteristicDescriptor: Boolean,
+                                   bleNotifyCallback: BleNotifyCallback) {
         val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
         val characteristic = gattService?.getCharacteristic(UUID.fromString(notifyUUID))
         if (bluetoothGatt != null && gattService != null && characteristic != null &&

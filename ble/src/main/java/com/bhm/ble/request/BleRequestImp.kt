@@ -13,8 +13,7 @@ import com.bhm.ble.callback.BleNotifyCallback
 import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.control.NotifyFailException
 import com.bhm.ble.data.BleDevice
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 
 
 /**
@@ -45,8 +44,10 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     /**
      * 开始扫描
      */
-    override fun startScan(bleScanCallback: BleScanCallback) {
-        BleScanRequest.get().startScan(bleScanCallback)
+    override fun startScan(bleScanCallback: BleScanCallback.() -> Unit) {
+        val callback = BleScanCallback()
+        callback.apply(bleScanCallback)
+        BleScanRequest.get().startScan(callback)
     }
 
     /**
@@ -66,10 +67,12 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     /**
      * 开始连接
      */
-    override fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback) {
+    override fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit) {
+        val callback = BleConnectCallback()
+        callback.apply(bleConnectCallback)
         BleConnectRequestManager.get()
             .buildBleConnectRequest(bleDevice)
-            ?.connect(bleConnectCallback)
+            ?.connect(callback)
     }
 
     /**
@@ -108,14 +111,16 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     override fun notify(bleDevice: BleDevice,
                         serviceUUID: String,
                         notifyUUID: String,
-                        bleNotifyCallback: BleNotifyCallback,
-                        useCharacteristicDescriptor: Boolean) {
+                        useCharacteristicDescriptor: Boolean,
+                        bleNotifyCallback: BleNotifyCallback.() -> Unit) {
+        val callback = BleNotifyCallback()
+        callback.apply(bleNotifyCallback)
         val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
         request?.let {
-            it.enableCharacteristicNotify(bleNotifyCallback, serviceUUID, notifyUUID, useCharacteristicDescriptor)
+            it.enableCharacteristicNotify(serviceUUID, notifyUUID, useCharacteristicDescriptor, callback)
             return
         }
-        bleNotifyCallback.callNotifyFail(NotifyFailException.UnConnectedException)
+        callback.callNotifyFail(NotifyFailException.UnConnectedException)
     }
 
     /**

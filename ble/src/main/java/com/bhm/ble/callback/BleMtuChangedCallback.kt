@@ -12,7 +12,7 @@ package com.bhm.ble.callback
  * @author Buhuiming
  * @date 2023年05月26日 16时17分
  */
-class BleMtuChangedCallback : BleBaseCallback(){
+open class BleMtuChangedCallback : BleBaseCallback(){
 
     private var mtuChanged: ((mtu: Int) -> Unit)? = null
 
@@ -26,13 +26,13 @@ class BleMtuChangedCallback : BleBaseCallback(){
         mtuChanged = value
     }
 
-    internal fun callSetMtuFail(throwable: Throwable) {
+    open fun callSetMtuFail(throwable: Throwable) {
         launchInMainThread {
             fail?.invoke(throwable)
         }
     }
 
-    internal fun callMtuChanged(mtu: Int) {
+    open fun callMtuChanged(mtu: Int) {
         launchInMainThread {
             mtuChanged?.invoke(mtu)
         }

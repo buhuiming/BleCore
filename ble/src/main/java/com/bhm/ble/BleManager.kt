@@ -84,10 +84,8 @@ class BleManager private constructor() {
      */
     @Synchronized
     fun startScan(bleScanCallback: BleScanCallback.() -> Unit) {
-        val callback = BleScanCallback()
-        callback.apply(bleScanCallback)
         checkInitialize()
-        bleBaseRequest?.startScan(callback)
+        bleBaseRequest?.startScan(bleScanCallback)
     }
 
     /**
@@ -129,9 +127,7 @@ class BleManager private constructor() {
     fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit) {
         checkInitialize()
         stopScan()
-        val callback = BleConnectCallback()
-        callback.apply(bleConnectCallback)
-        bleBaseRequest?.connect(bleDevice, callback)
+        bleBaseRequest?.connect(bleDevice, bleConnectCallback)
     }
 
     /**
@@ -184,10 +180,10 @@ class BleManager private constructor() {
     fun notify(bleDevice: BleDevice,
                serviceUUID: String,
                notifyUUID: String,
-               bleNotifyCallback: BleNotifyCallback,
-               useCharacteristicDescriptor: Boolean = false) {
+               useCharacteristicDescriptor: Boolean = false,
+               bleNotifyCallback: BleNotifyCallback.() -> Unit) {
         checkInitialize()
-        bleBaseRequest?.notify(bleDevice, serviceUUID, notifyUUID, bleNotifyCallback, useCharacteristicDescriptor)
+        bleBaseRequest?.notify(bleDevice, serviceUUID, notifyUUID, useCharacteristicDescriptor, bleNotifyCallback)
     }
 
     /**
@@ -210,7 +206,7 @@ class BleManager private constructor() {
     fun release() {
         checkInitialize()
         bleBaseRequest?.release()
-        BleLogger.e("资源释放完毕，BleCore SDK退出")
+        BleLogger.i("资源释放完毕，BleCore SDK退出")
     }
 
 

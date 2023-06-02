@@ -15,7 +15,7 @@ import com.bhm.ble.data.BleScanFailType
  * @author Buhuiming
  * @date 2023年05月22日 09时08分
  */
-class BleScanCallback : BleBaseCallback(){
+open class BleScanCallback : BleBaseCallback(){
 
     private var start: (() -> Unit)? = null
 
@@ -69,32 +69,32 @@ class BleScanCallback : BleBaseCallback(){
         scanComplete = value
     }
 
-    internal fun callScanStart() {
+    open fun callScanStart() {
         //MainScope是CoroutineScope类型，为协同作用域，子协程取消后，父协程也会取消
         launchInMainThread {
             start?.invoke()
         }
     }
 
-    internal fun callLeScan(bleDevice: BleDevice, currentScanCount: Int) {
+    open fun callLeScan(bleDevice: BleDevice, currentScanCount: Int) {
         launchInMainThread {
             leScan?.invoke(bleDevice, currentScanCount)
         }
     }
 
-    internal fun callLeScanDuplicateRemoval(bleDevice: BleDevice, currentScanCount: Int) {
+    open fun callLeScanDuplicateRemoval(bleDevice: BleDevice, currentScanCount: Int) {
         launchInMainThread {
             leScanDuplicateRemoval?.invoke(bleDevice, currentScanCount)
         }
     }
 
-    internal fun callScanFail(scanFailType: BleScanFailType) {
+    open fun callScanFail(scanFailType: BleScanFailType) {
         launchInMainThread {
             scanFail?.invoke(scanFailType)
         }
     }
 
-    internal fun callScanComplete(bleDeviceList: MutableList<BleDevice>,
+    open fun callScanComplete(bleDeviceList: MutableList<BleDevice>,
                                   bleDeviceDuplicateRemovalList: MutableList<BleDevice>) {
         launchInMainThread {
             scanComplete?.invoke(bleDeviceList, bleDeviceDuplicateRemovalList)

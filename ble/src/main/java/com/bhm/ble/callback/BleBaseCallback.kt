@@ -29,9 +29,9 @@ open class BleBaseCallback {
         }
     }
 
-    fun setKey(key: String) {
+    open fun setKey(key: String) {
         this.key = key
     }
 
-    fun getKey() = key
+    open fun getKey() = key
 }

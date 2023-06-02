@@ -12,7 +12,7 @@ package com.bhm.ble.callback
  * @author Buhuiming
  * @date 2023年05月26日 15时54分
  */
-class BleRssiCallback : BleBaseCallback(){
+open class BleRssiCallback : BleBaseCallback(){
 
     private var success: ((rssi: Int) -> Unit)? = null
 
@@ -26,13 +26,13 @@ class BleRssiCallback : BleBaseCallback(){
         success = value
     }
 
-    internal fun callRssiFail(throwable: Throwable) {
+    open fun callRssiFail(throwable: Throwable) {
         launchInMainThread {
             fail?.invoke(throwable)
         }
     }
 
-    internal fun callRssiSuccess(rssi: Int) {
+    open fun callRssiSuccess(rssi: Int) {
         launchInMainThread {
             success?.invoke(rssi)
         }

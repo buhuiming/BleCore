@@ -16,7 +16,7 @@ import com.bhm.ble.data.BleDevice
  * @author Buhuiming
  * @date 2023年05月24日 14时00分
  */
-class BleConnectCallback : BleBaseCallback(){
+open class BleConnectCallback : BleBaseCallback(){
 
     private var start: (() -> Unit)? = null
 
@@ -59,25 +59,25 @@ class BleConnectCallback : BleBaseCallback(){
         disConnected = value
     }
 
-    internal fun callConnectStart() {
+    open fun callConnectStart() {
         launchInMainThread {
             start?.invoke()
         }
     }
 
-    internal fun callConnectFail(bleDevice: BleDevice, connectFailType: BleConnectFailType) {
+    open fun callConnectFail(bleDevice: BleDevice, connectFailType: BleConnectFailType) {
         launchInMainThread {
             connectFail?.invoke(bleDevice, connectFailType)
         }
     }
 
-    internal fun callConnectSuccess(bleDevice: BleDevice, gatt: BluetoothGatt?) {
+    open fun callConnectSuccess(bleDevice: BleDevice, gatt: BluetoothGatt?) {
         launchInMainThread {
             connectSuccess?.invoke(bleDevice, gatt)
         }
     }
 
-    internal fun callDisConnected(isActiveDisConnected: Boolean, bleDevice: BleDevice,
+    open fun callDisConnected(isActiveDisConnected: Boolean, bleDevice: BleDevice,
                                   gatt: BluetoothGatt?, status: Int) {
         launchInMainThread {
             disConnected?.invoke(isActiveDisConnected, bleDevice, gatt, status)

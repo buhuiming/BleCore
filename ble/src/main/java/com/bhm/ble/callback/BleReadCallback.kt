@@ -12,7 +12,7 @@ package com.bhm.ble.callback
  * @author Buhuiming
  * @date 2023年05月26日 15时54分
  */
-class BleReadCallback : BleBaseCallback(){
+open class BleReadCallback : BleBaseCallback(){
 
     private var readSuccess: ((data: ByteArray) -> Unit)? = null
 
@@ -26,13 +26,13 @@ class BleReadCallback : BleBaseCallback(){
         readSuccess = value
     }
 
-    internal fun callReadFail(throwable: Throwable) {
+    open fun callReadFail(throwable: Throwable) {
         launchInMainThread {
             readFail?.invoke(throwable)
         }
     }
 
-    internal fun callReadSuccess(data: ByteArray) {
+    open fun callReadSuccess(data: ByteArray) {
         launchInMainThread {
             readSuccess?.invoke(data)
         }

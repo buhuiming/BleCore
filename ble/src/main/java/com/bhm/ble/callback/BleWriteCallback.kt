@@ -12,7 +12,7 @@ package com.bhm.ble.callback
  * @author Buhuiming
  * @date 2023年05月26日 15时54分
  */
-class BleWriteCallback : BleBaseCallback(){
+open class BleWriteCallback : BleBaseCallback(){
 
     private var writeSuccess: ((current: Int, total: Int, justWrite: ByteArray) -> Unit)? = null
 
@@ -26,13 +26,13 @@ class BleWriteCallback : BleBaseCallback(){
         writeSuccess = value
     }
 
-    internal fun callWriteFail(throwable: Throwable) {
+    open fun callWriteFail(throwable: Throwable) {
         launchInMainThread {
             writeFail?.invoke(throwable)
         }
     }
 
-    internal fun callWriteSuccess(current: Int, total: Int, justWrite: ByteArray) {
+    open fun callWriteSuccess(current: Int, total: Int, justWrite: ByteArray) {
         launchInMainThread {
             writeSuccess?.invoke(current, total, justWrite)
         }
