@@ -130,7 +130,9 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
             }
         }
         viewBinding.recyclerView.adapter = expandAdapter
-        expandAdapter?.expand(0)
+        if ((expandAdapter?.data?.size?: 0) > 0) {
+            expandAdapter?.expand(0)
+        }
 
         val logLayoutManager = LinearLayoutManager(this)
         logLayoutManager.orientation = LinearLayoutManager.VERTICAL
@@ -151,6 +153,10 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
                 loggerListAdapter?.notifyItemInserted(position)
                 viewBinding.logRecyclerView.smoothScrollToPosition(position)
             }
+        }
+        viewBinding.btnClear.setOnClickListener {
+            loggerListAdapter?.notifyItemRangeRemoved(0, viewModel.listLogData.size)
+            viewModel.listLogData.clear()
         }
     }
 

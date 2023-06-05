@@ -2,6 +2,7 @@ package com.bhm.demo.ui
 
 import android.content.Intent
 import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -90,9 +91,18 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
                     viewModel.connect(bleDevice)
                 }
             } else if (view.id == R.id.btnOperate) {
-                val intent = Intent(this@MainActivity, DetailOperateActivity::class.java)
-                intent.putExtra("data", bleDevice)
-                startActivity(intent)
+                if (viewModel.isConnected(bleDevice)) {
+                    val intent = Intent(this@MainActivity, DetailOperateActivity::class.java)
+                    intent.putExtra("data", bleDevice)
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(application, "设备未连接", Toast.LENGTH_SHORT).show()
+                    val index = listAdapter?.data?.indexOf(bleDevice) ?: -1
+                    if (index >= 0) {
+                        listAdapter?.notifyItemChanged(index)
+                    }
+                    BleLogger.i("item isConnected: ${viewModel.isConnected(bleDevice)}")
+                }
             }
         }
 

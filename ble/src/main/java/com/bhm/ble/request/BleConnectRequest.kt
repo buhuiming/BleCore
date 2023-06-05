@@ -565,7 +565,11 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
      */
     @Synchronized
     fun release() {
-        lastState = BleConnectLastState.ConnectIdle
+        bleConnectCallback?.callDisConnected(
+            isActiveDisconnect.get(),
+            bleDevice, bluetoothGatt, BluetoothGatt.GATT_SUCCESS
+        )
+        lastState = BleConnectLastState.Disconnect
         disConnectGatt()
         refreshDeviceCache()
         closeBluetoothGatt()
