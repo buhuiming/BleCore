@@ -14,7 +14,7 @@
         }
 
 #### 1、添加权限
-    
+
     //动态申请
     val LOCATION_PERMISSION = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             arrayOf(
@@ -130,8 +130,24 @@
                                   notifyUUID: String,
                                   useCharacteristicDescriptor: Boolean = false)
 
-#### 11、断开所有连接 释放资源
-    BleManager.get().release()
+#### 11、设置Indicate
+    BleManager.get().indicate(bleDevice: BleDevice,
+                                  serviceUUID: String,
+                                  notifyUUID: String,
+                                  bleIndicateCallback: BleIndicateCallback,
+                                  useCharacteristicDescriptor: Boolean = false)
+
+#### 12、取消Indicate
+    BleManager.get().stopIndicate(bleDevice: BleDevice,
+                                  serviceUUID: String,
+                                  notifyUUID: String,
+                                  useCharacteristicDescriptor: Boolean = false)
+
+#### 11、断开某个设备的连接 释放资源
+    BleManager.get().release(bleDevice: BleDevice)
+
+#### 12、断开所有连接 释放资源
+    BleManager.get().releaseAll()
 
 
 

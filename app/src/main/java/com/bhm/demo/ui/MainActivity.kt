@@ -30,6 +30,8 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
 
     private var listAdapter: DeviceListAdapter? = null
 
+    private var autoOpenDetailsActivity = false
+
     override fun createViewModel() = MainViewModel(application)
 
     override fun initData() {
@@ -71,7 +73,12 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
                     if (position >= 0) {
                         listAdapter?.notifyItemChanged(position)
                     }
-                    BleLogger.i("item isConnected: ${viewModel.isConnected(bleDevice)}")
+                    val isConnected= viewModel.isConnected(bleDevice)
+                    BleLogger.i("item isConnected: $isConnected")
+                    if (isConnected && autoOpenDetailsActivity) {
+                        openDetails(it.bleDevice)
+                    }
+                    autoOpenDetailsActivity = false
                 }
             }
         }
@@ -91,19 +98,17 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
                     viewModel.connect(bleDevice)
                 }
             } else if (view.id == R.id.btnOperate) {
-                if (viewModel.isConnected(bleDevice)) {
-                    val intent = Intent(this@MainActivity, DetailOperateActivity::class.java)
-                    intent.putExtra("data", bleDevice)
-                    startActivity(intent)
-                } else {
-                    Toast.makeText(application, "设备未连接", Toast.LENGTH_SHORT).show()
-                    val index = listAdapter?.data?.indexOf(bleDevice) ?: -1
-                    if (index >= 0) {
-                        listAdapter?.notifyItemChanged(index)
-                    }
-                    BleLogger.i("item isConnected: ${viewModel.isConnected(bleDevice)}")
-                }
+                openDetails(bleDevice)
             }
+        }
+
+        viewBinding.btnConnect.setOnClickListener {
+            if (ViewUtil.isInvalidClick(it)) {
+                return@setOnClickListener
+            }
+            autoOpenDetailsActivity = true
+            showLoading("连接中...")
+            viewModel.connect("7C:DF:A1:A3:5A:BE")
         }
 
         viewBinding.btnSetting.setOnClickListener {
@@ -141,6 +146,33 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
         (viewBinding.recyclerView.itemAnimator as DefaultItemAnimator).supportsChangeAnimations = false
         listAdapter = DeviceListAdapter(viewModel.listDRData)
         viewBinding.recyclerView.adapter = listAdapter
+    }
+
+    /**
+     * 打开操作页面
+     */
+    private fun openDetails(bleDevice: BleDevice?) {
+        if (viewModel.isConnected(bleDevice)) {
+            val intent = Intent(this@MainActivity, DetailOperateActivity::class.java)
+            intent.putExtra("data", bleDevice)
+            startActivity(intent) { _, resultIntent ->
+                if (resultIntent != null) {
+                    showLoading("断开中...")
+                    //断开需要一定的时间，才可以连接，这里防止没断开完成，马上点击连接
+                    lifecycleScope.launch {
+                        delay(2000)
+                        dismissLoading()
+                    }
+                }
+            }
+        } else {
+            Toast.makeText(application, "设备未连接", Toast.LENGTH_SHORT).show()
+            val index = listAdapter?.data?.indexOf(bleDevice) ?: -1
+            if (index >= 0) {
+                listAdapter?.notifyItemChanged(index)
+            }
+            BleLogger.i("item isConnected: ${viewModel.isConnected(bleDevice)}")
+        }
     }
 
     override fun onDestroy() {

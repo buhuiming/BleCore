@@ -32,6 +32,20 @@
             android:gravity="center">
 
         <Button
+                android:id="@+id/btnConnect"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="40dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:textSize="10sp"
+                android:padding="0dp"
+                android:background="@color/purple_500"
+                android:text="连接指定设备"/>
+
+        <Button
                 android:id="@+id/btnSetting"
                 android:layout_width="0dp"
                 android:layout_weight="1"

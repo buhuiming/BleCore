@@ -213,6 +213,13 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
     /**
      * 开始连接
      */
+    fun connect(address: String) {
+        connect(BleManager.get().buildBleDeviceByDeviceAddress(address))
+    }
+
+    /**
+     * 开始连接
+     */
     fun connect(bleDevice: BleDevice?) {
         bleDevice?.let { device ->
             BleManager.get().connect(device) {

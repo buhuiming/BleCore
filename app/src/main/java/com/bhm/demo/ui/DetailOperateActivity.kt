@@ -5,7 +5,9 @@
  */
 package com.bhm.demo.ui
 
+import android.content.Intent
 import android.os.Build
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -28,7 +30,7 @@ import java.util.logging.Level
 
 
 /**
- * 服务，特征
+ * 服务，特征 操作页面
  *
  * @author Buhuiming
  * @date 2023年06月01日 09时17分
@@ -173,8 +175,13 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        BleManager.get().release(getBleDevice())
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            BleManager.get().release(getBleDevice())
+            setResult(0, Intent())
+            finish()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
 }
