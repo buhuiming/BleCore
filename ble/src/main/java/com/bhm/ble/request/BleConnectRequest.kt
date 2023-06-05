@@ -474,7 +474,11 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             (characteristic.properties or BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0
         ) {
             cancelNotifyJob()
-            return setCharacteristicNotify(characteristic, userCharacteristicDescriptor, false, null)
+            val success = setCharacteristicNotify(characteristic, userCharacteristicDescriptor, false, null)
+            if (success) {
+                removeNotifyCallback(notifyUUID)
+            }
+            return success
         }
         return false
     }
@@ -493,23 +497,23 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     }
 
     @Synchronized
-    fun addNotifyCallback(uuid: String?, bleNotifyCallback: BleNotifyCallback?) {
-        bleNotifyCallbackHashMap[uuid!!] = bleNotifyCallback!!
+    fun addNotifyCallback(uuid: String, bleNotifyCallback: BleNotifyCallback) {
+        bleNotifyCallbackHashMap[uuid] = bleNotifyCallback
     }
 
     @Synchronized
-    fun addIndicateCallback(uuid: String?, bleIndicateCallback: BleIndicateCallback?) {
-        bleIndicateCallbackHashMap[uuid!!] = bleIndicateCallback!!
+    fun addIndicateCallback(uuid: String, bleIndicateCallback: BleIndicateCallback) {
+        bleIndicateCallbackHashMap[uuid] = bleIndicateCallback
     }
 
     @Synchronized
-    fun addWriteCallback(uuid: String?, bleWriteCallback: BleWriteCallback?) {
-        bleWriteCallbackHashMap[uuid!!] = bleWriteCallback!!
+    fun addWriteCallback(uuid: String, bleWriteCallback: BleWriteCallback) {
+        bleWriteCallbackHashMap[uuid] = bleWriteCallback
     }
 
     @Synchronized
-    fun addReadCallback(uuid: String?, bleReadCallback: BleReadCallback?) {
-        bleReadCallbackHashMap[uuid!!] = bleReadCallback!!
+    fun addReadCallback(uuid: String, bleReadCallback: BleReadCallback) {
+        bleReadCallbackHashMap[uuid] = bleReadCallback
     }
 
     @Synchronized
