@@ -6,7 +6,7 @@
 package com.bhm.ble.control
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
+import java.util.concurrent.atomic.AtomicBoolean
 
 
 /**
@@ -23,16 +23,22 @@ class BleTask(val durationTimeMillis: Long = 0,
               private val interrupt: ((throwable: Throwable?) -> Unit)? = null
 ) {
 
-    /**
-     * 用于执行task时，挂起当前coroutine
-     */
-    private var mutex: Mutex? = null
+    private var isCompleted = AtomicBoolean(false)
 
-    fun setMutexLock(mutex: Mutex){
-        this.mutex = mutex
+    private var timingJob: Job? = null
+
+    fun setIsCompleted(completed: Boolean) {
+        if (completed) {
+            timingJob?.cancel()
+        }
+        isCompleted.set(completed)
     }
 
-    fun getMutexLock() = mutex
+    fun isCompleted() = isCompleted.get()
+
+    fun setTimingJob(job: Job) {
+        timingJob = job
+    }
 
     /**
      * 执行任务
@@ -52,15 +58,5 @@ class BleTask(val durationTimeMillis: Long = 0,
      */
     fun remove() {
         interrupt?.invoke(CancellationException())
-    }
-
-    /**
-     * 恢复当前coroutine，执行下一个task
-     */
-    fun doNextTask() {
-        if (mutex?.isLocked == true) {
-            mutex?.unlock()
-        }
-        mutex = null
     }
 }

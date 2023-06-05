@@ -11,7 +11,6 @@ import com.bhm.ble.utils.BleLogger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.sync.Mutex
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -41,8 +40,6 @@ class BleTaskQueue {
 
     private var mCoroutineScope: CoroutineScope? = null
 
-    private var mLock = Mutex()
-
     private val taskList: CopyOnWriteArrayList<BleTask> = CopyOnWriteArrayList()
 
     init {
@@ -65,21 +62,19 @@ class BleTaskQueue {
     private suspend fun tryHandleTask(task: BleTask) {
         //防止有task抛出异常，用CoroutineExceptionHandler捕获异常之后父coroutine关闭了，之后的send的Task不执行了
         try {
-            task.setMutexLock(mLock)
-            mLock.lock()
             BleLogger.i("开始执行任务：$task")
             task.doTask()
-            taskList.removeFirstOrNull()
-            BleLogger.i("任务结束完毕，剩下${taskList.size}个任务")
+            task.setIsCompleted(true)
+            taskList.remove(task)
+            BleLogger.i("任务：${task}结束完毕，剩下${taskList.size}个任务")
             if (task.autoDoNextTask) {
                 sendTask(taskList.firstOrNull())
-                task.doNextTask()
             }
         } catch (e: Exception) {
             BleLogger.i("任务执行中断：$task，\r\n ${e.message}")
-            taskList.removeFirstOrNull()
+            task.setIsCompleted(true)
+            taskList.remove(task)
             sendTask(taskList.firstOrNull())
-            task.doNextTask()
         }
     }
 
@@ -93,10 +88,35 @@ class BleTaskQueue {
             initLoop()
         }
         BleLogger.i("当前任务数量：${taskList.size}, 添加任务：$task")
+        task.setIsCompleted(false)
         taskList.add(task)
+        taskForTiming(task)
         if (taskList.size == 1) {
             sendTask(task)
         }
+    }
+
+    /**
+     * 任务的超时计时
+     */
+    private fun taskForTiming(task: BleTask) {
+        if (task.durationTimeMillis <= 0) {
+            return
+        }
+        val timingJob = CoroutineScope(Dispatchers.Default).launch {
+            withTimeout(task.durationTimeMillis) {
+                delay(task.durationTimeMillis)
+            }
+        }
+        timingJob.invokeOnCompletion {
+            if (it is TimeoutCancellationException && !task.isCompleted()) {
+                BleLogger.e("任务超时，即刻移除：$task")
+                removeTask(task)
+            } else if (it is CancellationException){
+                BleLogger.i("任务未超时：$task")
+            }
+        }
+        task.setTimingJob(timingJob)
     }
 
     /**
@@ -105,10 +125,10 @@ class BleTaskQueue {
     @Synchronized
     fun removeTask(task: BleTask?) {
         if (taskList.contains(task)) {
-            if (task?.getMutexLock() != null) {
+            if (task == taskList.firstOrNull()) {
                 //正在执行
                 BleLogger.e("取消正在执行的任务：$this")
-                task.remove()
+                task?.remove()
             } else {
                 BleLogger.e("取消队列中的任务：${task}")
                 taskList.remove(task)
@@ -139,6 +159,9 @@ class BleTaskQueue {
      * 关闭并释放资源
      */
     fun clear() {
+        taskList.forEach {
+            removeTask(it)
+        }
         mChannel?.close()
         mChannel = null
         mCoroutineScope?.cancel()

@@ -104,7 +104,9 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
                 return@setOnClickListener
             }
 //            startActivity(Intent(this@MainActivity, OptionSettingActivity::class.java))
-            jobs.clear()
+            job1 = null
+            job2 = null
+            job3 = null
             BleTaskQueue.get().addTask(testTask1)
             BleTaskQueue.get().addTask(testTask2)
             BleTaskQueue.get().addTask(testTask3)
@@ -131,32 +133,42 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
         }
     }
 
-    private var jobs: MutableList<Job> = arrayListOf()
+    private var job1: Job? = null
 
-    private val testTask1 = BleTask(callInMainThread = true,
+    private var job2: Job? = null
+
+    private var job3: Job? = null
+
+    private val testTask1 = BleTask(
+        durationTimeMillis = 3000L,
+        callInMainThread = true,
         autoDoNextTask = true,
         block = {
             testJob(1)
         }, interrupt = {
-            jobs[0].cancel("手动测试取消")
+            job1?.cancel("手动测试取消")
         }
     )
 
-    private val testTask2 = BleTask(callInMainThread = true,
+    private val testTask2 = BleTask(
+        durationTimeMillis = 7000L,
+        callInMainThread = true,
         autoDoNextTask = true,
         block = {
             testJob(2)
         }, interrupt = {
-            jobs[1].cancel("手动测试取消")
+            job2?.cancel("手动测试取消")
         }
     )
 
-    private val testTask3 = BleTask(callInMainThread = true,
+    private val testTask3 = BleTask(
+        durationTimeMillis = 15000L,
+        callInMainThread = true,
         autoDoNextTask = true,
         block = {
             testJob(3)
         }, interrupt = {
-            jobs[2].cancel("手动测试取消")
+            job3?.cancel("手动测试取消")
         }
     )
 
@@ -179,7 +191,11 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
                 BleLogger.e("${it?.message}")
                 continuation.resume(it == null)
             }
-            jobs.add(job)
+            when(i) {
+                1 -> job1 = job
+                2 -> job2 = job
+                3 -> job3 = job
+            }
         }
 
 //        repeat(5) {
@@ -209,5 +225,6 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
         super.onDestroy()
         viewModel.stopScan()
         viewModel.release()
+        BleTaskQueue.get().clear()
     }
 }
