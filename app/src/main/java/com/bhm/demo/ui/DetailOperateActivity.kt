@@ -58,11 +58,15 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
         }
         viewBinding.tvName.text = buildString {
             append("设备广播名：")
-            append(bleDevice?.deviceName)
+            append(getBleDevice().deviceName)
             append("\r\n")
-            append("地址：${bleDevice?.deviceAddress}")
+            append("地址：${getBleDevice().deviceAddress}")
         }
         initList()
+    }
+
+    private fun getBleDevice(): BleDevice {
+        return bleDevice!!
     }
 
     private fun initList() {
@@ -70,7 +74,7 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         viewBinding.recyclerView.layoutManager = layoutManager
         viewBinding.recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
-        expandAdapter = DetailsExpandAdapter(viewModel.getListData(bleDevice!!)) {
+        expandAdapter = DetailsExpandAdapter(viewModel.getListData(getBleDevice())) {
                 checkBox, operateType, isChecked, node ->
             var logEntity: LogEntity? = null
             when (operateType) {
@@ -100,8 +104,10 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
                 is OperateType.Notify -> {
                     if (isChecked) {
                         logEntity = LogEntity(Level.INFO, "Notify： ${node.characteristicUUID}")
+                        viewModel.notify(getBleDevice(), node.serviceUUID, node.characteristicUUID)
                     } else {
                         logEntity = LogEntity(Level.WARNING, "取消Notify： ${node.characteristicUUID}")
+                        viewModel.stopNotify(getBleDevice(), node.serviceUUID, node.characteristicUUID)
                     }
                 }
                 is OperateType.Indicate -> {
@@ -146,7 +152,7 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
         super.onMessageEvent(event)
         event?.let {
             val device = event.data as BleDevice
-            if (bleDevice == device) {
+            if (getBleDevice() == device) {
                 finish()
             }
         }

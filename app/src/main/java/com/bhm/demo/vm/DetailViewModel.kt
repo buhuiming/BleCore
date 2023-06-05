@@ -24,7 +24,7 @@ import java.util.logging.Level
  * @author Buhuiming
  * @date 2023年06月01日 09时18分
  */
-class DetailViewModel(private val application: Application) : BaseViewModel(application) {
+class DetailViewModel(application: Application) : BaseViewModel(application) {
 
     private val listLogMutableStateFlow = MutableStateFlow(LogEntity(Level.INFO, "数据适配完毕"))
 
@@ -43,6 +43,7 @@ class DetailViewModel(private val application: Application) : BaseViewModel(appl
             service.characteristics?.forEachIndexed { position, characteristics ->
                 val characteristicNode = CharacteristicNode(
                     position.toString(),
+                    service.uuid.toString(),
                     characteristics.uuid.toString(),
                     getOperateType(characteristics),
                     characteristics.properties
@@ -98,7 +99,43 @@ class DetailViewModel(private val application: Application) : BaseViewModel(appl
     /**
      * 添加日志显示
      */
+    @Synchronized
     fun addLogMsg(logEntity: LogEntity) {
         listLogMutableStateFlow.value = logEntity
+    }
+
+    /**
+     * notify
+     */
+    fun notify(bleDevice: BleDevice,
+               serviceUUID: String,
+               notifyUUID: String) {
+        BleManager.get().notify(bleDevice, serviceUUID, notifyUUID, false) {
+            onNotifyFail {
+                addLogMsg(LogEntity(Level.OFF, "notify失败，notifyUUID：${it.message}"))
+            }
+            onNotifySuccess {
+                addLogMsg(LogEntity(Level.FINE, "notify成功，notifyUUID：${notifyUUID}"))
+            }
+            onCharacteristicChanged {
+                addLogMsg(LogEntity(Level.INFO, "接收到${notifyUUID}的数据：$it"))
+            }
+        }
+    }
+
+    /**
+     * stop notify
+     */
+    fun stopNotify(
+        bleDevice: BleDevice,
+        serviceUUID: String,
+        notifyUUID: String,
+    ) {
+        val success = BleManager.get().stopNotify(bleDevice, serviceUUID, notifyUUID)
+        if (success == true) {
+            addLogMsg(LogEntity(Level.FINE, "notify取消成功，notifyUUID：${notifyUUID}"))
+        } else {
+            addLogMsg(LogEntity(Level.OFF, "notify取消失败，notifyUUID：${notifyUUID}"))
+        }
     }
 }

@@ -15,8 +15,8 @@ import com.chad.library.adapter.base.entity.node.BaseNode
  * @author Buhuiming
  * @date 2023年06月01日 10时11分
  */
-class ServiceNode(var serviceName: String?,
-                       var serviceUUID: String?,
+class ServiceNode(var serviceName: String,
+                       var serviceUUID: String,
                        var characteristicList: MutableList<BaseNode>?
 ) : BaseExpandNode() {
     init {

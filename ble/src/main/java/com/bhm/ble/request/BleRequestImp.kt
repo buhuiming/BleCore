@@ -11,6 +11,8 @@ import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.callback.BleNotifyCallback
 import com.bhm.ble.callback.BleScanCallback
+import com.bhm.ble.control.BleTask
+import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.control.NotifyFailException
 import com.bhm.ble.data.BleDevice
 import kotlinx.coroutines.*
@@ -113,6 +115,9 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                         notifyUUID: String,
                         useCharacteristicDescriptor: Boolean,
                         bleNotifyCallback: BleNotifyCallback.() -> Unit) {
+        val task = BleTask(
+
+        )
         val callback = BleNotifyCallback()
         callback.apply(bleNotifyCallback)
         val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
@@ -145,5 +150,6 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     override fun release() {
         mainScope.cancel()
         BleConnectRequestManager.get().release()
+        BleTaskQueue.get().clear()
     }
 }

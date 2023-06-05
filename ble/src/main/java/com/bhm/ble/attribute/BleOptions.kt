@@ -66,7 +66,7 @@ class BleOptions private constructor(builder: Builder) {
 
         const val DEFAULT_CONNECT_RETRY_INTERVAL: Long = 1000
 
-        const val DEFAULT_OPERATE_MILLIS_TIMEOUT: Long = 5000
+        const val DEFAULT_OPERATE_MILLIS_TIMEOUT: Long = 10000
 
         const val DEFAULT_WRITE_INTERVAL: Long = 100
 
