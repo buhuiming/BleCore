@@ -17,6 +17,13 @@ import kotlinx.coroutines.CancellationException
 internal class CompleteThrowable : CancellationException()
 
 /**
+ * 超时抛出的Throwable
+ * @author Buhuiming
+ * @date :2023/6/5 10:24
+ */
+internal class TimeoutCancellationThrowable : CancellationException()
+
+/**
  * 主动断开连接时抛出的Throwable
  *
  * @author Buhuiming

@@ -141,7 +141,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
 
     private val testTask1 = BleTask(
         durationTimeMillis = 3000L,
-        callInMainThread = true,
+        callInMainThread = false,
         autoDoNextTask = true,
         block = {
             testJob(1)
@@ -152,7 +152,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
 
     private val testTask2 = BleTask(
         durationTimeMillis = 7000L,
-        callInMainThread = true,
+        callInMainThread = false,
         autoDoNextTask = true,
         block = {
             testJob(2)

@@ -7,6 +7,9 @@
 
 package com.bhm.ble.control
 
+import com.bhm.ble.control.BleTask.Companion.CANCEL_UN_COMPLETE
+import com.bhm.ble.control.BleTask.Companion.COMPLETED
+import com.bhm.ble.control.BleTask.Companion.UN_COMPLETE
 import com.bhm.ble.utils.BleLogger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -64,7 +67,10 @@ class BleTaskQueue {
         try {
             BleLogger.i("开始执行任务：$task")
             task.doTask()
-            task.setIsCompleted(true)
+            if (task.completed() == UN_COMPLETE) {
+                task.setCompleted(COMPLETED)
+            }
+            task.callback?.invoke(CompleteThrowable())
             taskList.remove(task)
             BleLogger.i("任务：${task}结束完毕，剩下${taskList.size}个任务")
             if (task.autoDoNextTask) {
@@ -72,7 +78,8 @@ class BleTaskQueue {
             }
         } catch (e: Exception) {
             BleLogger.i("任务执行中断：$task，\r\n ${e.message}")
-            task.setIsCompleted(true)
+            task.setCompleted(CANCEL_UN_COMPLETE)
+            task.callback?.invoke(CancellationException(e.message))
             taskList.remove(task)
             sendTask(taskList.firstOrNull())
         }
@@ -88,7 +95,7 @@ class BleTaskQueue {
             initLoop()
         }
         BleLogger.i("当前任务数量：${taskList.size}, 添加任务：$task")
-        task.setIsCompleted(false)
+        task.setCompleted(UN_COMPLETE)
         taskList.add(task)
         taskForTiming(task)
         if (taskList.size == 1) {
@@ -103,15 +110,22 @@ class BleTaskQueue {
         if (task.durationTimeMillis <= 0) {
             return
         }
-        val timingJob = CoroutineScope(Dispatchers.Default).launch {
+        val context = if (task.callInMainThread) {
+            SupervisorJob() + Dispatchers.Main
+        } else {
+            SupervisorJob() + Dispatchers.IO
+        }
+        val timingJob = CoroutineScope(context).launch {
             withTimeout(task.durationTimeMillis) {
                 delay(task.durationTimeMillis)
             }
         }
         timingJob.invokeOnCompletion {
-            if (it is TimeoutCancellationException && !task.isCompleted()) {
+            if (it is TimeoutCancellationException &&
+                task.completed() == UN_COMPLETE) {
                 BleLogger.e("任务超时，即刻移除：$task")
                 removeTask(task)
+                task.callback?.invoke(TimeoutCancellationThrowable())
             } else if (it is CancellationException){
                 BleLogger.i("任务未超时：$task")
             }
@@ -125,9 +139,10 @@ class BleTaskQueue {
     @Synchronized
     fun removeTask(task: BleTask?) {
         if (taskList.contains(task)) {
+            task?.setCompleted(CANCEL_UN_COMPLETE)
             if (task == taskList.firstOrNull()) {
                 //正在执行
-                BleLogger.e("取消正在执行的任务：$this")
+                BleLogger.e("取消正在执行的任务：$task")
                 task?.remove()
             } else {
                 BleLogger.e("取消队列中的任务：${task}")
@@ -161,6 +176,7 @@ class BleTaskQueue {
     fun clear() {
         taskList.forEach {
             removeTask(it)
+            it.setTimingJob(null)
         }
         mChannel?.close()
         mChannel = null

@@ -6,37 +6,42 @@
 package com.bhm.ble.control
 
 import kotlinx.coroutines.*
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 
 /**
  * Ble任务，主要是用来处理rssi、mtu、write、read、notify、indicate操作
- * durationTimeMillis Long 任务执行的时间，0：表示任务执行时间不固定
+ * durationTimeMillis： Long 任务执行的时间，0：表示任务执行时间不固定
+ * callInMainThread：指定在主线程执行，默认为false
  * autoDoNextTask = true自动执行下一个任务，= false，则需要调用doNextTask()执行下一个任务
+ * interrupt：中断任务执行
+ * callback：任务执行回调，成功throwable = CompleteThrowable，超时throwable = TimeoutCancellationThrowable，
+ * 任务中断抛异常 throwable = CancellationException
  * @author Buhuiming
  * @date 2023年06月02日 11时01分
  */
 class BleTask(val durationTimeMillis: Long = 0,
-              val callInMainThread: Boolean = true,
+              val callInMainThread: Boolean = false,
               val autoDoNextTask: Boolean = false,
               private val block: suspend BleTask.() -> Unit,
-              private val interrupt: ((throwable: Throwable?) -> Unit)? = null
+              private val interrupt: ((throwable: Throwable?) -> Unit)? = null,
+              val callback: ((throwable: Throwable?) -> Unit)? = null
 ) {
 
-    private var isCompleted = AtomicBoolean(false)
+    private var completed = AtomicInteger(UN_COMPLETE)
 
     private var timingJob: Job? = null
 
-    fun setIsCompleted(completed: Boolean) {
-        if (completed) {
+    fun setCompleted(complete: Int) {
+        if (complete == COMPLETED || complete == CANCEL_UN_COMPLETE) {
             timingJob?.cancel()
         }
-        isCompleted.set(completed)
+        completed.set(complete)
     }
 
-    fun isCompleted() = isCompleted.get()
+    fun completed() = completed.get()
 
-    fun setTimingJob(job: Job) {
+    fun setTimingJob(job: Job?) {
         timingJob = job
     }
 
@@ -58,5 +63,11 @@ class BleTask(val durationTimeMillis: Long = 0,
      */
     fun remove() {
         interrupt?.invoke(CancellationException())
+    }
+
+    companion object {
+        const val UN_COMPLETE = 0
+        const val COMPLETED = 1
+        const val CANCEL_UN_COMPLETE = 2
     }
 }
