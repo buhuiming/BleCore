@@ -109,13 +109,15 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
      */
     fun notify(bleDevice: BleDevice,
                serviceUUID: String,
-               notifyUUID: String) {
+               notifyUUID: String,
+               failCall: () -> Unit) {
         BleManager.get().notify(bleDevice, serviceUUID, notifyUUID, false) {
             onNotifyFail {
-                addLogMsg(LogEntity(Level.OFF, "notify失败，notifyUUID：${it.message}"))
+                addLogMsg(LogEntity(Level.OFF, "notify失败，${notifyUUID}：${it.message}"))
+                failCall.invoke()
             }
             onNotifySuccess {
-                addLogMsg(LogEntity(Level.FINE, "notify成功，notifyUUID：${notifyUUID}"))
+                addLogMsg(LogEntity(Level.FINE, "notify成功：${notifyUUID}"))
             }
             onCharacteristicChanged {
                 addLogMsg(LogEntity(Level.INFO, "接收到${notifyUUID}的数据：$it"))
@@ -133,9 +135,9 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
     ) {
         val success = BleManager.get().stopNotify(bleDevice, serviceUUID, notifyUUID)
         if (success == true) {
-            addLogMsg(LogEntity(Level.FINE, "notify取消成功，notifyUUID：${notifyUUID}"))
+            addLogMsg(LogEntity(Level.FINE, "notify取消成功：${notifyUUID}"))
         } else {
-            addLogMsg(LogEntity(Level.OFF, "notify取消失败，notifyUUID：${notifyUUID}"))
+            addLogMsg(LogEntity(Level.OFF, "notify取消失败：${notifyUUID}"))
         }
     }
 }

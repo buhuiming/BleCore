@@ -69,8 +69,10 @@ class BleTaskQueue {
             task.doTask()
             if (task.completed() == UN_COMPLETE) {
                 task.setCompleted(COMPLETED)
+                task.callback?.invoke(task, CompleteThrowable())
+            } else if (task.completed() == CANCEL_UN_COMPLETE) {
+                task.callback?.invoke(task, CancellationThrowable())
             }
-            task.callback?.invoke(CompleteThrowable())
             taskList.remove(task)
             BleLogger.i("任务：${task}结束完毕，剩下${taskList.size}个任务")
             if (task.autoDoNextTask) {
@@ -79,7 +81,7 @@ class BleTaskQueue {
         } catch (e: Exception) {
             BleLogger.i("任务执行中断：$task，\r\n ${e.message}")
             task.setCompleted(CANCEL_UN_COMPLETE)
-            task.callback?.invoke(CancellationException(e.message))
+            task.callback?.invoke(task, CancellationException(e.message))
             taskList.remove(task)
             sendTask(taskList.firstOrNull())
         }
@@ -125,7 +127,7 @@ class BleTaskQueue {
                 task.completed() == UN_COMPLETE) {
                 BleLogger.e("任务超时，即刻移除：$task")
                 removeTask(task)
-                task.callback?.invoke(TimeoutCancellationThrowable())
+                task.callback?.invoke(task, TimeoutCancellationThrowable())
             } else if (it is CancellationException){
                 BleLogger.i("任务未超时：$task")
             }
@@ -142,11 +144,23 @@ class BleTaskQueue {
             task?.setCompleted(CANCEL_UN_COMPLETE)
             if (task == taskList.firstOrNull()) {
                 //正在执行
-                BleLogger.e("取消正在执行的任务：$task")
+                BleLogger.e("移除正在执行的任务：$task")
                 task?.remove()
             } else {
-                BleLogger.e("取消队列中的任务：${task}")
+                BleLogger.e("移除队列中的任务：${task}")
                 taskList.remove(task)
+            }
+        }
+    }
+
+    /**
+     * 移除任务
+     */
+    @Synchronized
+    fun removeTask(taskId: Int) {
+        taskList.forEach {
+            if (it.taskId == taskId) {
+                removeTask(it)
             }
         }
     }

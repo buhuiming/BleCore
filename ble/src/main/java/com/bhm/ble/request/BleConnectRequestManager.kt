@@ -27,6 +27,18 @@ internal class BleConnectRequestManager private constructor() {
 
     companion object {
 
+        const val NOTIFY_TASK_ID = 1000
+
+        const val INDICATE_TASK_ID = 1001
+
+        const val SET_RSSI_TASK_ID = 1002
+
+        const val SET_MTU_TASK_ID = 1003
+
+        const val READ_TASK_ID = 1004
+
+        const val WRITE_TASK_ID = 1005
+
         private var instance: BleConnectRequestManager = BleConnectRequestManager()
 
         @Synchronized
@@ -79,10 +91,19 @@ internal class BleConnectRequestManager private constructor() {
     }
 
     /**
+     * 断开某个设备的连接 释放资源
+     */
+    @Synchronized
+    fun release(bleDevice: BleDevice) {
+        getBleConnectRequest(bleDevice)?.release()
+        bleLruHashMap.remove(bleDevice.getKey())
+    }
+
+    /**
      * 断开所有连接 释放资源
      */
     @Synchronized
-    fun release() {
+    fun releaseAll() {
         bleLruHashMap.values.forEach {
             it?.release()
         }

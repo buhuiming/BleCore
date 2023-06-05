@@ -266,6 +266,6 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
      * 断开所有连接 释放资源
      */
     fun release() {
-        BleManager.get().release()
+        BleManager.get().releaseAll()
     }
 }

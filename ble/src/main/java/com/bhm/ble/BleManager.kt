@@ -183,7 +183,13 @@ class BleManager private constructor() {
                useCharacteristicDescriptor: Boolean = false,
                bleNotifyCallback: BleNotifyCallback.() -> Unit) {
         checkInitialize()
-        bleBaseRequest?.notify(bleDevice, serviceUUID, notifyUUID, useCharacteristicDescriptor, bleNotifyCallback)
+        bleBaseRequest?.notify(
+            bleDevice,
+            serviceUUID,
+            notifyUUID,
+            useCharacteristicDescriptor,
+            bleNotifyCallback
+        )
     }
 
     /**
@@ -196,17 +202,32 @@ class BleManager private constructor() {
         useCharacteristicDescriptor: Boolean = false
     ): Boolean? {
         checkInitialize()
-        return bleBaseRequest?.stopNotify(bleDevice, serviceUUID, notifyUUID, useCharacteristicDescriptor)
+        return bleBaseRequest?.stopNotify(
+            bleDevice,
+            serviceUUID,
+            notifyUUID,
+            useCharacteristicDescriptor
+        )
     }
 
     /**
      * 断开所有连接 释放资源
      */
     @Synchronized
-    fun release() {
+    fun releaseAll() {
         checkInitialize()
-        bleBaseRequest?.release()
+        bleBaseRequest?.releaseAll()
         BleLogger.i("资源释放完毕，BleCore SDK退出")
+    }
+
+    /**
+     * 断开某个设备的连接 释放资源
+     */
+    @Synchronized
+    fun release(bleDevice: BleDevice) {
+        checkInitialize()
+        bleBaseRequest?.release(bleDevice)
+        BleLogger.i("${bleDevice}资源释放完毕")
     }
 
 

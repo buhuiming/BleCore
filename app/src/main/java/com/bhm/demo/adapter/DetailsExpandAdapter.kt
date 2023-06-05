@@ -85,7 +85,7 @@ class DetailsExpandAdapter(nodeList: MutableList<BaseNode>,
             helper.setText(R.id.tvCharacteristicName, "特征(${node.characteristicName})")
             helper.setText(R.id.tvCharacteristicUUID, "CharacteristicUUID: ${node.characteristicUUID}")
             helper.setText(R.id.tvCharacteristicProperties, "CharacteristicProperties: ${node.characteristicProperties}")
-            helper.setGone(R.id.tvCharacteristicProperties, node.characteristicProperties?.isNotEmpty() != true)
+            helper.setGone(R.id.tvCharacteristicProperties, node.characteristicProperties.isEmpty())
 
             val cbWrite = helper.getView<CheckBox>(R.id.cbWrite)
             val cbRead = helper.getView<CheckBox>(R.id.cbRead)
@@ -99,16 +99,20 @@ class DetailsExpandAdapter(nodeList: MutableList<BaseNode>,
             helper.setGone(R.id.cbNotify, charaProp and BluetoothGattCharacteristic.PROPERTY_NOTIFY <= 0)
             helper.setGone(R.id.cbIndicate, charaProp and BluetoothGattCharacteristic.PROPERTY_INDICATE <= 0)
 
-            cbWrite.setOnCheckedChangeListener { buttonView, isChecked ->
+            cbWrite.setOnClickListener { buttonView ->
+                val isChecked = cbWrite.isChecked
                 operateCallback?.invoke(buttonView as CheckBox, OperateType.Write, isChecked, node)
             }
-            cbRead.setOnCheckedChangeListener { buttonView, isChecked ->
+            cbRead.setOnClickListener { buttonView ->
+                val isChecked = cbRead.isChecked
                 operateCallback?.invoke(buttonView as CheckBox, OperateType.Read, isChecked, node)
             }
-            cbNotify.setOnCheckedChangeListener { buttonView, isChecked ->
+            cbNotify.setOnClickListener { buttonView ->
+                val isChecked = cbNotify.isChecked
                 operateCallback?.invoke(buttonView as CheckBox, OperateType.Notify, isChecked, node)
             }
-            cbIndicate.setOnCheckedChangeListener { buttonView, isChecked ->
+            cbIndicate.setOnClickListener { buttonView ->
+                val isChecked = cbIndicate.isChecked
                 operateCallback?.invoke(buttonView as CheckBox, OperateType.Indicate, isChecked, node)
             }
         }

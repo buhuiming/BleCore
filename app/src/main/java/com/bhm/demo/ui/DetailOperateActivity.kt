@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bhm.ble.BleManager
 import com.bhm.ble.data.BleDevice
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.R
@@ -76,7 +77,6 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
         viewBinding.recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
         expandAdapter = DetailsExpandAdapter(viewModel.getListData(getBleDevice())) {
                 checkBox, operateType, isChecked, node ->
-            var logEntity: LogEntity? = null
             when (operateType) {
                 is OperateType.Write -> {
                     if (isChecked) {
@@ -87,38 +87,47 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
                         }
                         viewBinding.btnSend.isEnabled = true
                         viewBinding.etContent.isEnabled = true
-                        logEntity = LogEntity(Level.INFO, "写： ${node.characteristicUUID}")
+                        val logEntity = LogEntity(Level.INFO, "写： ${node.characteristicUUID}")
+                        viewModel.addLogMsg(logEntity)
                     } else {
                         viewBinding.btnSend.isEnabled = false
                         viewBinding.etContent.isEnabled = false
-                        logEntity = LogEntity(Level.OFF, "取消写： ${node.characteristicUUID}")
+                        val logEntity = LogEntity(Level.OFF, "取消写： ${node.characteristicUUID}")
+                        viewModel.addLogMsg(logEntity)
                     }
                 }
                 is OperateType.Read -> {
                     if (isChecked) {
-                        logEntity = LogEntity(Level.INFO, "读： ${node.characteristicUUID}")
+                        val logEntity = LogEntity(Level.INFO, "读： ${node.characteristicUUID}")
+                        viewModel.addLogMsg(logEntity)
                     } else {
-                        logEntity = LogEntity(Level.OFF, "取消读： ${node.characteristicUUID}")
+                        val logEntity = LogEntity(Level.OFF, "取消读： ${node.characteristicUUID}")
+                        viewModel.addLogMsg(logEntity)
                     }
                 }
                 is OperateType.Notify -> {
                     if (isChecked) {
-                        logEntity = LogEntity(Level.INFO, "Notify： ${node.characteristicUUID}")
-                        viewModel.notify(getBleDevice(), node.serviceUUID, node.characteristicUUID)
+                        val logEntity = LogEntity(Level.INFO, "Notify： ${node.characteristicUUID}")
+                        viewModel.addLogMsg(logEntity)
+                        viewModel.notify(getBleDevice(), node.serviceUUID, node.characteristicUUID) {
+                            checkBox.isChecked = false
+                        }
                     } else {
-                        logEntity = LogEntity(Level.WARNING, "取消Notify： ${node.characteristicUUID}")
+                        val logEntity = LogEntity(Level.WARNING, "取消Notify： ${node.characteristicUUID}")
+                        viewModel.addLogMsg(logEntity)
                         viewModel.stopNotify(getBleDevice(), node.serviceUUID, node.characteristicUUID)
                     }
                 }
                 is OperateType.Indicate -> {
                     if (isChecked) {
-                        logEntity = LogEntity(Level.INFO, "Indicate： ${node.characteristicUUID}")
+                        val logEntity = LogEntity(Level.INFO, "Indicate： ${node.characteristicUUID}")
+                        viewModel.addLogMsg(logEntity)
                     } else {
-                        logEntity = LogEntity(Level.WARNING, "取消Indicate： ${node.characteristicUUID}")
+                        val logEntity = LogEntity(Level.WARNING, "取消Indicate： ${node.characteristicUUID}")
+                        viewModel.addLogMsg(logEntity)
                     }
                 }
             }
-            viewModel.addLogMsg(logEntity)
         }
         viewBinding.recyclerView.adapter = expandAdapter
         expandAdapter?.expand(0)
@@ -156,5 +165,10 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
                 finish()
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        BleManager.get().release(getBleDevice())
     }
 }

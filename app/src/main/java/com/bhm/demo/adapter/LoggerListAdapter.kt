@@ -1,6 +1,7 @@
 package com.bhm.demo.adapter
 
 import android.graphics.Color
+import android.provider.CalendarContract
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.bhm.demo.databinding.LayoutRecyclerLogBinding
@@ -41,7 +42,7 @@ class LoggerListAdapter(data: MutableList<LogEntity>?
         holder.binding.tvName.text = item.msg
         when (item.level) {
             Level.INFO -> holder.binding.tvName.setTextColor(Color.BLUE)
-            Level.WARNING -> holder.binding.tvName.setTextColor(Color.YELLOW)
+            Level.WARNING -> holder.binding.tvName.setTextColor(Color.parseColor("#FF9800"))
             Level.OFF -> holder.binding.tvName.setTextColor(Color.RED)
             Level.FINE -> holder.binding.tvName.setTextColor(Color.BLACK)
             else -> holder.binding.tvName.setTextColor(Color.GRAY)

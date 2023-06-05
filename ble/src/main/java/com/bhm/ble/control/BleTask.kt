@@ -20,12 +20,13 @@ import java.util.concurrent.atomic.AtomicInteger
  * @author Buhuiming
  * @date 2023年06月02日 11时01分
  */
-class BleTask(val durationTimeMillis: Long = 0,
+class BleTask(val taskId: Int,
+              val durationTimeMillis: Long = 0,
               val callInMainThread: Boolean = false,
-              val autoDoNextTask: Boolean = false,
+              val autoDoNextTask: Boolean = true,
               private val block: suspend BleTask.() -> Unit,
-              private val interrupt: ((throwable: Throwable?) -> Unit)? = null,
-              val callback: ((throwable: Throwable?) -> Unit)? = null
+              private val interrupt: ((task: BleTask, throwable: Throwable?) -> Unit)? = null,
+              val callback: ((task: BleTask, throwable: Throwable?) -> Unit)? = null
 ) {
 
     private var completed = AtomicInteger(UN_COMPLETE)
@@ -62,7 +63,7 @@ class BleTask(val durationTimeMillis: Long = 0,
      * 中断任务
      */
     fun remove() {
-        interrupt?.invoke(CancellationException())
+        interrupt?.invoke(this@BleTask, CancellationException())
     }
 
     companion object {

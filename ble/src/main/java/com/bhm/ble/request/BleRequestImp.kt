@@ -115,9 +115,6 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                         notifyUUID: String,
                         useCharacteristicDescriptor: Boolean,
                         bleNotifyCallback: BleNotifyCallback.() -> Unit) {
-        val task = BleTask(
-
-        )
         val callback = BleNotifyCallback()
         callback.apply(bleNotifyCallback)
         val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
@@ -147,9 +144,16 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     /**
      * 断开所有连接 释放资源
      */
-    override fun release() {
+    override fun releaseAll() {
         mainScope.cancel()
-        BleConnectRequestManager.get().release()
+        BleConnectRequestManager.get().releaseAll()
         BleTaskQueue.get().clear()
+    }
+
+    /**
+     * 断开某个设备的连接 释放资源
+     */
+    override fun release(bleDevice: BleDevice) {
+        BleConnectRequestManager.get().release(bleDevice)
     }
 }

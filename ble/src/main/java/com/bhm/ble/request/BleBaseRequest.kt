@@ -78,7 +78,12 @@ internal interface BleBaseRequest {
                useCharacteristicDescriptor: Boolean = false): Boolean
 
     /**
+     * 断开某个设备的连接 释放资源
+     */
+    fun release(bleDevice: BleDevice)
+
+    /**
      * 断开所有连接 释放资源
      */
-    fun release()
+    fun releaseAll()
 }
