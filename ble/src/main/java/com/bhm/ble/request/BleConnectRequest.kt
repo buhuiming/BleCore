@@ -120,90 +120,6 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     }
 
     /**
-     * 开始连接
-     */
-    private fun startConnectJob() {
-        //初始化，待coreGattCallback回调再设置为连接中
-        lastState = BleConnectLastState.ConnectIdle
-        isActiveDisconnect.set(false)
-        var connectTime = getBleOptions()?.connectMillisTimeOut?: BleOptions.DEFAULT_CONNECT_MILLIS_TIMEOUT
-        if (connectTime <= 0) {
-            connectTime = BleOptions.DEFAULT_CONNECT_MILLIS_TIMEOUT
-        }
-        connectJob = bleConnectCallback?.launchInMainThread {
-            withTimeout(connectTime) {
-                //每次连接之前确保和上一次操作间隔一定时间
-                delay(waitTime)
-                bluetoothGatt = bleDevice.deviceInfo?.connectGatt(getBleManager().getContext(),
-                    autoConnect, coreGattCallback, BluetoothDevice.TRANSPORT_LE)
-                BleLogger.d("${bleDevice.deviceAddress} -> 开始第${currentConnectRetryCount + 1}次连接")
-                if (bluetoothGatt == null) {
-                    cancel(CancellationException("连接异常：bluetoothGatt == null"))
-                } else {
-                    delay(connectTime + waitTime * 6) //需要加上等待发现服务的时间
-                }
-            }
-        }
-        connectJob?.invokeOnCompletion {
-            onCompletion(it)
-        }
-    }
-
-    /**
-     * 处理连接结果，是否重连、或者显示结果
-     */
-    private fun onCompletion(throwable: Throwable?) {
-        if (isContinueConnect(throwable)) {
-            val retryInterval = getBleOptions()?.connectRetryInterval?: BleOptions.DEFAULT_CONNECT_RETRY_INTERVAL
-            waitConnectJob = bleConnectCallback?.launchInMainThread {
-                delay(retryInterval)
-                currentConnectRetryCount ++
-                startConnectJob()
-            }
-            waitConnectJob?.invokeOnCompletion {
-                if (it is ActiveDisConnectedThrowable || it is CompleteThrowable) {
-                    onCompletion(it)
-                }
-            }
-        } else {
-            throwable?.let {
-                BleLogger.e(it.message)
-                when (it) {
-                    //连接超时
-                    is TimeoutCancellationException -> {
-                        connectFail()
-                        BleLogger.e("连接失败：超时")
-                        bleConnectCallback?.callConnectFail(
-                            bleDevice,
-                            BleConnectFailType.ConnectTimeOut
-                        )
-                    }
-                    //连接成功
-                    is CompleteThrowable -> {
-                        //发现服务
-                        findService()
-                    }
-                    //主动断开
-                    is ActiveDisConnectedThrowable -> {
-                        disConnectGatt()
-                    }
-                    //连接失败
-                    else -> {
-                        connectFail()
-                        BleLogger.e("连接失败：${it.message}")
-                        bleConnectCallback?.callConnectFail(
-                            bleDevice,
-                            BleConnectFailType.ConnectException(it)
-                        )
-                        connectJob?.cancel(null)
-                        waitConnectJob?.cancel(null)
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * 主动断开连接，上层API调用
      */
     @Synchronized
@@ -250,227 +166,6 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                 isActiveDisconnect.get(),
                 bleDevice, bluetoothGatt, BluetoothGatt.GATT_SUCCESS
             )
-        }
-    }
-
-    private val coreGattCallback = object : BluetoothGattCallback() {
-        /**
-         * 当连接上设备或者失去连接时会触发
-         */
-        override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
-            super.onConnectionStateChange(gatt, status, newState)
-            BleLogger.i(
-                """
-                    BluetoothGattCallback：onConnectionStateChange 
-                    status: $status
-                    newState: $newState
-                    currentThread: ${Thread.currentThread().name}
-                    bleAddress: ${bleDevice.deviceAddress}
-                    lastState: $lastState
-                    """.trimIndent()
-            )
-            bluetoothGatt = gatt
-
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                //连接成功
-                if (connectJob?.isActive == true || waitConnectJob?.isActive == true) {
-                    val throwable = CompleteThrowable()
-                    connectJob?.cancel(throwable)
-                    waitConnectJob?.cancel(throwable)
-                } else {
-                    findService()
-                }
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                when (lastState) {
-                    BleConnectLastState.ConnectIdle -> {
-                        //触发connectGatt之后，将开始连接的初始状态改成连接中
-                        lastState = BleConnectLastState.Connecting
-                    }
-                    BleConnectLastState.Connecting -> {
-                        //连接过程中断开，进入判断是否重连
-                        checkIfContinueConnect(Throwable("连接过程中断开"))
-                    }
-                    //所有断开连接的情况
-                    else -> {
-                        if (!isActiveDisconnect.get()) {
-                            lastState = BleConnectLastState.Disconnect
-                            refreshDeviceCache()
-                            closeBluetoothGatt()
-                            BleConnectRequestManager.get()
-                                .removeBleConnectRequest(bleDevice.getKey())
-                            removeRssiCallback()
-                            removeMtuChangedCallback()
-                            clearCharacterCallback()
-                            BleLogger.e("自动断开连接")
-                            bleConnectCallback?.callDisConnected(
-                                isActiveDisconnect.get(),
-                                bleDevice, gatt, status
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        /**
-         * 当设备是否找到服务[bluetoothGatt?.discoverServices()]时会触发
-         */
-        override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
-            super.onServicesDiscovered(gatt, status)
-            bluetoothGatt = gatt
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                BleLogger.i("连接成功，发现服务")
-                currentConnectRetryCount = 0
-                lastState = BleConnectLastState.Connected
-                isActiveDisconnect.set(false)
-                bleConnectCallback?.callConnectSuccess(bleDevice, bluetoothGatt)
-                autoSetMtu()
-            } else {
-                connectFail()
-                BleLogger.e("连接失败：未发现服务")
-                bleConnectCallback?.callConnectFail(
-                    bleDevice,
-                    BleConnectFailType.ConnectException(Throwable("发现服务失败"))
-                )
-            }
-        }
-
-        /**
-         * 设备发出通知时会时会触发
-         */
-        override fun onCharacteristicChanged(
-            gatt: BluetoothGatt,
-            characteristic: BluetoothGattCharacteristic,
-            value: ByteArray
-        ) {
-            super.onCharacteristicChanged(gatt, characteristic, value)
-            bleNotifyCallbackHashMap.values.forEach {
-                if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
-                    BleLogger.d("收到Notify数据：${value}")
-                    it.callCharacteristicChanged(value)
-                }
-            }
-            bleIndicateCallbackHashMap.values.forEach {
-                if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
-                    BleLogger.d("收到Indicate数据：${value}")
-                    it.callCharacteristicChanged(value)
-                }
-            }
-        }
-
-        /**
-         * 当向设备Descriptor中写数据时会触发
-         */
-        override fun onDescriptorWrite(
-            gatt: BluetoothGatt?,
-            descriptor: BluetoothGattDescriptor?,
-            status: Int
-        ) {
-            super.onDescriptorWrite(gatt, descriptor, status)
-            bleNotifyCallbackHashMap.values.forEach {
-                if (descriptor?.characteristic?.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
-                    if (status == BluetoothGatt.GATT_SUCCESS) {
-                        cancelNotifyJob()
-                        BleLogger.d("设置Notify成功")
-                        it.callNotifySuccess()
-                    } else {
-                        val exception = NotificationFailException.DescriptorException(NOTIFY)
-                        cancelNotifyJob()
-                        BleLogger.e("设置Notify失败：${exception.message}")
-                        it.callNotifyFail(exception)
-                    }
-                }
-            }
-            bleIndicateCallbackHashMap.values.forEach {
-                if (descriptor?.characteristic?.uuid.toString().equals(it.getKey(), ignoreCase = true)) {
-                    if (status == BluetoothGatt.GATT_SUCCESS) {
-                        cancelIndicateJob()
-                        BleLogger.d("设置Indicate成功")
-                        it.callIndicateSuccess()
-                    } else {
-                        val exception = NotificationFailException.DescriptorException(INDICATE)
-                        cancelIndicateJob()
-                        BleLogger.e("设置Indicate失败：${exception.message}")
-                        it.callIndicateFail(exception)
-                    }
-                }
-            }
-        }
-
-        /**
-         * 当读取设备时会触发
-         */
-        override fun onCharacteristicRead(
-            gatt: BluetoothGatt,
-            characteristic: BluetoothGattCharacteristic,
-            value: ByteArray,
-            status: Int
-        ) {
-            super.onCharacteristicRead(gatt, characteristic, value, status)
-        }
-
-        /**
-         * 当向Characteristic写数据时会触发
-         */
-        override fun onCharacteristicWrite(
-            gatt: BluetoothGatt?,
-            characteristic: BluetoothGattCharacteristic?,
-            status: Int
-        ) {
-            super.onCharacteristicWrite(gatt, characteristic, status)
-        }
-
-        /**
-         * 读取信号值后会触发
-         */
-        override fun onReadRemoteRssi(gatt: BluetoothGatt?, rssi: Int, status: Int) {
-            super.onReadRemoteRssi(gatt, rssi, status)
-            cancelReadRssiJob()
-            bleRssiCallback?.let {
-                if (status == BluetoothGatt.GATT_SUCCESS) {
-                    BleLogger.d("读取Rssi成功：$rssi")
-                    it.callRssiSuccess(rssi)
-                } else {
-                    BleLogger.e("读取Rssi失败，status = $status")
-                    it.callRssiFail(Throwable("读取Rssi失败，status = $status"))
-                }
-            }
-        }
-
-        /**
-         * 设置Mtu值后会触发
-         */
-        override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
-            super.onMtuChanged(gatt, mtu, status)
-            cancelSetMtuJob()
-            bleMtuChangedCallback?.let {
-                if (status == BluetoothGatt.GATT_SUCCESS) {
-                    BleLogger.d("设置Mtu成功：$mtu")
-                    it.callMtuChanged(mtu)
-                } else {
-                    BleLogger.e("设置Mtu失败，status = $status")
-                    it.callSetMtuFail(Throwable("设置Mtu失败，status = $status"))
-                }
-            }
-        }
-    }
-
-    /**
-     * 自动设置mtu
-     */
-    private fun autoSetMtu() {
-        if (getBleOptions()?.autoSetMtu == true) {
-            setMtu(getBleOptions()?.mtu?: BleOptions.DEFAULT_MTU, object : BleMtuChangedCallback(){
-                override fun callMtuChanged(mtu: Int) {
-                    super.callMtuChanged(mtu)
-                    BleLogger.d("自动设置Mtu成功: $mtu")
-                }
-
-                override fun callSetMtuFail(throwable: Throwable) {
-                    super.callSetMtuFail(throwable)
-                    BleLogger.e("自动设置Mtu: ${throwable.message}")
-                }
-            })
         }
     }
 
@@ -699,12 +394,15 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         bleTaskQueue.addTask(task)
     }
 
-    private fun getOperateTime(): Long {
-        var operateTime = getBleOptions()?.operateMillisTimeOut?: BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
-        if (operateTime <= 0) {
-            operateTime = BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
-        }
-        return operateTime
+    /**
+     * 设置设备的优先级
+     * connectionPriority 必须是 [BluetoothGatt.CONNECTION_PRIORITY_BALANCED]、
+     * [BluetoothGatt.CONNECTION_PRIORITY_HIGH]、
+     * [BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER]的其中一个
+     *
+     */
+    fun setConnectionPriority(connectionPriority: Int): Boolean {
+       return bluetoothGatt?.requestConnectionPriority(connectionPriority)?: false
     }
 
     @Synchronized
@@ -809,6 +507,292 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     }
 
     /**
+     * 开始连接
+     */
+    private fun startConnectJob() {
+        //初始化，待coreGattCallback回调再设置为连接中
+        lastState = BleConnectLastState.ConnectIdle
+        isActiveDisconnect.set(false)
+        var connectTime = getBleOptions()?.connectMillisTimeOut?: BleOptions.DEFAULT_CONNECT_MILLIS_TIMEOUT
+        if (connectTime <= 0) {
+            connectTime = BleOptions.DEFAULT_CONNECT_MILLIS_TIMEOUT
+        }
+        connectJob = bleConnectCallback?.launchInMainThread {
+            withTimeout(connectTime) {
+                //每次连接之前确保和上一次操作间隔一定时间
+                delay(waitTime)
+                bluetoothGatt = bleDevice.deviceInfo?.connectGatt(getBleManager().getContext(),
+                    autoConnect, coreGattCallback, BluetoothDevice.TRANSPORT_LE)
+                BleLogger.d("${bleDevice.deviceAddress} -> 开始第${currentConnectRetryCount + 1}次连接")
+                if (bluetoothGatt == null) {
+                    cancel(CancellationException("连接异常：bluetoothGatt == null"))
+                } else {
+                    delay(connectTime + waitTime * 6) //需要加上等待发现服务的时间
+                }
+            }
+        }
+        connectJob?.invokeOnCompletion {
+            onCompletion(it)
+        }
+    }
+
+    /**
+     * 处理连接结果，是否重连、或者显示结果
+     */
+    private fun onCompletion(throwable: Throwable?) {
+        if (isContinueConnect(throwable)) {
+            val retryInterval = getBleOptions()?.connectRetryInterval?: BleOptions.DEFAULT_CONNECT_RETRY_INTERVAL
+            waitConnectJob = bleConnectCallback?.launchInMainThread {
+                delay(retryInterval)
+                currentConnectRetryCount ++
+                startConnectJob()
+            }
+            waitConnectJob?.invokeOnCompletion {
+                if (it is ActiveDisConnectedThrowable || it is CompleteThrowable) {
+                    onCompletion(it)
+                }
+            }
+        } else {
+            throwable?.let {
+                BleLogger.e(it.message)
+                when (it) {
+                    //连接超时
+                    is TimeoutCancellationException -> {
+                        connectFail()
+                        BleLogger.e("连接失败：超时")
+                        bleConnectCallback?.callConnectFail(
+                            bleDevice,
+                            BleConnectFailType.ConnectTimeOut
+                        )
+                    }
+                    //连接成功
+                    is CompleteThrowable -> {
+                        //发现服务
+                        findService()
+                    }
+                    //主动断开
+                    is ActiveDisConnectedThrowable -> {
+                        disConnectGatt()
+                    }
+                    //连接失败
+                    else -> {
+                        connectFail()
+                        BleLogger.e("连接失败：${it.message}")
+                        bleConnectCallback?.callConnectFail(
+                            bleDevice,
+                            BleConnectFailType.ConnectException(it)
+                        )
+                        connectJob?.cancel(null)
+                        waitConnectJob?.cancel(null)
+                    }
+                }
+            }
+        }
+    }
+
+    private val coreGattCallback = object : BluetoothGattCallback() {
+        /**
+         * 当连接上设备或者失去连接时会触发
+         */
+        override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
+            super.onConnectionStateChange(gatt, status, newState)
+            BleLogger.i(
+                """
+                    BluetoothGattCallback：onConnectionStateChange 
+                    status: $status
+                    newState: $newState
+                    currentThread: ${Thread.currentThread().name}
+                    bleAddress: ${bleDevice.deviceAddress}
+                    lastState: $lastState
+                    """.trimIndent()
+            )
+            bluetoothGatt = gatt
+
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                //连接成功
+                if (connectJob?.isActive == true || waitConnectJob?.isActive == true) {
+                    val throwable = CompleteThrowable()
+                    connectJob?.cancel(throwable)
+                    waitConnectJob?.cancel(throwable)
+                } else {
+                    findService()
+                }
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                when (lastState) {
+                    BleConnectLastState.ConnectIdle -> {
+                        //触发connectGatt之后，将开始连接的初始状态改成连接中
+                        lastState = BleConnectLastState.Connecting
+                    }
+                    BleConnectLastState.Connecting -> {
+                        //连接过程中断开，进入判断是否重连
+                        checkIfContinueConnect(Throwable("连接过程中断开"))
+                    }
+                    //所有断开连接的情况
+                    else -> {
+                        if (!isActiveDisconnect.get()) {
+                            lastState = BleConnectLastState.Disconnect
+                            refreshDeviceCache()
+                            closeBluetoothGatt()
+                            BleConnectRequestManager.get()
+                                .removeBleConnectRequest(bleDevice.getKey())
+                            removeRssiCallback()
+                            removeMtuChangedCallback()
+                            clearCharacterCallback()
+                            BleLogger.e("自动断开连接")
+                            bleConnectCallback?.callDisConnected(
+                                isActiveDisconnect.get(),
+                                bleDevice, gatt, status
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * 当设备是否找到服务[bluetoothGatt?.discoverServices()]时会触发
+         */
+        override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
+            super.onServicesDiscovered(gatt, status)
+            bluetoothGatt = gatt
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                BleLogger.i("连接成功，发现服务")
+                currentConnectRetryCount = 0
+                lastState = BleConnectLastState.Connected
+                isActiveDisconnect.set(false)
+                bleConnectCallback?.callConnectSuccess(bleDevice, bluetoothGatt)
+                autoSetMtu()
+            } else {
+                connectFail()
+                BleLogger.e("连接失败：未发现服务")
+                bleConnectCallback?.callConnectFail(
+                    bleDevice,
+                    BleConnectFailType.ConnectException(Throwable("发现服务失败"))
+                )
+            }
+        }
+
+        /**
+         * 设备发出通知时会时会触发
+         */
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            value: ByteArray
+        ) {
+            super.onCharacteristicChanged(gatt, characteristic, value)
+            bleNotifyCallbackHashMap.values.forEach {
+                if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
+                    BleLogger.d("收到Notify数据：${value}")
+                    it.callCharacteristicChanged(value)
+                }
+            }
+            bleIndicateCallbackHashMap.values.forEach {
+                if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
+                    BleLogger.d("收到Indicate数据：${value}")
+                    it.callCharacteristicChanged(value)
+                }
+            }
+        }
+
+        /**
+         * 当向设备Descriptor中写数据时会触发
+         */
+        override fun onDescriptorWrite(
+            gatt: BluetoothGatt?,
+            descriptor: BluetoothGattDescriptor?,
+            status: Int
+        ) {
+            super.onDescriptorWrite(gatt, descriptor, status)
+            bleNotifyCallbackHashMap.values.forEach {
+                if (descriptor?.characteristic?.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        cancelNotifyJob()
+                        BleLogger.d("设置Notify成功")
+                        it.callNotifySuccess()
+                    } else {
+                        val exception = NotificationFailException.DescriptorException(NOTIFY)
+                        cancelNotifyJob()
+                        BleLogger.e("设置Notify失败：${exception.message}")
+                        it.callNotifyFail(exception)
+                    }
+                }
+            }
+            bleIndicateCallbackHashMap.values.forEach {
+                if (descriptor?.characteristic?.uuid.toString().equals(it.getKey(), ignoreCase = true)) {
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        cancelIndicateJob()
+                        BleLogger.d("设置Indicate成功")
+                        it.callIndicateSuccess()
+                    } else {
+                        val exception = NotificationFailException.DescriptorException(INDICATE)
+                        cancelIndicateJob()
+                        BleLogger.e("设置Indicate失败：${exception.message}")
+                        it.callIndicateFail(exception)
+                    }
+                }
+            }
+        }
+
+        /**
+         * 当读取设备时会触发
+         */
+        override fun onCharacteristicRead(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            value: ByteArray,
+            status: Int
+        ) {
+            super.onCharacteristicRead(gatt, characteristic, value, status)
+        }
+
+        /**
+         * 当向Characteristic写数据时会触发
+         */
+        override fun onCharacteristicWrite(
+            gatt: BluetoothGatt?,
+            characteristic: BluetoothGattCharacteristic?,
+            status: Int
+        ) {
+            super.onCharacteristicWrite(gatt, characteristic, status)
+        }
+
+        /**
+         * 读取信号值后会触发
+         */
+        override fun onReadRemoteRssi(gatt: BluetoothGatt?, rssi: Int, status: Int) {
+            super.onReadRemoteRssi(gatt, rssi, status)
+            cancelReadRssiJob()
+            bleRssiCallback?.let {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    BleLogger.d("读取Rssi成功：$rssi")
+                    it.callRssiSuccess(rssi)
+                } else {
+                    BleLogger.e("读取Rssi失败，status = $status")
+                    it.callRssiFail(Throwable("读取Rssi失败，status = $status"))
+                }
+            }
+        }
+
+        /**
+         * 设置Mtu值后会触发
+         */
+        override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
+            super.onMtuChanged(gatt, mtu, status)
+            cancelSetMtuJob()
+            bleMtuChangedCallback?.let {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    BleLogger.d("设置Mtu成功：$mtu")
+                    it.callMtuChanged(mtu)
+                } else {
+                    BleLogger.e("设置Mtu失败，status = $status")
+                    it.callSetMtuFail(Throwable("设置Mtu失败，status = $status"))
+                }
+            }
+        }
+    }
+
+    /**
      * 判断是否进入重连机制
      */
     private fun checkIfContinueConnect(throwable: Throwable?) {
@@ -845,12 +829,32 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             delay(waitTime * 5)
             if (bluetoothGatt == null || bluetoothGatt?.discoverServices() == false) {
                 connectFail()
-                BleLogger.e("发现服务失败")
+                val throwable = Throwable("发现服务失败")
+                BleLogger.e(throwable.message)
                 bleConnectCallback?.callConnectFail(
                     bleDevice,
-                    BleConnectFailType.ConnectException(Throwable("发现服务失败"))
+                    BleConnectFailType.ConnectException(throwable)
                 )
             }
+        }
+    }
+
+    /**
+     * 自动设置mtu
+     */
+    private fun autoSetMtu() {
+        if (getBleOptions()?.autoSetMtu == true) {
+            setMtu(getBleOptions()?.mtu?: BleOptions.DEFAULT_MTU, object : BleMtuChangedCallback(){
+                override fun callMtuChanged(mtu: Int) {
+                    super.callMtuChanged(mtu)
+                    BleLogger.d("自动设置Mtu成功: $mtu")
+                }
+
+                override fun callSetMtuFail(throwable: Throwable) {
+                    super.callSetMtuFail(throwable)
+                    BleLogger.e("自动设置Mtu: ${throwable.message}")
+                }
+            })
         }
     }
 
@@ -897,7 +901,6 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         bluetoothGatt?.close()
     }
 
-
     /**
      * 取消设置notify任务
      */
@@ -924,6 +927,14 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
      */
     private fun cancelSetMtuJob() {
         bleTaskQueue.removeTask(taskId = SET_MTU_TASK_ID)
+    }
+
+    private fun getOperateTime(): Long {
+        var operateTime = getBleOptions()?.operateMillisTimeOut?: BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
+        if (operateTime <= 0) {
+            operateTime = BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
+        }
+        return operateTime
     }
 
     /**

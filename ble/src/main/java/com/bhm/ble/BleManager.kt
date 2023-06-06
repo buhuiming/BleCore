@@ -277,6 +277,22 @@ class BleManager private constructor() {
     }
 
     /**
+     * 设置设备的优先级
+     * connectionPriority 必须是 [BluetoothGatt.CONNECTION_PRIORITY_BALANCED]、
+     * [BluetoothGatt.CONNECTION_PRIORITY_HIGH]、
+     * [BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER]的其中一个
+     *
+     */
+    fun setConnectionPriority(bleDevice: BleDevice, connectionPriority: Int): Boolean {
+        if (connectionPriority != BluetoothGatt.CONNECTION_PRIORITY_BALANCED &&
+            connectionPriority != BluetoothGatt.CONNECTION_PRIORITY_HIGH &&
+            connectionPriority != BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER) {
+            return false
+        }
+        return bleBaseRequest?.setConnectionPriority(bleDevice, connectionPriority)?: false
+    }
+
+    /**
      * 移除该设备的连接回调
      */
     fun removeBleConnectCallback(bleDevice: BleDevice) {

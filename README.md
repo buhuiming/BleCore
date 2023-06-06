@@ -31,7 +31,7 @@
             )
         }
 
-    注意：
+*    注意：
 *    有些设备GPS是关闭状态的话，申请定位权限之后，GPS是依然关闭状态，这里要根据GPS是否打开来跳转页面
 *    BleUtil.isGpsOpen(context) 判断GPS是否打开
 *    跳转到系统GPS设置页面，GPS设置是全局的独立的，是否打开跟权限申请无关
@@ -166,19 +166,23 @@
 *    设置MTU，需要在设备连接之后进行操作。
 *    默认每一个BLE设备都必须支持的MTU为23。
 *    MTU为23，表示最多可以发送20个字节的数据。
-*    在Android 低版本(API-17 到 API-20)上，没有这个限制。所以只有在API21以上的设备，才会有拓展MTU这个需求。
 *    该方法的参数mtu，最小设置为23，最大设置为512。
 *    并不是每台设备都支持拓展MTU，需要通讯双方都支持才行，也就是说，需要设备硬件也支持拓展MTU该方法才会起效果。
      调用该方法后，可以通过onMtuChanged(int mtu)查看最终设置完后，设备的最大传输单元被拓展到多少。如果设备不支持，
      可能无论设置多少，最终的mtu还是23。 
 
 #### 16、断开某个设备的连接 释放资源
+    BleManager.get().setConnectionPriority(connectionPriority: Int)
+
+*    设置连接的优先级，一般用于高速传输大量数据的时候可以进行设置。
+
+#### 17、断开某个设备的连接 释放资源
     BleManager.get().release(bleDevice: BleDevice)
 
-#### 17、断开所有连接 释放资源
+#### 18、断开所有连接 释放资源
     BleManager.get().releaseAll()
 
-#### 18、一些移除监听的函数
+#### 19、一些移除监听的函数
     BleManager.get().removeBleScanCallback()
     BleManager.get().removeBleConnectCallback(bleDevice: BleDevice)
     BleManager.get().removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String)

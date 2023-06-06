@@ -200,13 +200,23 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
+     * 设置设备的优先级
+     * connectionPriority 必须是 [BluetoothGatt.CONNECTION_PRIORITY_BALANCED]、
+     * [BluetoothGatt.CONNECTION_PRIORITY_HIGH]、
+     * [BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER]的其中一个
+     *
+     */
+    override fun setConnectionPriority(bleDevice: BleDevice, connectionPriority: Int): Boolean {
+        val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
+        return request?.setConnectionPriority(connectionPriority)?: false
+    }
+
+    /**
      * 移除该设备的Indicate回调
      */
     override fun removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String) {
         val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
-        request?.let {
-            return it.removeIndicateCallback(indicateUUID)
-        }
+        request?.removeIndicateCallback(indicateUUID)
     }
 
     /**
@@ -214,9 +224,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      */
     override fun removeBleNotifyCallback(bleDevice: BleDevice, notifyUUID: String) {
         val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
-        request?.let {
-            return it.removeNotifyCallback(notifyUUID)
-        }
+        request?.removeNotifyCallback(notifyUUID)
     }
 
     /**
@@ -224,9 +232,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      */
     override fun removeBleReadCallback(bleDevice: BleDevice, readUUID: String) {
         val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
-        request?.let {
-            return it.removeReadCallback(readUUID)
-        }
+        request?.removeReadCallback(readUUID)
     }
 
     /**
@@ -234,9 +240,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      */
     override fun removeBleMtuChangedCallback(bleDevice: BleDevice) {
         val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
-        request?.let {
-            return it.removeMtuChangedCallback()
-        }
+        request?.removeMtuChangedCallback()
     }
 
     /**
@@ -244,9 +248,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      */
     override fun removeBleRssiCallback(bleDevice: BleDevice) {
         val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
-        request?.let {
-            return it.removeRssiCallback()
-        }
+        request?.removeRssiCallback()
     }
 
     /**
@@ -254,9 +256,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      */
     override fun removeBleWriteCallback(bleDevice: BleDevice, writeUUID: String) {
         val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
-        request?.let {
-            return it.removeWriteCallback(writeUUID)
-        }
+        request?.removeWriteCallback(writeUUID)
     }
 
     /**
