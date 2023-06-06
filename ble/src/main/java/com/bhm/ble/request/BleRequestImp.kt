@@ -9,11 +9,10 @@ package com.bhm.ble.request
 
 import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.BleConnectCallback
+import com.bhm.ble.callback.BleIndicateCallback
 import com.bhm.ble.callback.BleNotifyCallback
 import com.bhm.ble.callback.BleScanCallback
-import com.bhm.ble.control.BleTask
-import com.bhm.ble.control.BleTaskQueue
-import com.bhm.ble.control.NotifyFailException
+import com.bhm.ble.control.*
 import com.bhm.ble.data.BleDevice
 import kotlinx.coroutines.*
 
@@ -122,7 +121,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             it.enableCharacteristicNotify(serviceUUID, notifyUUID, useCharacteristicDescriptor, callback)
             return
         }
-        callback.callNotifyFail(NotifyFailException.UnConnectedException)
+        callback.callNotifyFail(NotificationFailException.UnConnectedException(NOTIFY))
     }
 
     /**
@@ -137,6 +136,40 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
         request?.let {
             return it.disableCharacteristicNotify(serviceUUID, notifyUUID, useCharacteristicDescriptor)
+        }
+        return false
+    }
+
+    /**
+     * indicate
+     */
+    override fun indicate(bleDevice: BleDevice,
+                          serviceUUID: String,
+                          indicateUUID: String,
+                          useCharacteristicDescriptor: Boolean,
+                          bleIndicateCallback: BleIndicateCallback.() -> Unit) {
+        val callback = BleIndicateCallback()
+        callback.apply(bleIndicateCallback)
+        val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
+        request?.let {
+            it.enableCharacteristicIndicate(serviceUUID, indicateUUID, useCharacteristicDescriptor, callback)
+            return
+        }
+        callback.callIndicateFail(NotificationFailException.UnConnectedException(INDICATE))
+    }
+
+    /**
+     * stop indicate
+     */
+    override fun stopIndicate(
+        bleDevice: BleDevice,
+        serviceUUID: String,
+        indicateUUID: String,
+        useCharacteristicDescriptor: Boolean
+    ): Boolean {
+        val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
+        request?.let {
+            return it.disableCharacteristicIndicate(serviceUUID, indicateUUID, useCharacteristicDescriptor)
         }
         return false
     }

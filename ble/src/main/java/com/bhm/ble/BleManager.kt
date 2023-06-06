@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothProfile
 import android.content.Context
 import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.callback.BleConnectCallback
+import com.bhm.ble.callback.BleIndicateCallback
 import com.bhm.ble.callback.BleNotifyCallback
 import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.data.BleDevice
@@ -206,6 +207,43 @@ class BleManager private constructor() {
             bleDevice,
             serviceUUID,
             notifyUUID,
+            useCharacteristicDescriptor
+        )
+    }
+
+    /**
+     * indicate
+     */
+    @Synchronized
+    fun indicate(bleDevice: BleDevice,
+                 serviceUUID: String,
+                 indicateUUID: String,
+                 useCharacteristicDescriptor: Boolean = false,
+                 bleIndicateCallback: BleIndicateCallback.() -> Unit) {
+        checkInitialize()
+        bleBaseRequest?.indicate(
+            bleDevice,
+            serviceUUID,
+            indicateUUID,
+            useCharacteristicDescriptor,
+            bleIndicateCallback
+        )
+    }
+
+    /**
+     * stop indicate
+     */
+    fun stopIndicate(
+        bleDevice: BleDevice,
+        serviceUUID: String,
+        indicateUUID: String,
+        useCharacteristicDescriptor: Boolean = false
+    ): Boolean? {
+        checkInitialize()
+        return bleBaseRequest?.stopIndicate(
+            bleDevice,
+            serviceUUID,
+            indicateUUID,
             useCharacteristicDescriptor
         )
     }

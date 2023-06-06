@@ -117,14 +117,14 @@
 #### 8、移除该设备的连接回调
     BleManager.get().removeBleConnectCallback(device)
 
-#### 9、设置通知
+#### 9、设置Notify
     BleManager.get().notify(bleDevice: BleDevice,
                                   serviceUUID: String,
                                   notifyUUID: String,
-                                  bleNotifyCallback: BleNotifyCallback,
-                                  useCharacteristicDescriptor: Boolean = false)
+                                  useCharacteristicDescriptor: Boolean = false,
+                                  bleIndicateCallback: BleIndicateCallback)
 
-#### 10、取消通知
+#### 10、取消Notify
     BleManager.get().stopNotify(bleDevice: BleDevice,
                                   serviceUUID: String,
                                   notifyUUID: String,
@@ -133,14 +133,14 @@
 #### 11、设置Indicate
     BleManager.get().indicate(bleDevice: BleDevice,
                                   serviceUUID: String,
-                                  notifyUUID: String,
-                                  bleIndicateCallback: BleIndicateCallback,
-                                  useCharacteristicDescriptor: Boolean = false)
+                                  indicateUUID: String,
+                                  useCharacteristicDescriptor: Boolean = false,
+                                  bleIndicateCallback: BleIndicateCallback)
 
 #### 12、取消Indicate
     BleManager.get().stopIndicate(bleDevice: BleDevice,
                                   serviceUUID: String,
-                                  notifyUUID: String,
+                                  indicateUUID: String,
                                   useCharacteristicDescriptor: Boolean = false)
 
 #### 11、断开某个设备的连接 释放资源

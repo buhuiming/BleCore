@@ -124,9 +124,13 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
                     if (isChecked) {
                         val logEntity = LogEntity(Level.INFO, "Indicate： ${node.characteristicUUID}")
                         viewModel.addLogMsg(logEntity)
+                        viewModel.indicate(getBleDevice(), node.serviceUUID, node.characteristicUUID) {
+                            checkBox.isChecked = false
+                        }
                     } else {
                         val logEntity = LogEntity(Level.WARNING, "取消Indicate： ${node.characteristicUUID}")
                         viewModel.addLogMsg(logEntity)
+                        viewModel.stopIndicate(getBleDevice(), node.serviceUUID, node.characteristicUUID)
                     }
                 }
             }

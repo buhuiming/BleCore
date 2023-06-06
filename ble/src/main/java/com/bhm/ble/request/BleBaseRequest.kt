@@ -7,6 +7,7 @@ package com.bhm.ble.request
 
 import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.BleConnectCallback
+import com.bhm.ble.callback.BleIndicateCallback
 import com.bhm.ble.callback.BleNotifyCallback
 import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.data.BleDevice
@@ -73,9 +74,26 @@ internal interface BleBaseRequest {
      * stop notify
      */
     fun stopNotify(bleDevice: BleDevice,
-               serviceUUID: String,
-               notifyUUID: String,
-               useCharacteristicDescriptor: Boolean = false): Boolean
+                   serviceUUID: String,
+                   notifyUUID: String,
+                   useCharacteristicDescriptor: Boolean = false): Boolean
+
+    /**
+     * indicate
+     */
+    fun indicate(bleDevice: BleDevice,
+                 serviceUUID: String,
+                 indicateUUID: String,
+                 useCharacteristicDescriptor: Boolean = false,
+                 bleIndicateCallback: BleIndicateCallback.() -> Unit)
+
+    /**
+     * stop indicate
+     */
+    fun stopIndicate(bleDevice: BleDevice,
+                     serviceUUID: String,
+                     indicateUUID: String,
+                     useCharacteristicDescriptor: Boolean = false): Boolean
 
     /**
      * 断开某个设备的连接 释放资源

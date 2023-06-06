@@ -38,17 +38,26 @@ internal class TimeoutCancellationThrowable(msg: String? = null) : CancellationE
 internal class ActiveDisConnectedThrowable(msg: String? = null) : CancellationException(msg)
 
 /**
- * 设置Notify失败
+ * 设置Notify或者Indicate失败
  */
-sealed class NotifyFailException(message: String): CancellationException(message) {
+sealed class NotificationFailException(message: String): CancellationException(message) {
 
-    object DescriptorException : NotifyFailException("设置Notify失败，Descriptor写数据失败")
+    class DescriptorException(type: String = "通知")
+        : NotificationFailException("设置${type}失败，Descriptor写数据失败")
 
-    object UnConnectedException : NotifyFailException("设置Notify失败，设备未连接")
+    class UnConnectedException(type: String = "通知")
+        : NotificationFailException("设置${type}失败，设备未连接")
 
-    object UnSupportNotifyException : NotifyFailException("设置Notify失败，此特性不支持Notify")
+    class UnSupportNotifyException(type: String = "通知")
+        : NotificationFailException("设置${type}失败，此特性不支持通知")
 
-    object SetCharacteristicNotificationFailException : NotifyFailException("设置Notify失败，SetCharacteristicNotificationFail")
+    class SetCharacteristicNotificationFailException(type: String = "通知")
+        : NotificationFailException("设置${type}失败，SetCharacteristicNotificationFail")
 
-    object TimeoutCancellationException : NotifyFailException("设置Notify失败，设置超时")
+    class TimeoutCancellationException(type: String = "通知")
+        : NotificationFailException("设置${type}失败，设置超时")
 }
+
+const val NOTIFY = "Notify"
+
+const val INDICATE = "Indicate"

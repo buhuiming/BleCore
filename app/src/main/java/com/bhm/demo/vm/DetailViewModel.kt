@@ -140,4 +140,41 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
             addLogMsg(LogEntity(Level.OFF, "notify取消失败：${notifyUUID}"))
         }
     }
+
+    /**
+     * indicate
+     */
+    fun indicate(bleDevice: BleDevice,
+               serviceUUID: String,
+               indicateUUID: String,
+               failCall: () -> Unit) {
+        BleManager.get().indicate(bleDevice, serviceUUID, indicateUUID, false) {
+            onIndicateFail {
+                addLogMsg(LogEntity(Level.OFF, "indicate失败，${indicateUUID}：${it.message}"))
+                failCall.invoke()
+            }
+            onIndicateSuccess {
+                addLogMsg(LogEntity(Level.FINE, "indicate成功：${indicateUUID}"))
+            }
+            onCharacteristicChanged {
+                addLogMsg(LogEntity(Level.INFO, "接收到${indicateUUID}的数据：$it"))
+            }
+        }
+    }
+
+    /**
+     * stop indicate
+     */
+    fun stopIndicate(
+        bleDevice: BleDevice,
+        serviceUUID: String,
+        indicateUUID: String,
+    ) {
+        val success = BleManager.get().stopIndicate(bleDevice, serviceUUID, indicateUUID)
+        if (success == true) {
+            addLogMsg(LogEntity(Level.FINE, "indicate取消成功：${indicateUUID}"))
+        } else {
+            addLogMsg(LogEntity(Level.OFF, "indicate取消失败：${indicateUUID}"))
+        }
+    }
 }

@@ -16,6 +16,7 @@ import com.bhm.ble.control.*
 import com.bhm.ble.data.BleConnectFailType
 import com.bhm.ble.data.BleConnectLastState
 import com.bhm.ble.data.BleDevice
+import com.bhm.ble.request.BleConnectRequestManager.Companion.INDICATE_TASK_ID
 import com.bhm.ble.request.BleConnectRequestManager.Companion.NOTIFY_TASK_ID
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
@@ -362,7 +363,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                         cancelNotifyJob()
                         it.callNotifySuccess()
                     } else {
-                        val exception = NotifyFailException.DescriptorException
+                        val exception = NotificationFailException.DescriptorException(NOTIFY)
                         cancelNotifyJob()
                         it.callNotifyFail(exception)
                     }
@@ -370,7 +371,14 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             }
             bleIndicateCallbackHashMap.values.forEach {
                 if (descriptor?.characteristic?.uuid.toString().equals(it.getKey(), ignoreCase = true)) {
-
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        cancelIndicateJob()
+                        it.callIndicateSuccess()
+                    } else {
+                        val exception = NotificationFailException.DescriptorException(INDICATE)
+                        cancelIndicateJob()
+                        it.callIndicateFail(exception)
+                    }
                 }
             }
         }
@@ -450,14 +458,14 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                     throwable?.let {
                         BleLogger.e(it.message)
                         if (it is TimeoutCancellationException || it is TimeoutCancellationThrowable) {
-                            bleNotifyCallback.callNotifyFail(NotifyFailException.TimeoutCancellationException)
+                            bleNotifyCallback.callNotifyFail(NotificationFailException.TimeoutCancellationException(NOTIFY))
                         }
                     }
                 }
             )
             bleTaskQueue.addTask(task)
         } else {
-            bleNotifyCallback.callNotifyFail(NotifyFailException.UnSupportNotifyException)
+            bleNotifyCallback.callNotifyFail(NotificationFailException.UnSupportNotifyException(NOTIFY))
         }
     }
 
@@ -477,6 +485,78 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             val success = setCharacteristicNotify(characteristic, userCharacteristicDescriptor, false, null)
             if (success) {
                 removeNotifyCallback(notifyUUID)
+            }
+            return success
+        }
+        return false
+    }
+
+    /**
+     * indicate
+     */
+    @Synchronized
+    fun enableCharacteristicIndicate(serviceUUID: String,
+                                     indicateUUID: String,
+                                     userCharacteristicDescriptor: Boolean,
+                                     bleIndicateCallback: BleIndicateCallback) {
+        val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
+        val characteristic = gattService?.getCharacteristic(UUID.fromString(indicateUUID))
+        if (bluetoothGatt != null && gattService != null && characteristic != null &&
+            (characteristic.properties or BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0
+        ) {
+            bleIndicateCallback.setKey(indicateUUID)
+            addIndicateCallback(indicateUUID, bleIndicateCallback)
+            var operateTime = getBleOptions()?.operateMillisTimeOut?: BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
+            if (operateTime <= 0) {
+                operateTime = BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
+            }
+            var mContinuation: Continuation<Throwable?>? = null
+            val task = BleTask (
+                INDICATE_TASK_ID,
+                durationTimeMillis = operateTime,
+                callInMainThread = false,
+                autoDoNextTask = true,
+                block = {
+                    suspendCoroutine<Throwable?> { continuation ->
+                        mContinuation = continuation
+                        setCharacteristicIndicate(characteristic, userCharacteristicDescriptor, true, bleIndicateCallback)
+                    }
+                },
+                interrupt = { _, throwable ->
+                    mContinuation?.resume(throwable)
+                },
+                callback = { _, throwable ->
+                    throwable?.let {
+                        BleLogger.e(it.message)
+                        if (it is TimeoutCancellationException || it is TimeoutCancellationThrowable) {
+                            bleIndicateCallback.callIndicateFail(NotificationFailException.TimeoutCancellationException(
+                                INDICATE))
+                        }
+                    }
+                }
+            )
+            bleTaskQueue.addTask(task)
+        } else {
+            bleIndicateCallback.callIndicateFail(NotificationFailException.UnSupportNotifyException(INDICATE))
+        }
+    }
+
+    /**
+     * stop indicate
+     */
+    @Synchronized
+    fun disableCharacteristicIndicate(serviceUUID: String,
+                                      indicateUUID: String,
+                                      userCharacteristicDescriptor: Boolean): Boolean {
+        val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
+        val characteristic = gattService?.getCharacteristic(UUID.fromString(indicateUUID))
+        if (bluetoothGatt != null && gattService != null && characteristic != null &&
+            (characteristic.properties or BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0
+        ) {
+            cancelIndicateJob()
+            val success = setCharacteristicIndicate(characteristic, userCharacteristicDescriptor, false, null)
+            if (success) {
+                removeIndicateCallback(indicateUUID)
             }
             return success
         }
@@ -682,6 +762,13 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     }
 
     /**
+     * 取消设置indicate
+     */
+    private fun cancelIndicateJob() {
+        bleTaskQueue.removeTask(taskId = INDICATE_TASK_ID)
+    }
+
+    /**
      * 配置Notify
      */
     private fun setCharacteristicNotify(characteristic: BluetoothGattCharacteristic,
@@ -690,7 +777,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                                         bleNotifyCallback: BleNotifyCallback?): Boolean {
         val setSuccess = bluetoothGatt?.setCharacteristicNotification(characteristic, enable)
         if (setSuccess != true) {
-            val exception = NotifyFailException.SetCharacteristicNotificationFailException
+            val exception = NotificationFailException.SetCharacteristicNotificationFailException(NOTIFY)
             cancelNotifyJob()
             bleNotifyCallback?.callNotifyFail(exception)
             return false
@@ -701,7 +788,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             characteristic.getDescriptor(UUID.fromString(BleOptions.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR))
         }
         if (descriptor == null) {
-            val exception = NotifyFailException.SetCharacteristicNotificationFailException
+            val exception = NotificationFailException.SetCharacteristicNotificationFailException(NOTIFY)
             cancelNotifyJob()
             bleNotifyCallback?.callNotifyFail(exception)
             return false
@@ -726,9 +813,62 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             success = writeDescriptor == true
         }
         if (!success) {
-            val exception = NotifyFailException.DescriptorException
+            val exception = NotificationFailException.DescriptorException(NOTIFY)
             cancelNotifyJob()
             bleNotifyCallback?.callNotifyFail(exception)
+            return false
+        }
+        return true
+    }
+
+    /**
+     * 配置Indicate
+     */
+    private fun setCharacteristicIndicate(characteristic: BluetoothGattCharacteristic,
+                                          useCharacteristicDescriptor: Boolean,
+                                          enable: Boolean,
+                                          bleIndicateCallback: BleIndicateCallback?): Boolean {
+        val setSuccess = bluetoothGatt?.setCharacteristicNotification(characteristic, enable)
+        if (setSuccess != true) {
+            val exception = NotificationFailException.SetCharacteristicNotificationFailException(INDICATE)
+            cancelIndicateJob()
+            bleIndicateCallback?.callIndicateFail(exception)
+            return false
+        }
+        val descriptor = if (useCharacteristicDescriptor) {
+            characteristic.getDescriptor(characteristic.uuid)
+        } else {
+            characteristic.getDescriptor(UUID.fromString(BleOptions.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR))
+        }
+        if (descriptor == null) {
+            val exception = NotificationFailException.SetCharacteristicNotificationFailException(INDICATE)
+            cancelIndicateJob()
+            bleIndicateCallback?.callIndicateFail(exception)
+            return false
+        }
+        val success: Boolean
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val writeDescriptor: Int? = if (enable) {
+                bluetoothGatt?.writeDescriptor(descriptor, BluetoothGattDescriptor.ENABLE_INDICATION_VALUE)
+            } else {
+                bluetoothGatt?.writeDescriptor(descriptor, BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE)
+            }
+            success = writeDescriptor == BluetoothStatusCodes.SUCCESS
+        } else {
+            @Suppress("DEPRECATION")
+            descriptor.value = if (enable) {
+                BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
+            } else {
+                BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
+            }
+            @Suppress("DEPRECATION")
+            val writeDescriptor: Boolean? = bluetoothGatt?.writeDescriptor(descriptor)
+            success = writeDescriptor == true
+        }
+        if (!success) {
+            val exception = NotificationFailException.DescriptorException(INDICATE)
+            cancelIndicateJob()
+            bleIndicateCallback?.callIndicateFail(exception)
             return false
         }
         return true
