@@ -49,11 +49,6 @@ internal interface BleBaseRequest {
     fun isConnected(bleDevice: BleDevice): Boolean
 
     /**
-     * 移除该设备的连接回调
-     */
-    fun removeBleConnectCallback(bleDevice: BleDevice)
-
-    /**
      * 获取设备的BluetoothGatt对象
      */
     fun getBluetoothGatt(bleDevice: BleDevice): BluetoothGatt?
@@ -96,6 +91,11 @@ internal interface BleBaseRequest {
                      serviceUUID: String,
                      indicateUUID: String,
                      useCharacteristicDescriptor: Boolean = false): Boolean
+
+    /**
+     * 移除该设备的连接回调
+     */
+    fun removeBleConnectCallback(bleDevice: BleDevice)
 
     /**
      * 移除该设备的Indicate回调

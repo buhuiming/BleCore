@@ -143,14 +143,25 @@
                                   indicateUUID: String,
                                   useCharacteristicDescriptor: Boolean = false)
 
-#### 11、断开某个设备的连接 释放资源
+#### 13、读取信号值
+    BleManager.get().readRssi(bleDevice: BleDevice, bleRssiCallback: BleRssiCallback)
+
+#### 14、断开某个设备的连接 释放资源
     BleManager.get().release(bleDevice: BleDevice)
 
-#### 12、断开所有连接 释放资源
+#### 15、断开所有连接 释放资源
     BleManager.get().releaseAll()
 
-
-
+#### 16、一些移除监听的函数
+    BleManager.get().removeBleScanCallback()
+    BleManager.get().removeBleConnectCallback(bleDevice: BleDevice)
+    BleManager.get().removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String)
+    BleManager.get().removeBleNotifyCallback(bleDevice: BleDevice, notifyUUID: String)
+    BleManager.get().removeBleRssiCallback(bleDevice: BleDevice)
+    BleManager.get().removeBleMtuChangedCallback(bleDevice: BleDevice)
+    BleManager.get().removeBleReadCallback(bleDevice: BleDevice, readUUID: String)
+    BleManager.get().removeBleWriteCallback(bleDevice: BleDevice, writeUUID: String)
+    
 ## License
 
 ```
