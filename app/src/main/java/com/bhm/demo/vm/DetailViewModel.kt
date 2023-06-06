@@ -8,7 +8,8 @@ package com.bhm.demo.vm
 import android.app.Application
 import android.bluetooth.BluetoothGattCharacteristic
 import com.bhm.ble.BleManager
-import com.bhm.ble.callback.BleRssiCallback
+import com.bhm.ble.attribute.BleOptions
+import com.bhm.ble.callback.BleMtuChangedCallback
 import com.bhm.ble.data.BleDevice
 import com.bhm.demo.entity.CharacteristicNode
 import com.bhm.demo.entity.LogEntity
@@ -189,6 +190,20 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
             }
             onRssiSuccess {
                 addLogMsg(LogEntity(Level.FINE, "读取信号值成功：${it}"))
+            }
+        }
+    }
+
+    /**
+     * 设置mtu
+     */
+    fun setMtu(bleDevice: BleDevice) {
+        BleManager.get().setMtu(bleDevice) {
+            onSetMtuFail {
+                addLogMsg(LogEntity(Level.OFF, "设置mtu值失败：${it.message}"))
+            }
+            onMtuChanged {
+                addLogMsg(LogEntity(Level.FINE, "设置mtu值成功：${it}"))
             }
         }
     }

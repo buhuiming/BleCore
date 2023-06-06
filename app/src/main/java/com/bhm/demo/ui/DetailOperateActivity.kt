@@ -172,6 +172,7 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
             if (ViewUtil.isInvalidClick(it)) {
                 return@setOnClickListener
             }
+            viewModel.setMtu(getBleDevice())
         }
         viewBinding.btnReadRssi.setOnClickListener {
             if (ViewUtil.isInvalidClick(it)) {

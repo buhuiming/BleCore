@@ -18,6 +18,7 @@ import com.bhm.ble.data.BleConnectLastState
 import com.bhm.ble.data.BleDevice
 import com.bhm.ble.request.BleConnectRequestManager.Companion.INDICATE_TASK_ID
 import com.bhm.ble.request.BleConnectRequestManager.Companion.NOTIFY_TASK_ID
+import com.bhm.ble.request.BleConnectRequestManager.Companion.SET_MTU_TASK_ID
 import com.bhm.ble.request.BleConnectRequestManager.Companion.SET_RSSI_TASK_ID
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
@@ -111,6 +112,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             lastState =  BleConnectLastState.Connected
             BleLogger.e("已连接")
             bleConnectCallback.callConnectSuccess(bleDevice, bluetoothGatt)
+            autoSetMtu()
             return
         }
         bleConnectCallback.callConnectStart()
@@ -170,6 +172,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                     //连接超时
                     is TimeoutCancellationException -> {
                         connectFail()
+                        BleLogger.e("连接失败：超时")
                         bleConnectCallback?.callConnectFail(
                             bleDevice,
                             BleConnectFailType.ConnectTimeOut
@@ -187,6 +190,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                     //连接失败
                     else -> {
                         connectFail()
+                        BleLogger.e("连接失败：${it.message}")
                         bleConnectCallback?.callConnectFail(
                             bleDevice,
                             BleConnectFailType.ConnectException(it)
@@ -241,6 +245,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             removeRssiCallback()
             removeMtuChangedCallback()
             clearCharacterCallback()
+            BleLogger.e("主动断开连接")
             bleConnectCallback?.callDisConnected(
                 isActiveDisconnect.get(),
                 bleDevice, bluetoothGatt, BluetoothGatt.GATT_SUCCESS
@@ -296,6 +301,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                             removeRssiCallback()
                             removeMtuChangedCallback()
                             clearCharacterCallback()
+                            BleLogger.e("自动断开连接")
                             bleConnectCallback?.callDisConnected(
                                 isActiveDisconnect.get(),
                                 bleDevice, gatt, status
@@ -318,8 +324,10 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                 lastState = BleConnectLastState.Connected
                 isActiveDisconnect.set(false)
                 bleConnectCallback?.callConnectSuccess(bleDevice, bluetoothGatt)
+                autoSetMtu()
             } else {
                 connectFail()
+                BleLogger.e("连接失败：未发现服务")
                 bleConnectCallback?.callConnectFail(
                     bleDevice,
                     BleConnectFailType.ConnectException(Throwable("发现服务失败"))
@@ -338,11 +346,13 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             super.onCharacteristicChanged(gatt, characteristic, value)
             bleNotifyCallbackHashMap.values.forEach {
                 if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
+                    BleLogger.d("收到Notify数据：${value}")
                     it.callCharacteristicChanged(value)
                 }
             }
             bleIndicateCallbackHashMap.values.forEach {
                 if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
+                    BleLogger.d("收到Indicate数据：${value}")
                     it.callCharacteristicChanged(value)
                 }
             }
@@ -361,10 +371,12 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                 if (descriptor?.characteristic?.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
                     if (status == BluetoothGatt.GATT_SUCCESS) {
                         cancelNotifyJob()
+                        BleLogger.d("设置Notify成功")
                         it.callNotifySuccess()
                     } else {
                         val exception = NotificationFailException.DescriptorException(NOTIFY)
                         cancelNotifyJob()
+                        BleLogger.e("设置Notify失败：${exception.message}")
                         it.callNotifyFail(exception)
                     }
                 }
@@ -373,10 +385,12 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                 if (descriptor?.characteristic?.uuid.toString().equals(it.getKey(), ignoreCase = true)) {
                     if (status == BluetoothGatt.GATT_SUCCESS) {
                         cancelIndicateJob()
+                        BleLogger.d("设置Indicate成功")
                         it.callIndicateSuccess()
                     } else {
                         val exception = NotificationFailException.DescriptorException(INDICATE)
                         cancelIndicateJob()
+                        BleLogger.e("设置Indicate失败：${exception.message}")
                         it.callIndicateFail(exception)
                     }
                 }
@@ -414,11 +428,49 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             cancelReadRssiJob()
             bleRssiCallback?.let {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
+                    BleLogger.d("读取Rssi成功：$rssi")
                     it.callRssiSuccess(rssi)
                 } else {
-                    it.callRssiFail(Throwable("读取Rssi失败，status = ${status}"))
+                    BleLogger.e("读取Rssi失败，status = $status")
+                    it.callRssiFail(Throwable("读取Rssi失败，status = $status"))
                 }
             }
+        }
+
+        /**
+         * 设置Mtu值后会触发
+         */
+        override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
+            super.onMtuChanged(gatt, mtu, status)
+            cancelSetMtuJob()
+            bleMtuChangedCallback?.let {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    BleLogger.d("设置Mtu成功：$mtu")
+                    it.callMtuChanged(mtu)
+                } else {
+                    BleLogger.e("设置Mtu失败，status = $status")
+                    it.callSetMtuFail(Throwable("设置Mtu失败，status = $status"))
+                }
+            }
+        }
+    }
+
+    /**
+     * 自动设置mtu
+     */
+    private fun autoSetMtu() {
+        if (getBleOptions()?.autoSetMtu == true) {
+            setMtu(getBleOptions()?.mtu?: BleOptions.DEFAULT_MTU, object : BleMtuChangedCallback(){
+                override fun callMtuChanged(mtu: Int) {
+                    super.callMtuChanged(mtu)
+                    BleLogger.d("自动设置Mtu成功: $mtu")
+                }
+
+                override fun callSetMtuFail(throwable: Throwable) {
+                    super.callSetMtuFail(throwable)
+                    BleLogger.e("自动设置Mtu: ${throwable.message}")
+                }
+            })
         }
     }
 
@@ -469,6 +521,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                     throwable?.let {
                         BleLogger.e(it.message)
                         if (it is TimeoutCancellationException || it is TimeoutCancellationThrowable) {
+                            BleLogger.e("设置Notify超时")
                             bleNotifyCallback.callNotifyFail(NotificationFailException.TimeoutCancellationException(NOTIFY))
                         }
                     }
@@ -476,6 +529,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             )
             bleTaskQueue.addTask(task)
         } else {
+            BleLogger.e("设置Notify失败，此特性不支持通知")
             bleNotifyCallback.callNotifyFail(NotificationFailException.UnSupportNotifyException(NOTIFY))
         }
     }
@@ -536,6 +590,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                     throwable?.let {
                         BleLogger.e(it.message)
                         if (it is TimeoutCancellationException || it is TimeoutCancellationThrowable) {
+                            BleLogger.e("设置Indicate超时")
                             bleIndicateCallback.callIndicateFail(NotificationFailException.TimeoutCancellationException(
                                 INDICATE))
                         }
@@ -544,6 +599,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             )
             bleTaskQueue.addTask(task)
         } else {
+            BleLogger.e("设置Indicate失败，此特性不支持通知")
             bleIndicateCallback.callIndicateFail(NotificationFailException.UnSupportNotifyException(INDICATE))
         }
     }
@@ -571,7 +627,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     }
 
     /**
-     * indicate
+     * 读取信号值
      */
     @Synchronized
     fun readRemoteRssi(bleRssiCallback: BleRssiCallback) {
@@ -598,7 +654,44 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                 throwable?.let {
                     BleLogger.e(it.message)
                     if (it is TimeoutCancellationException || it is TimeoutCancellationThrowable) {
+                        BleLogger.e("读取Rssi超时")
                         bleRssiCallback.callRssiFail(TimeoutCancellationThrowable("读取Rssi失败，超时"))
+                    }
+                }
+            }
+        )
+        bleTaskQueue.addTask(task)
+    }
+
+    /**
+     * 设置mtu
+     */
+    fun setMtu(mtu: Int, bleMtuChangedCallback: BleMtuChangedCallback) {
+        cancelSetMtuJob()
+        addMtuChangedCallback(bleMtuChangedCallback)
+        var mContinuation: Continuation<Throwable?>? = null
+        val task = BleTask (
+            SET_MTU_TASK_ID,
+            durationTimeMillis = getOperateTime(),
+            callInMainThread = false,
+            autoDoNextTask = true,
+            block = {
+                suspendCoroutine<Throwable?> { continuation ->
+                    mContinuation = continuation
+                    if (bluetoothGatt?.requestMtu(mtu) == false) {
+                        continuation.resume(Throwable("Gatt设置mtu失败"))
+                    }
+                }
+            },
+            interrupt = { _, throwable ->
+                mContinuation?.resume(throwable)
+            },
+            callback = { _, throwable ->
+                throwable?.let {
+                    BleLogger.e(it.message)
+                    if (it is TimeoutCancellationException || it is TimeoutCancellationThrowable) {
+                        BleLogger.e("设置Mtu超时")
+                        bleMtuChangedCallback.callSetMtuFail(TimeoutCancellationThrowable("设置mtu失败，超时"))
                     }
                 }
             }
@@ -752,6 +845,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             delay(waitTime * 5)
             if (bluetoothGatt == null || bluetoothGatt?.discoverServices() == false) {
                 connectFail()
+                BleLogger.e("发现服务失败")
                 bleConnectCallback?.callConnectFail(
                     bleDevice,
                     BleConnectFailType.ConnectException(Throwable("发现服务失败"))
@@ -826,6 +920,13 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     }
 
     /**
+     * 取消设置Mtu任务
+     */
+    private fun cancelSetMtuJob() {
+        bleTaskQueue.removeTask(taskId = SET_MTU_TASK_ID)
+    }
+
+    /**
      * 配置Notify
      */
     private fun setCharacteristicNotify(characteristic: BluetoothGattCharacteristic,
@@ -836,6 +937,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         if (setSuccess != true) {
             val exception = NotificationFailException.SetCharacteristicNotificationFailException(NOTIFY)
             cancelNotifyJob()
+            BleLogger.e("设置Notify失败，SetCharacteristicNotificationFail")
             bleNotifyCallback?.callNotifyFail(exception)
             return false
         }
@@ -847,6 +949,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         if (descriptor == null) {
             val exception = NotificationFailException.SetCharacteristicNotificationFailException(NOTIFY)
             cancelNotifyJob()
+            BleLogger.e("设置Notify失败，SetCharacteristicNotificationFail")
             bleNotifyCallback?.callNotifyFail(exception)
             return false
         }
@@ -872,6 +975,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         if (!success) {
             val exception = NotificationFailException.DescriptorException(NOTIFY)
             cancelNotifyJob()
+            BleLogger.e("设置Notify失败，Descriptor写数据失败")
             bleNotifyCallback?.callNotifyFail(exception)
             return false
         }
@@ -889,6 +993,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         if (setSuccess != true) {
             val exception = NotificationFailException.SetCharacteristicNotificationFailException(INDICATE)
             cancelIndicateJob()
+            BleLogger.e("设置Indicate失败，SetCharacteristicNotificationFail")
             bleIndicateCallback?.callIndicateFail(exception)
             return false
         }
@@ -900,6 +1005,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         if (descriptor == null) {
             val exception = NotificationFailException.SetCharacteristicNotificationFailException(INDICATE)
             cancelIndicateJob()
+            BleLogger.e("设置Indicate失败，SetCharacteristicNotificationFail")
             bleIndicateCallback?.callIndicateFail(exception)
             return false
         }
@@ -925,6 +1031,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         if (!success) {
             val exception = NotificationFailException.DescriptorException(INDICATE)
             cancelIndicateJob()
+            BleLogger.e("设置Indicate失败，Descriptor写数据失败")
             bleIndicateCallback?.callIndicateFail(exception)
             return false
         }

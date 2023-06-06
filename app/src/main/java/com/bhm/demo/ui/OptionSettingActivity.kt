@@ -75,6 +75,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
             viewBinding.etMTU.setText(it.mtu.toString())
             viewBinding.cbContainScanDeviceName.isChecked = it.containScanDeviceName
             viewBinding.cbLogger.isChecked = it.enableLog
+            viewBinding.cbMtu.isChecked = it.autoSetMtu
             viewBinding.cbAutoConnect.isChecked = it.autoConnect
         }
     }
@@ -100,6 +101,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
             viewBinding.etMTU.setText(BleOptions.DEFAULT_MTU.toString())
             viewBinding.cbContainScanDeviceName.isChecked = BleOptions.CONTAIN_SCAN_DEVICE_NAME
             viewBinding.cbLogger.isChecked = BleOptions.ENABLE_LOG
+            viewBinding.cbMtu.isChecked = BleOptions.DEFAULT_AUTO_SET_MTU
             viewBinding.cbAutoConnect.isChecked = BleOptions.AUTO_CONNECT
             BleManager.get().init(application)
         }
@@ -109,9 +111,6 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
             }
             if (viewBinding.etMaxConnectNum.text.toString().toInt() > 7) {
                 viewBinding.etMaxConnectNum.setText("7")
-            }
-            if (viewBinding.etMTU.text.toString().toInt() > BleOptions.MAX_MTU) {
-                viewBinding.etMTU.setText(BleOptions.MAX_MTU.toString())
             }
 
             val builder = BleOptions.builder()
@@ -143,7 +142,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
                 .setOperateMillisTimeOut(viewBinding.etOperateMillisTimeOut.text.toString().toLong())
                 .setWriteInterval(viewBinding.etWriteInterval.text.toString().toLong())
                 .setMaxConnectNum(viewBinding.etMaxConnectNum.text.toString().toInt())
-                .setMtu(viewBinding.etMTU.text.toString().toInt())
+                .setMtu(viewBinding.etMTU.text.toString().toInt(), viewBinding.cbMtu.isChecked)
             BleManager.get().init(application, builder.build())
             finish()
         }

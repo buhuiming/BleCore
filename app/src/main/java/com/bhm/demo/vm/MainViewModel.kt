@@ -53,25 +53,6 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
      * 初始化蓝牙组件
      */
     fun initBle() {
-//        val options =
-//            BleOptions.builder()
-//                .setScanServiceUuid("0000ff80-0000-1000-8000-00805f9b34fb")
-//                .setScanDeviceName("midea")
-//                .setScanDeviceAddress("70:86:CE:88:7A:AF")
-//                .isContainScanDeviceName(true)
-//                .setEnableLog(true)
-//                .setScanMillisTimeOut(4000)
-//                //这个机制是：不会因为扫描的次数导致上一次扫描到的数据被清空，也就是onStart和onScanComplete
-//                //都只会回调一次，而且扫描到的数据是所有扫描次数的总和
-//                .setScanRetryCountAndInterval(2, 1000)
-//                .setConnectMillisTimeOut(10000)
-//                .setConnectRetryCountAndInterval(0, 1000)
-//                .setAutoConnect(false)
-//                .setOperateMillisTimeOut(6000)//实现中
-//                .setWriteInterval(80)//实现中
-//                .setMaxConnectNum(5)//实现中
-//                .setMtu(500)//实现中
-//                .build()
         BleManager.get().init(application,
             BleOptions.Builder()
                 .setScanMillisTimeOut(2000)
@@ -253,7 +234,6 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                 }
                 onConnectSuccess { bleDevice, _ ->
                     Toast.makeText(application, "连接成功(${bleDevice.deviceAddress})", Toast.LENGTH_SHORT).show()
-                    BleLogger.e("-----onConnectSuccess")
                     refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
                 }
             }

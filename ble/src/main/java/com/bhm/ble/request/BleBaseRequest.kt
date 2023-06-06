@@ -80,17 +80,22 @@ internal interface BleBaseRequest {
                  bleIndicateCallback: BleIndicateCallback.() -> Unit)
 
     /**
-     * 读取信号值
-     */
-    fun readRssi(bleDevice: BleDevice, bleRssiCallback: BleRssiCallback.() -> Unit)
-
-    /**
      * stop indicate
      */
     fun stopIndicate(bleDevice: BleDevice,
                      serviceUUID: String,
                      indicateUUID: String,
                      useCharacteristicDescriptor: Boolean = false): Boolean
+
+    /**
+     * 读取信号值
+     */
+    fun readRssi(bleDevice: BleDevice, bleRssiCallback: BleRssiCallback.() -> Unit)
+
+    /**
+     * 设置mtu
+     */
+    fun setMtu(bleDevice: BleDevice, mtu: Int, bleMtuChangedCallback: BleMtuChangedCallback.() -> Unit)
 
     /**
      * 移除该设备的连接回调

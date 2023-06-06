@@ -242,8 +242,32 @@ class BleManager private constructor() {
     /**
      * 读取信号值
      */
+    @Synchronized
     fun readRssi(bleDevice: BleDevice, bleRssiCallback: BleRssiCallback.() -> Unit) {
         bleBaseRequest?.readRssi(bleDevice, bleRssiCallback)
+    }
+
+    /**
+     * 设置mtu
+     */
+    @Synchronized
+    fun setMtu(bleDevice: BleDevice, bleMtuChangedCallback: BleMtuChangedCallback.() -> Unit) {
+        setMtu(bleDevice, bleOptions?.mtu?: BleOptions.DEFAULT_MTU, bleMtuChangedCallback)
+    }
+
+    /**
+     * 设置mtu
+     */
+    @Synchronized
+    fun setMtu(bleDevice: BleDevice, mtu: Int, bleMtuChangedCallback: BleMtuChangedCallback.() -> Unit) {
+        if (mtu > 512) {
+            BleLogger.w("requiredMtu should lower than 512 !")
+        }
+
+        if (mtu < 23) {
+            BleLogger.w("requiredMtu should higher than 23 !")
+        }
+        bleBaseRequest?.setMtu(bleDevice, mtu, bleMtuChangedCallback)
     }
 
     /**

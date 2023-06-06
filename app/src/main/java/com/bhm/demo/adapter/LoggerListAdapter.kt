@@ -1,7 +1,6 @@
 package com.bhm.demo.adapter
 
 import android.graphics.Color
-import android.provider.CalendarContract
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.bhm.demo.databinding.LayoutRecyclerLogBinding

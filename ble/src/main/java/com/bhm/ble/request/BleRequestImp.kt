@@ -186,6 +186,20 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
+     * 设置mtu
+     */
+    override fun setMtu(bleDevice: BleDevice, mtu: Int, bleMtuChangedCallback: BleMtuChangedCallback.() -> Unit) {
+        val callback = BleMtuChangedCallback()
+        callback.apply(bleMtuChangedCallback)
+        val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
+        request?.let {
+            it.setMtu(mtu, callback)
+            return
+        }
+        callback.callSetMtuFail(UnConnectedThrowable("设置mtu失败，设备未连接"))
+    }
+
+    /**
      * 移除该设备的Indicate回调
      */
     override fun removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String) {

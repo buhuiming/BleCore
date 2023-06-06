@@ -46,6 +46,8 @@ class BleOptions private constructor(builder: Builder) {
 
     var mtu = builder.mtu
 
+    var autoSetMtu = builder.autoSetMtu
+
     companion object {
 
         const val CONTAIN_SCAN_DEVICE_NAME = false
@@ -72,9 +74,9 @@ class BleOptions private constructor(builder: Builder) {
 
         const val DEFAULT_MAX_CONNECT_NUM: Int = 7
 
-        const val DEFAULT_MTU: Int = 20
+        const val DEFAULT_MTU: Int = 23
 
-        const val MAX_MTU: Int = 517
+        const val DEFAULT_AUTO_SET_MTU = true
 
         //系统提供接受通知自带的UUID
         const val UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR =
@@ -87,7 +89,7 @@ class BleOptions private constructor(builder: Builder) {
         fun builder() = Builder()
     }
 
-    class Builder() {
+    class Builder {
 
         internal var scanServiceUuids: ArrayList<String> = ArrayList(1)
 
@@ -120,6 +122,8 @@ class BleOptions private constructor(builder: Builder) {
         internal var maxConnectNum: Int = DEFAULT_MAX_CONNECT_NUM
 
         internal var mtu: Int = DEFAULT_MTU
+
+        internal var autoSetMtu: Boolean = DEFAULT_AUTO_SET_MTU
 
         /**
          * 设置扫描过滤规则：只查询对应ServiceUuid的设备
@@ -232,13 +236,12 @@ class BleOptions private constructor(builder: Builder) {
         }
 
         /**
-         * 设置mtu，默认为[DEFAULT_MTU]，最大为517
+         * 设置mtu，默认为[DEFAULT_MTU]
+         * @param autoSetMtu 是否自动设置mtu，true：连接成功之后会自动设置mtu，默认为[DEFAULT_AUTO_SET_MTU]
          */
-        fun setMtu(mtu: Int) = apply {
+        fun setMtu(mtu: Int, autoSetMtu: Boolean = DEFAULT_AUTO_SET_MTU) = apply {
             this.mtu = mtu
-            if (this.mtu > MAX_MTU) {
-                this.mtu = MAX_MTU
-            }
+            this.autoSetMtu = autoSetMtu
         }
 
         fun build(): BleOptions {
