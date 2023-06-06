@@ -8,6 +8,7 @@ package com.bhm.demo.vm
 import android.app.Application
 import android.bluetooth.BluetoothGattCharacteristic
 import com.bhm.ble.BleManager
+import com.bhm.ble.callback.BleRssiCallback
 import com.bhm.ble.data.BleDevice
 import com.bhm.demo.entity.CharacteristicNode
 import com.bhm.demo.entity.LogEntity
@@ -175,6 +176,20 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
             addLogMsg(LogEntity(Level.FINE, "indicate取消成功：${indicateUUID}"))
         } else {
             addLogMsg(LogEntity(Level.OFF, "indicate取消失败：${indicateUUID}"))
+        }
+    }
+
+    /**
+     * 读取信号值
+     */
+    fun readRssi(bleDevice: BleDevice) {
+        BleManager.get().readRssi(bleDevice) {
+            onRssiFail {
+                addLogMsg(LogEntity(Level.OFF, "读取信号值失败：${it.message}"))
+            }
+            onRssiSuccess {
+                addLogMsg(LogEntity(Level.FINE, "读取信号值成功：${it}"))
+            }
         }
     }
 }

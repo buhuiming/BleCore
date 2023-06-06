@@ -13,21 +13,28 @@ import kotlinx.coroutines.CancellationException
  * @author Buhuiming
  * @date 2023年05月29日 16时18分
  */
-internal class CompleteThrowable(msg: String? = null) : CancellationException(msg)
+open class CompleteThrowable(msg: String? = null) : CancellationException(msg)
 
 /**
  * 主动取消
  * @author Buhuiming
  * @date :2023/6/5 14:32
  */
-internal class CancellationThrowable(msg: String? = null) : CancellationException(msg)
+open class CancellationThrowable(msg: String? = null) : CancellationException(msg)
 
 /**
  * 超时抛出的Throwable
  * @author Buhuiming
  * @date :2023/6/5 10:24
  */
-internal class TimeoutCancellationThrowable(msg: String? = null) : CancellationException(msg)
+open class TimeoutCancellationThrowable(msg: String? = null) : CancellationException(msg)
+
+/**
+ * 设备未连接抛出的Throwable
+ * @author Buhuiming
+ * @date :2023/6/5 10:24
+ */
+open class UnConnectedThrowable(msg: String? = "设备未连接") : CancellationException(msg)
 
 /**
  * 主动断开连接时抛出的Throwable
@@ -35,7 +42,7 @@ internal class TimeoutCancellationThrowable(msg: String? = null) : CancellationE
  * @author Buhuiming
  * @date 2023年05月29日 16时18分
  */
-internal class ActiveDisConnectedThrowable(msg: String? = null) : CancellationException(msg)
+open class ActiveDisConnectedThrowable(msg: String? = null) : CancellationException(msg)
 
 /**
  * 设置Notify或者Indicate失败

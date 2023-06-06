@@ -7,7 +7,7 @@ package com.bhm.ble.callback
 
 
 /**
- * Rssi信号值回调
+ * 读回调
  *
  * @author Buhuiming
  * @date 2023年05月26日 15时54分

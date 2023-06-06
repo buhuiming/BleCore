@@ -14,4 +14,4 @@ import java.util.logging.Level
  * @author Buhuiming
  * @date 2023年06月01日 15时54分
  */
-data class LogEntity(val level: Level, val msg: String)
+data class LogEntity(val level: Level, val msg: String, val time: Long = System.currentTimeMillis())

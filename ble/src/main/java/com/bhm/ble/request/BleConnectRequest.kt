@@ -18,6 +18,7 @@ import com.bhm.ble.data.BleConnectLastState
 import com.bhm.ble.data.BleDevice
 import com.bhm.ble.request.BleConnectRequestManager.Companion.INDICATE_TASK_ID
 import com.bhm.ble.request.BleConnectRequestManager.Companion.NOTIFY_TASK_ID
+import com.bhm.ble.request.BleConnectRequestManager.Companion.SET_RSSI_TASK_ID
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.*
@@ -312,7 +313,6 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             super.onServicesDiscovered(gatt, status)
             bluetoothGatt = gatt
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                BleLogger.e("2---------${System.currentTimeMillis()}")
                 BleLogger.i("连接成功，发现服务")
                 currentConnectRetryCount = 0
                 lastState = BleConnectLastState.Connected
@@ -405,6 +405,21 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         ) {
             super.onCharacteristicWrite(gatt, characteristic, status)
         }
+
+        /**
+         * 读取信号值后会触发
+         */
+        override fun onReadRemoteRssi(gatt: BluetoothGatt?, rssi: Int, status: Int) {
+            super.onReadRemoteRssi(gatt, rssi, status)
+            cancelReadRssiJob()
+            bleRssiCallback?.let {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    it.callRssiSuccess(rssi)
+                } else {
+                    it.callRssiFail(Throwable("读取Rssi失败，status = ${status}"))
+                }
+            }
+        }
     }
 
     /**
@@ -422,15 +437,11 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         ) {
             bleNotifyCallback.setKey(notifyUUID)
             addNotifyCallback(notifyUUID, bleNotifyCallback)
-            var operateTime = getBleOptions()?.operateMillisTimeOut?: BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
-            if (operateTime <= 0) {
-                operateTime = BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
-            }
 //            var job: Job? = null
             var mContinuation: Continuation<Throwable?>? = null
             val task = BleTask (
                 NOTIFY_TASK_ID,
-                durationTimeMillis = operateTime,
+                durationTimeMillis = getOperateTime(),
                 callInMainThread = false,
                 autoDoNextTask = true,
                 block = {
@@ -506,14 +517,10 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         ) {
             bleIndicateCallback.setKey(indicateUUID)
             addIndicateCallback(indicateUUID, bleIndicateCallback)
-            var operateTime = getBleOptions()?.operateMillisTimeOut?: BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
-            if (operateTime <= 0) {
-                operateTime = BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
-            }
             var mContinuation: Continuation<Throwable?>? = null
             val task = BleTask (
                 INDICATE_TASK_ID,
-                durationTimeMillis = operateTime,
+                durationTimeMillis = getOperateTime(),
                 callInMainThread = false,
                 autoDoNextTask = true,
                 block = {
@@ -561,6 +568,50 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             return success
         }
         return false
+    }
+
+    /**
+     * indicate
+     */
+    @Synchronized
+    fun readRemoteRssi(bleRssiCallback: BleRssiCallback) {
+        cancelReadRssiJob()
+        addRssiCallback(bleRssiCallback)
+        var mContinuation: Continuation<Throwable?>? = null
+        val task = BleTask (
+            SET_RSSI_TASK_ID,
+            durationTimeMillis = getOperateTime(),
+            callInMainThread = false,
+            autoDoNextTask = true,
+            block = {
+                suspendCoroutine<Throwable?> { continuation ->
+                    mContinuation = continuation
+                    if (bluetoothGatt?.readRemoteRssi() == false) {
+                        continuation.resume(Throwable("Gatt读取Rssi失败"))
+                    }
+                }
+            },
+            interrupt = { _, throwable ->
+                mContinuation?.resume(throwable)
+            },
+            callback = { _, throwable ->
+                throwable?.let {
+                    BleLogger.e(it.message)
+                    if (it is TimeoutCancellationException || it is TimeoutCancellationThrowable) {
+                        bleRssiCallback.callRssiFail(TimeoutCancellationThrowable("读取Rssi失败，超时"))
+                    }
+                }
+            }
+        )
+        bleTaskQueue.addTask(task)
+    }
+
+    private fun getOperateTime(): Long {
+        var operateTime = getBleOptions()?.operateMillisTimeOut?: BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
+        if (operateTime <= 0) {
+            operateTime = BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
+        }
+        return operateTime
     }
 
     @Synchronized
@@ -699,7 +750,6 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     private fun findService() {
         bleConnectCallback?.launchInMainThread {
             delay(waitTime * 5)
-            BleLogger.e("1---------${System.currentTimeMillis()}")
             if (bluetoothGatt == null || bluetoothGatt?.discoverServices() == false) {
                 connectFail()
                 bleConnectCallback?.callConnectFail(
@@ -755,17 +805,24 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
 
 
     /**
-     * 取消设置notify
+     * 取消设置notify任务
      */
     private fun cancelNotifyJob() {
         bleTaskQueue.removeTask(taskId = NOTIFY_TASK_ID)
     }
 
     /**
-     * 取消设置indicate
+     * 取消设置indicate任务
      */
     private fun cancelIndicateJob() {
         bleTaskQueue.removeTask(taskId = INDICATE_TASK_ID)
+    }
+
+    /**
+     * 取消读取Rssi任务
+     */
+    private fun cancelReadRssiJob() {
+        bleTaskQueue.removeTask(taskId = SET_RSSI_TASK_ID)
     }
 
     /**

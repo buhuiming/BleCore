@@ -24,19 +24,52 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-    <Button
-            android:id="@+id/btnClear"
-            android:layout_width="120dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="20dp"
+    <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
             android:layout_marginBottom="5dp"
-            android:textColor="@color/white"
-            android:gravity="center"
-            android:layout_gravity="end"
-            android:textSize="13sp"
-            android:padding="0dp"
-            android:background="@color/purple_500"
-            android:text="清除日志"/>
+            android:orientation="horizontal">
+
+        <Button
+                android:id="@+id/btnReadRssi"
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="20dp"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:layout_gravity="end"
+                android:textSize="13sp"
+                android:padding="0dp"
+                android:background="@color/purple_500"
+                android:text="读取Rssi"/>
+
+        <Button
+                android:id="@+id/btnSetMtu"
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="20dp"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:layout_gravity="end"
+                android:textSize="13sp"
+                android:padding="0dp"
+                android:background="@color/purple_500"
+                android:text="设置Mtu"/>
+
+        <Button
+                android:id="@+id/btnClear"
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="20dp"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:layout_gravity="end"
+                android:textSize="13sp"
+                android:padding="0dp"
+                android:background="@color/purple_500"
+                android:text="清除日志"/>
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/logRecyclerView"

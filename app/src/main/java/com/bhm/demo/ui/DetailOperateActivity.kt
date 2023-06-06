@@ -25,6 +25,7 @@ import com.bhm.demo.entity.OperateType
 import com.bhm.demo.vm.DetailViewModel
 import com.bhm.support.sdk.core.AppTheme
 import com.bhm.support.sdk.entity.MessageEvent
+import com.bhm.support.sdk.utils.ViewUtil
 import kotlinx.coroutines.launch
 import java.util.logging.Level
 
@@ -161,8 +162,22 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
             }
         }
         viewBinding.btnClear.setOnClickListener {
+            if (ViewUtil.isInvalidClick(it)) {
+                return@setOnClickListener
+            }
             loggerListAdapter?.notifyItemRangeRemoved(0, viewModel.listLogData.size)
             viewModel.listLogData.clear()
+        }
+        viewBinding.btnSetMtu.setOnClickListener {
+            if (ViewUtil.isInvalidClick(it)) {
+                return@setOnClickListener
+            }
+        }
+        viewBinding.btnReadRssi.setOnClickListener {
+            if (ViewUtil.isInvalidClick(it)) {
+                return@setOnClickListener
+            }
+            viewModel.readRssi(getBleDevice())
         }
     }
 

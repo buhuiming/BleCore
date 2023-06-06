@@ -304,6 +304,10 @@ internal class BleScanRequest private constructor() : Request(){
      */
     fun isScanning() = isScanning.get()
 
+    fun removeBleScanCallback() {
+        this.bleScanCallback = null
+    }
+
     /**
      * 停止扫描
      */

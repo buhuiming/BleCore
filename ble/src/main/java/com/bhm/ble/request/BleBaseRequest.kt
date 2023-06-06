@@ -6,10 +6,7 @@
 package com.bhm.ble.request
 
 import android.bluetooth.BluetoothGatt
-import com.bhm.ble.callback.BleConnectCallback
-import com.bhm.ble.callback.BleIndicateCallback
-import com.bhm.ble.callback.BleNotifyCallback
-import com.bhm.ble.callback.BleScanCallback
+import com.bhm.ble.callback.*
 import com.bhm.ble.data.BleDevice
 
 
@@ -88,12 +85,52 @@ internal interface BleBaseRequest {
                  bleIndicateCallback: BleIndicateCallback.() -> Unit)
 
     /**
+     * 读取信号值
+     */
+    fun readRssi(bleDevice: BleDevice, bleRssiCallback: BleRssiCallback.() -> Unit)
+
+    /**
      * stop indicate
      */
     fun stopIndicate(bleDevice: BleDevice,
                      serviceUUID: String,
                      indicateUUID: String,
                      useCharacteristicDescriptor: Boolean = false): Boolean
+
+    /**
+     * 移除该设备的Indicate回调
+     */
+    fun removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String)
+
+    /**
+     * 移除该设备的Notify回调
+     */
+    fun removeBleNotifyCallback(bleDevice: BleDevice, notifyUUID: String)
+
+    /**
+     * 移除该设备的Read回调
+     */
+    fun removeBleReadCallback(bleDevice: BleDevice, readUUID: String)
+
+    /**
+     * 移除该设备的MtuChanged回调
+     */
+    fun removeBleMtuChangedCallback(bleDevice: BleDevice)
+
+    /**
+     * 移除该设备的Rssi回调
+     */
+    fun removeBleRssiCallback(bleDevice: BleDevice)
+
+    /**
+     * 移除该设备的Write回调
+     */
+    fun removeBleWriteCallback(bleDevice: BleDevice, writeUUID: String)
+
+    /**
+     * 移除该设备的Scan回调
+     */
+    fun removeBleScanCallback()
 
     /**
      * 断开某个设备的连接 释放资源

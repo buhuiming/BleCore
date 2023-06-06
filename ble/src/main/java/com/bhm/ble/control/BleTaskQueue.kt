@@ -15,7 +15,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import java.util.*
-import java.util.concurrent.CopyOnWriteArrayList
 
 
 /**
@@ -43,7 +42,7 @@ class BleTaskQueue {
 
     private var mCoroutineScope: CoroutineScope? = null
 
-    private val taskList: CopyOnWriteArrayList<BleTask> = CopyOnWriteArrayList()
+    private val taskList = BleTaskList()
 
     init {
         initLoop()
@@ -158,6 +157,9 @@ class BleTaskQueue {
      */
     @Synchronized
     fun removeTask(taskId: Int) {
+        if (!taskList.containsTaskId(taskId)) {
+            return
+        }
         taskList.forEach {
             if (it.taskId == taskId) {
                 removeTask(it)

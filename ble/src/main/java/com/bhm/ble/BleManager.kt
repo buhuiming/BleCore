@@ -9,10 +9,7 @@ import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import com.bhm.ble.attribute.BleOptions
-import com.bhm.ble.callback.BleConnectCallback
-import com.bhm.ble.callback.BleIndicateCallback
-import com.bhm.ble.callback.BleNotifyCallback
-import com.bhm.ble.callback.BleScanCallback
+import com.bhm.ble.callback.*
 import com.bhm.ble.data.BleDevice
 import com.bhm.ble.request.BleBaseRequest
 import com.bhm.ble.request.BleRequestImp
@@ -51,6 +48,7 @@ class BleManager private constructor() {
     /**
      * 初始化，使用BleManager其他方法前，需先调用此方法
      */
+    @Synchronized
     fun init(context: Application, option: BleOptions? = null) {
         application = context
         bleOptions = option
@@ -157,15 +155,6 @@ class BleManager private constructor() {
     }
 
     /**
-     * 移除该设备的连接回调
-     */
-    @Synchronized
-    fun removeBleConnectCallback(bleDevice: BleDevice) {
-        checkInitialize()
-        bleBaseRequest?.removeBleConnectCallback(bleDevice)
-    }
-
-    /**
      * 获取设备的BluetoothGatt对象
      */
     @Synchronized
@@ -196,6 +185,7 @@ class BleManager private constructor() {
     /**
      * stop notify
      */
+    @Synchronized
     fun stopNotify(
         bleDevice: BleDevice,
         serviceUUID: String,
@@ -233,6 +223,7 @@ class BleManager private constructor() {
     /**
      * stop indicate
      */
+    @Synchronized
     fun stopIndicate(
         bleDevice: BleDevice,
         serviceUUID: String,
@@ -247,6 +238,71 @@ class BleManager private constructor() {
             useCharacteristicDescriptor
         )
     }
+
+    /**
+     * 读取信号值
+     */
+    fun readRssi(bleDevice: BleDevice, bleRssiCallback: BleRssiCallback.() -> Unit) {
+        bleBaseRequest?.readRssi(bleDevice, bleRssiCallback)
+    }
+
+    /**
+     * 移除该设备的连接回调
+     */
+    fun removeBleConnectCallback(bleDevice: BleDevice) {
+        checkInitialize()
+        bleBaseRequest?.removeBleConnectCallback(bleDevice)
+    }
+
+    /**
+     * 移除该设备的Indicate回调
+     */
+    fun removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String) {
+        bleBaseRequest?.removeBleIndicateCallback(bleDevice, indicateUUID)
+    }
+
+    /**
+     * 移除该设备的Notify回调
+     */
+    fun removeBleNotifyCallback(bleDevice: BleDevice, notifyUUID: String) {
+        bleBaseRequest?.removeBleNotifyCallback(bleDevice, notifyUUID)
+    }
+
+    /**
+     * 移除该设备的Read回调
+     */
+    fun removeBleReadCallback(bleDevice: BleDevice, readUUID: String) {
+        bleBaseRequest?.removeBleReadCallback(bleDevice, readUUID)
+    }
+
+    /**
+     * 移除该设备的MtuChanged回调
+     */
+    fun removeBleMtuChangedCallback(bleDevice: BleDevice) {
+        bleBaseRequest?.removeBleMtuChangedCallback(bleDevice)
+    }
+
+    /**
+     * 移除该设备的Rssi回调
+     */
+    fun removeBleRssiCallback(bleDevice: BleDevice) {
+        bleBaseRequest?.removeBleRssiCallback(bleDevice)
+    }
+
+    /**
+     * 移除该设备的Write回调
+     */
+    fun removeBleWriteCallback(bleDevice: BleDevice, writeUUID: String) {
+        bleBaseRequest?.removeBleWriteCallback(bleDevice, writeUUID)
+    }
+
+    /**
+     * 移除该设备的Scan回调
+     */
+    fun removeBleScanCallback() {
+        bleBaseRequest?.removeBleScanCallback()
+    }
+
 
     /**
      * 断开所有连接 释放资源

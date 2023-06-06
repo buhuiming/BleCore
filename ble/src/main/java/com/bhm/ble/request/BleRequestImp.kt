@@ -8,10 +8,7 @@
 package com.bhm.ble.request
 
 import android.bluetooth.BluetoothGatt
-import com.bhm.ble.callback.BleConnectCallback
-import com.bhm.ble.callback.BleIndicateCallback
-import com.bhm.ble.callback.BleNotifyCallback
-import com.bhm.ble.callback.BleScanCallback
+import com.bhm.ble.callback.*
 import com.bhm.ble.control.*
 import com.bhm.ble.data.BleDevice
 import kotlinx.coroutines.*
@@ -172,6 +169,87 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             return it.disableCharacteristicIndicate(serviceUUID, indicateUUID, useCharacteristicDescriptor)
         }
         return false
+    }
+
+    /**
+     * 读取信号值
+     */
+    override fun readRssi(bleDevice: BleDevice, bleRssiCallback: BleRssiCallback.() -> Unit) {
+        val callback = BleRssiCallback()
+        callback.apply(bleRssiCallback)
+        val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
+        request?.let {
+            it.readRemoteRssi(callback)
+            return
+        }
+        callback.callRssiFail(UnConnectedThrowable("读取Rssi失败，设备未连接"))
+    }
+
+    /**
+     * 移除该设备的Indicate回调
+     */
+    override fun removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String) {
+        val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
+        request?.let {
+            return it.removeIndicateCallback(indicateUUID)
+        }
+    }
+
+    /**
+     * 移除该设备的Notify回调
+     */
+    override fun removeBleNotifyCallback(bleDevice: BleDevice, notifyUUID: String) {
+        val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
+        request?.let {
+            return it.removeNotifyCallback(notifyUUID)
+        }
+    }
+
+    /**
+     * 移除该设备的Read回调
+     */
+    override fun removeBleReadCallback(bleDevice: BleDevice, readUUID: String) {
+        val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
+        request?.let {
+            return it.removeReadCallback(readUUID)
+        }
+    }
+
+    /**
+     * 移除该设备的MtuChanged回调
+     */
+    override fun removeBleMtuChangedCallback(bleDevice: BleDevice) {
+        val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
+        request?.let {
+            return it.removeMtuChangedCallback()
+        }
+    }
+
+    /**
+     * 移除该设备的Rssi回调
+     */
+    override fun removeBleRssiCallback(bleDevice: BleDevice) {
+        val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
+        request?.let {
+            return it.removeRssiCallback()
+        }
+    }
+
+    /**
+     * 移除该设备的Write回调
+     */
+    override fun removeBleWriteCallback(bleDevice: BleDevice, writeUUID: String) {
+        val request = BleConnectRequestManager.get().getBleConnectRequest(bleDevice)
+        request?.let {
+            return it.removeWriteCallback(writeUUID)
+        }
+    }
+
+    /**
+     * 移除该设备的Scan回调
+     */
+    override fun removeBleScanCallback() {
+        BleScanRequest.get().removeBleScanCallback()
     }
 
     /**
