@@ -146,13 +146,16 @@
 #### 13、读取信号值
     BleManager.get().readRssi(bleDevice: BleDevice, bleRssiCallback: BleRssiCallback)
 
-#### 14、断开某个设备的连接 释放资源
+#### 14、设置Mtu值
+    BleManager.get().setMtu(bleDevice: BleDevice, bleMtuChangedCallback: BleMtuChangedCallback) 
+
+#### 15、断开某个设备的连接 释放资源
     BleManager.get().release(bleDevice: BleDevice)
 
-#### 15、断开所有连接 释放资源
+#### 16、断开所有连接 释放资源
     BleManager.get().releaseAll()
 
-#### 16、一些移除监听的函数
+#### 17、一些移除监听的函数
     BleManager.get().removeBleScanCallback()
     BleManager.get().removeBleConnectCallback(bleDevice: BleDevice)
     BleManager.get().removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String)
