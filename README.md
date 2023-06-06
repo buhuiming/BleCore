@@ -32,12 +32,12 @@
         }
 
     注意：
-    有些设备GPS是关闭状态的话，申请定位权限之后，GPS是依然关闭状态，这里要根据GPS是否打开来跳转页面
-    BleUtil.isGpsOpen(context) 判断GPS是否打开
-    跳转到系统GPS设置页面，GPS设置是全局的独立的，是否打开跟权限申请无关
-    startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-    跳转到系统蓝牙设置页面
-    startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
+*    有些设备GPS是关闭状态的话，申请定位权限之后，GPS是依然关闭状态，这里要根据GPS是否打开来跳转页面
+*    BleUtil.isGpsOpen(context) 判断GPS是否打开
+*    跳转到系统GPS设置页面，GPS设置是全局的独立的，是否打开跟权限申请无关
+     startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+*    跳转到系统蓝牙设置页面
+     startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
 
 #### 1、初始化
     val options =
@@ -107,55 +107,78 @@
     BleManager.get().connect(device)
     BleManager.get().connect(deviceAddress)
 
+*    在某些型号手机上，connectGatt必须在主线程才能有效，所以把连接过程放在主线程，回调也在主线程。
+*    为保证重连成功率，建议断开后间隔一段时间之后进行重连。
+
 #### 6、断开连接
     BleManager.get().disConnect(device)
     BleManager.get().disConnect(deviceAddress)
 
+*    断开后，并不会马上更新状态，所以马上连接会直接返回已连接，而且扫描不出来，要等待一定时间才可以
+
 #### 7、是否已连接
     BleManager.get().isConnected(device)
 
-#### 8、移除该设备的连接回调
+#### 8、扫描并连接，如果扫描到多个设备，则会连接第一个
+    BleManager.get().startScanAndConnect(bleScanCallback: BleScanCallback,
+                                         bleConnectCallback: BleConnectCallback)
+
+*    扫描到首个符合扫描规则的设备后，便停止扫描，然后连接该设备。
+
+#### 9、移除该设备的连接回调
     BleManager.get().removeBleConnectCallback(device)
 
-#### 9、设置Notify
+#### 10、设置Notify
     BleManager.get().notify(bleDevice: BleDevice,
                                   serviceUUID: String,
                                   notifyUUID: String,
                                   useCharacteristicDescriptor: Boolean = false,
                                   bleIndicateCallback: BleIndicateCallback)
 
-#### 10、取消Notify
+#### 11、取消Notify
     BleManager.get().stopNotify(bleDevice: BleDevice,
                                   serviceUUID: String,
                                   notifyUUID: String,
                                   useCharacteristicDescriptor: Boolean = false)
 
-#### 11、设置Indicate
+#### 12、设置Indicate
     BleManager.get().indicate(bleDevice: BleDevice,
                                   serviceUUID: String,
                                   indicateUUID: String,
                                   useCharacteristicDescriptor: Boolean = false,
                                   bleIndicateCallback: BleIndicateCallback)
 
-#### 12、取消Indicate
+#### 13、取消Indicate
     BleManager.get().stopIndicate(bleDevice: BleDevice,
                                   serviceUUID: String,
                                   indicateUUID: String,
                                   useCharacteristicDescriptor: Boolean = false)
 
-#### 13、读取信号值
+#### 14、读取信号值
     BleManager.get().readRssi(bleDevice: BleDevice, bleRssiCallback: BleRssiCallback)
+    
+*    获取设备的信号强度，需要在设备连接之后进行。
+*    某些设备可能无法读取Rssi，不会回调onRssiSuccess(),而会因为超时而回调onRssiFail()。
 
-#### 14、设置Mtu值
+#### 15、设置Mtu值
     BleManager.get().setMtu(bleDevice: BleDevice, bleMtuChangedCallback: BleMtuChangedCallback) 
 
-#### 15、断开某个设备的连接 释放资源
+*    设置MTU，需要在设备连接之后进行操作。
+*    默认每一个BLE设备都必须支持的MTU为23。
+*    MTU为23，表示最多可以发送20个字节的数据。
+*    在Android 低版本(API-17 到 API-20)上，没有这个限制。所以只有在API21以上的设备，才会有拓展MTU这个需求。
+*    该方法的参数mtu，最小设置为23，最大设置为512。
+*    并不是每台设备都支持拓展MTU，需要通讯双方都支持才行，也就是说，需要设备硬件也支持拓展MTU该方法才会起效果。
+     调用该方法后，可以通过onMtuChanged(int mtu)查看最终设置完后，设备的最大传输单元被拓展到多少。如果设备不支持，
+     可能无论设置多少，最终的mtu还是23。 
+
+#### 16、断开某个设备的连接 释放资源
     BleManager.get().release(bleDevice: BleDevice)
 
-#### 16、断开所有连接 释放资源
+#### 17、断开所有连接 释放资源
     BleManager.get().releaseAll()
 
-#### 17、一些移除监听的函数
+#### 18、一些移除监听的函数
     BleManager.get().removeBleScanCallback()
     BleManager.get().removeBleConnectCallback(bleDevice: BleDevice)
     BleManager.get().removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String)

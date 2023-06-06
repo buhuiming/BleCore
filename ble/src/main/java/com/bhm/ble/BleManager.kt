@@ -137,6 +137,12 @@ class BleManager private constructor() {
         connect(buildBleDeviceByDeviceAddress(address), bleConnectCallback)
     }
 
+    @Synchronized
+    fun startScanAndConnect(bleScanCallback: BleScanCallback.() -> Unit,
+                            bleConnectCallback: BleConnectCallback.() -> Unit) {
+
+    }
+
     /**
      * 断开连接
      */
@@ -347,12 +353,6 @@ class BleManager private constructor() {
         bleBaseRequest?.release(bleDevice)
         BleLogger.i("${bleDevice}资源释放完毕")
     }
-
-
-//    @Synchronized
-//    fun startScanAndConnect() {
-//
-//    }
 
     fun getOptions() = bleOptions
 
