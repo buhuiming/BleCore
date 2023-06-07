@@ -126,6 +126,7 @@ internal class BleScanRequest private constructor() : Request(){
                     scanFilters.add(scanFilter)
                 }
             } catch (e: IllegalArgumentException) {
+                BleLogger.e("扫描参数设置有误： ${e.message}")
                 bleScanCallback.callScanFail(BleScanFailType.ScanError(-1, e))
                 return
             }
@@ -137,6 +138,7 @@ internal class BleScanRequest private constructor() : Request(){
                     .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                     .build()
             } catch (e: IllegalArgumentException) {
+                BleLogger.e("扫描参数设置有误： ${e.message}")
                 bleScanCallback.callScanFail(BleScanFailType.ScanError(-1, e))
                 return
             }
@@ -209,7 +211,8 @@ internal class BleScanRequest private constructor() : Request(){
             }
         } else {
             throwable?.let {
-                if (throwable !is CancellationException) {
+                if (it !is CancellationException) {
+                    BleLogger.e("扫描失败： ${it.message}")
                     bleScanCallback?.callScanFail(BleScanFailType.ScanError(-1, it))
                 }
             }
@@ -270,8 +273,9 @@ internal class BleScanRequest private constructor() : Request(){
              * 由于应用程序尝试扫描过于频繁，无法开始扫描。
              * 7、errorCode = -1，具体看throwable
              */
-            bleScanCallback?.callScanFail(BleScanFailType.ScanError(errorCode,
-                Throwable("扫描失败，请查验[android.bluetooth.le.ScanCallback错误码]")))
+            val e =  Throwable("扫描失败，请查验[android.bluetooth.le.ScanCallback错误码]")
+            BleLogger.e(e.message)
+            bleScanCallback?.callScanFail(BleScanFailType.ScanError(errorCode, e))
         }
     }
 

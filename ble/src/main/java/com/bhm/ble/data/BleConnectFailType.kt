@@ -48,4 +48,9 @@ sealed class BleConnectFailType {
      * 连接中
      */
     object AlreadyConnecting: BleConnectFailType()
+
+    /**
+     * 扫描并连接时，扫描到的BluetoothDevice为空
+     */
+    object ScanNullableBluetoothDevice: BleConnectFailType()
 }

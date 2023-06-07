@@ -7,7 +7,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.data.BleDevice
 import com.bhm.ble.utils.BleLogger
 import com.bhm.demo.BaseActivity
@@ -59,6 +58,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
                 viewBinding.pbLoading.visibility = if (it) { View.INVISIBLE } else { View.VISIBLE }
                 viewBinding.btnStart.text = if (it) { "开启扫描" } else { "扫描中..." }
                 viewBinding.btnStart.isEnabled = it
+                viewBinding.btnConnect.isEnabled = it
                 viewBinding.btnSetting.isEnabled = it
                 viewBinding.btnStop.isEnabled = !it
             }
@@ -108,6 +108,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
             }
             autoOpenDetailsActivity = true
             showLoading("连接中...")
+//            viewModel.startScanAndConnect(this@MainActivity)
             viewModel.connect("7C:DF:A1:A3:5A:BE")
         }
 

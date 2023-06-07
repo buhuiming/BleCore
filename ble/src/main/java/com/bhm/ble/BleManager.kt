@@ -140,7 +140,7 @@ class BleManager private constructor() {
     @Synchronized
     fun startScanAndConnect(bleScanCallback: BleScanCallback.() -> Unit,
                             bleConnectCallback: BleConnectCallback.() -> Unit) {
-
+        bleBaseRequest?.startScanAndConnect(bleScanCallback, bleConnectCallback)
     }
 
     /**

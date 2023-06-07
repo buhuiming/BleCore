@@ -34,6 +34,12 @@ internal interface BleBaseRequest {
     fun stopScan()
 
     /**
+     * 扫描并连接，如果扫描到多个设备，则会连接第一个
+     */
+    fun startScanAndConnect(bleScanCallback: BleScanCallback.() -> Unit,
+                            bleConnectCallback: BleConnectCallback.() -> Unit)
+
+    /**
      * 开始连接
      */
     fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit)

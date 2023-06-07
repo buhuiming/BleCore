@@ -7,6 +7,8 @@ import android.widget.Toast
 import androidx.lifecycle.viewModelScope
 import com.bhm.ble.BleManager
 import com.bhm.ble.attribute.BleOptions
+import com.bhm.ble.callback.BleConnectCallback
+import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.data.BleConnectFailType
 import com.bhm.ble.data.BleDevice
 import com.bhm.ble.data.BleScanFailType
@@ -55,6 +57,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
     fun initBle() {
         BleManager.get().init(application,
             BleOptions.Builder()
+                .setScanDeviceAddress("7C:DF:A1:A3:5A:BE")
                 .setScanMillisTimeOut(2000)
                 .setConnectMillisTimeOut(5000)
                 .setMaxConnectNum(3)
@@ -123,58 +126,64 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
         viewModelScope.launch {
             val hasScanPermission = hasScanPermission(activity)
             if (hasScanPermission) {
-                BleManager.get().startScan {
-                    onScanStart {
-                        BleLogger.d("onScanStart")
-                        scanStopMutableStateFlow.value = false
-                    }
-                    onLeScan { bleDevice, _ ->
-                        //可以根据currentScanCount是否已有清空列表数据
-                        bleDevice.deviceName?.let { _ ->
-
-                        }
-                    }
-                    onLeScanDuplicateRemoval { bleDevice, _ ->
-                        bleDevice.deviceName?.let { _ ->
-                            listDRData.add(bleDevice)
-                            listDRMutableStateFlow.value = bleDevice
-                        }
-                    }
-                    onScanComplete { bleDeviceList, bleDeviceDuplicateRemovalList ->
-                        //扫描到的数据是所有扫描次数的总和
-                        bleDeviceList.forEach {
-                            it.deviceName?.let { deviceName ->
-                                BleLogger.i("bleDeviceList-> $deviceName, ${it.deviceAddress}")
-                            }
-                        }
-                        bleDeviceDuplicateRemovalList.forEach {
-                            it.deviceName?.let { deviceName ->
-                                BleLogger.e("bleDeviceDuplicateRemovalList-> $deviceName, ${it.deviceAddress}")
-                            }
-                        }
-                        scanStopMutableStateFlow.value = true
-                        if (listDRData.isEmpty()) {
-                            Toast.makeText(application, "没有扫描到数据", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    onScanFail {
-                        val msg: String = when (it) {
-                            is BleScanFailType.UnTypeSupportBle -> "BleScanFailType.UnTypeSupportBle: 设备不支持蓝牙"
-                            is BleScanFailType.NoBlePermissionType -> "BleScanFailType.NoBlePermissionType: 权限不足，请检查"
-                            is BleScanFailType.GPSDisable -> "BleScanFailType.BleDisable: 设备未打开GPS定位"
-                            is BleScanFailType.BleDisable -> "BleScanFailType.BleDisable: 蓝牙未打开"
-                            is BleScanFailType.AlReadyScanning -> "BleScanFailType.AlReadyScanning: 正在扫描"
-                            is BleScanFailType.ScanError -> {
-                                "BleScanFailType.ScanError: ${it.throwable?.message}"
-                            }
-                        }
-                        BleLogger.e(msg)
-                        Toast.makeText(application, msg, Toast.LENGTH_SHORT).show()
-                        scanStopMutableStateFlow.value = true
-                    }
-                }
+                BleManager.get().startScan(getScanCallback(true))
             } else {
                 BleLogger.e("请检查权限、检查GPS开关、检查蓝牙开关")
+            }
+        }
+    }
+
+    private fun getScanCallback(showData: Boolean): BleScanCallback.() -> Unit {
+        return {
+            onScanStart {
+                BleLogger.d("onScanStart")
+                scanStopMutableStateFlow.value = false
+            }
+            onLeScan { bleDevice, _ ->
+                //可以根据currentScanCount是否已有清空列表数据
+                bleDevice.deviceName?.let { _ ->
+
+                }
+            }
+            onLeScanDuplicateRemoval { bleDevice, _ ->
+                bleDevice.deviceName?.let { _ ->
+                    if (showData) {
+                        listDRData.add(bleDevice)
+                        listDRMutableStateFlow.value = bleDevice
+                    }
+                }
+            }
+            onScanComplete { bleDeviceList, bleDeviceDuplicateRemovalList ->
+                //扫描到的数据是所有扫描次数的总和
+                bleDeviceList.forEach {
+                    it.deviceName?.let { deviceName ->
+                        BleLogger.i("bleDeviceList-> $deviceName, ${it.deviceAddress}")
+                    }
+                }
+                bleDeviceDuplicateRemovalList.forEach {
+                    it.deviceName?.let { deviceName ->
+                        BleLogger.e("bleDeviceDuplicateRemovalList-> $deviceName, ${it.deviceAddress}")
+                    }
+                }
+                scanStopMutableStateFlow.value = true
+                if (listDRData.isEmpty() && showData) {
+                    Toast.makeText(application, "没有扫描到数据", Toast.LENGTH_SHORT).show()
+                }
+            }
+            onScanFail {
+                val msg: String = when (it) {
+                    is BleScanFailType.UnTypeSupportBle -> "BleScanFailType.UnTypeSupportBle: 设备不支持蓝牙"
+                    is BleScanFailType.NoBlePermissionType -> "BleScanFailType.NoBlePermissionType: 权限不足，请检查"
+                    is BleScanFailType.GPSDisable -> "BleScanFailType.BleDisable: 设备未打开GPS定位"
+                    is BleScanFailType.BleDisable -> "BleScanFailType.BleDisable: 蓝牙未打开"
+                    is BleScanFailType.AlReadyScanning -> "BleScanFailType.AlReadyScanning: 正在扫描"
+                    is BleScanFailType.ScanError -> {
+                        "BleScanFailType.ScanError: ${it.throwable?.message}"
+                    }
+                }
+                BleLogger.e(msg)
+                Toast.makeText(application, msg, Toast.LENGTH_SHORT).show()
+                scanStopMutableStateFlow.value = true
             }
         }
     }
@@ -199,44 +208,63 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
     }
 
     /**
+     * 扫描并连接，如果扫描到多个设备，则会连接第一个
+     */
+    fun startScanAndConnect(activity: BaseActivity<*, *>) {
+        viewModelScope.launch {
+            val hasScanPermission = hasScanPermission(activity)
+            if (hasScanPermission) {
+                BleManager.get().startScanAndConnect(
+                    getScanCallback(false),
+                    connectCallback
+                )
+            }
+        }
+    }
+
+    /**
      * 开始连接
      */
     fun connect(bleDevice: BleDevice?) {
         bleDevice?.let { device ->
-            BleManager.get().connect(device) {
-                onConnectStart {
-                    BleLogger.e("-----onConnectStart")
-                }
-                onConnectFail { _, connectFailType ->
-                    val msg: String = when (connectFailType) {
-                        is BleConnectFailType.UnTypeSupportBle -> "BleConnectFailType.UnTypeSupportBle：设备不支持蓝牙"
-                        is BleConnectFailType.NoBlePermissionType -> "BleConnectFailType.NoBlePermissionType: 权限不足，请检查"
-                        is BleConnectFailType.NullableBluetoothDevice -> "BleConnectFailType.NullableBluetoothDevice: 设备为空"
-                        is BleConnectFailType.BleDisable -> "BleConnectFailType.BleDisable: 蓝牙未打开"
-                        is BleConnectFailType.ConnectException -> "BleConnectFailType.ConnectException: " +
-                                "连接异常(${connectFailType.throwable.message})"
-                        is BleConnectFailType.ConnectTimeOut -> "BleConnectFailType.ConnectTimeOut: 连接超时"
-                        is BleConnectFailType.AlreadyConnecting -> "BleConnectFailType.AlreadyConnecting: 连接中"
-                    }
-                    BleLogger.e(msg)
-                    Toast.makeText(application, msg, Toast.LENGTH_SHORT).show()
-                    refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
-                }
-                onDisConnected { isActiveDisConnected, bleDevice, _, _ ->
-                    Toast.makeText(application, "断开连接(${bleDevice.deviceAddress}，isActiveDisConnected: " +
-                            "$isActiveDisConnected)", Toast.LENGTH_SHORT).show()
-                    BleLogger.e("-----onDisConnected: $isActiveDisConnected")
-                    refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
-                    //发送断开的通知
-                    val message = MessageEvent()
-                    message.data = device
-                    EventBus.getDefault().post(message)
-                }
-                onConnectSuccess { bleDevice, _ ->
-                    Toast.makeText(application, "连接成功(${bleDevice.deviceAddress})", Toast.LENGTH_SHORT).show()
-                    refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
-                }
+            BleManager.get().connect(device, connectCallback)
+        }
+    }
+
+    private val connectCallback: BleConnectCallback.() -> Unit = {
+        onConnectStart {
+            BleLogger.e("-----onConnectStart")
+        }
+        onConnectFail { bleDevice, connectFailType ->
+            val msg: String = when (connectFailType) {
+                is BleConnectFailType.UnTypeSupportBle -> "BleConnectFailType.UnTypeSupportBle：设备不支持蓝牙"
+                is BleConnectFailType.NoBlePermissionType -> "BleConnectFailType.NoBlePermissionType: 权限不足，请检查"
+                is BleConnectFailType.NullableBluetoothDevice -> "BleConnectFailType.NullableBluetoothDevice: 设备为空"
+                is BleConnectFailType.BleDisable -> "BleConnectFailType.BleDisable: 蓝牙未打开"
+                is BleConnectFailType.ConnectException -> "BleConnectFailType.ConnectException: " +
+                        "连接异常(${connectFailType.throwable.message})"
+                is BleConnectFailType.ConnectTimeOut -> "BleConnectFailType.ConnectTimeOut: 连接超时"
+                is BleConnectFailType.AlreadyConnecting -> "BleConnectFailType.AlreadyConnecting: 连接中"
+                is BleConnectFailType.ScanNullableBluetoothDevice -> "BleConnectFailType.ScanNullableBluetoothDevice: " +
+                        "连接失败，扫描数据为空"
             }
+            BleLogger.e(msg)
+            Toast.makeText(application, msg, Toast.LENGTH_SHORT).show()
+            refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
+        }
+        onDisConnected { isActiveDisConnected, bleDevice, _, _ ->
+            Toast.makeText(application, "断开连接(${bleDevice.deviceAddress}，isActiveDisConnected: " +
+                    "$isActiveDisConnected)", Toast.LENGTH_SHORT).show()
+            BleLogger.e("-----onDisConnected: $isActiveDisConnected")
+            refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
+            //发送断开的通知
+            val message = MessageEvent()
+            message.data = bleDevice
+            EventBus.getDefault().post(message)
+        }
+        onConnectSuccess { bleDevice, _ ->
+            Toast.makeText(application, "连接成功(${bleDevice.deviceAddress})", Toast.LENGTH_SHORT).show()
+            refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
         }
     }
 

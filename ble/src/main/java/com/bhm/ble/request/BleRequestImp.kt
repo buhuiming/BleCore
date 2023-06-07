@@ -10,8 +10,11 @@ package com.bhm.ble.request
 import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.*
 import com.bhm.ble.control.*
+import com.bhm.ble.data.BleConnectFailType
 import com.bhm.ble.data.BleDevice
 import kotlinx.coroutines.*
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 
 /**
@@ -60,6 +63,70 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      */
     override fun stopScan() {
         BleScanRequest.get().stopScan()
+    }
+
+    /**
+     * 扫描并连接，如果扫描到多个设备，则会连接第一个
+     */
+    override fun startScanAndConnect(bleScanCallback: BleScanCallback.() -> Unit,
+                            bleConnectCallback: BleConnectCallback.() -> Unit) {
+        val scanCallback = BleScanCallback()
+        scanCallback.apply(bleScanCallback)
+        val connectCallback = BleConnectCallback()
+        connectCallback.apply(bleConnectCallback)
+
+        var device: BleDevice? = null
+        connectCallback.launchInMainThread {
+            suspendCoroutine { continuation ->
+                startScan {
+                    onScanStart {
+                        scanCallback.callScanStart()
+                    }
+                    onLeScan { bleDevice, currentScanCount ->
+                        scanCallback.callLeScan(bleDevice, currentScanCount)
+                        if (device == null) {
+                            device = bleDevice
+                            stopScan()
+                        }
+                    }
+                    onLeScanDuplicateRemoval { bleDevice, currentScanCount ->
+                        scanCallback.callLeScanDuplicateRemoval(bleDevice, currentScanCount)
+                    }
+                    onScanFail {
+                        scanCallback.callScanFail(it)
+                    }
+                    onScanComplete { bleDeviceList, bleDeviceDuplicateRemovalList ->
+                        scanCallback.callScanComplete(bleDeviceList, bleDeviceDuplicateRemovalList)
+                        continuation.resume(device)
+                    }
+                }
+            }
+            if (device == null || device?.deviceInfo == null) {
+                connectCallback.callConnectFail(BleDevice(null,
+                    "",
+                    "",
+                    0,
+                    0,
+                    null,
+                    0
+                ), BleConnectFailType.ScanNullableBluetoothDevice)
+                return@launchInMainThread
+            }
+            connect(device!!) {
+                onConnectStart {
+                    connectCallback.callConnectStart()
+                }
+                onConnectSuccess { bleDevice, gatt ->
+                    connectCallback.callConnectSuccess(bleDevice, gatt)
+                }
+                onDisConnected { isActiveDisConnected, bleDevice, gatt, status ->
+                    connectCallback.callDisConnected(isActiveDisConnected, bleDevice, gatt, status)
+                }
+                onConnectFail { bleDevice, connectFailType ->
+                    connectCallback.callConnectFail(bleDevice, connectFailType)
+                }
+            }
+        }
     }
 
     /**
