@@ -929,14 +929,6 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         bleTaskQueue.removeTask(taskId = SET_MTU_TASK_ID)
     }
 
-    private fun getOperateTime(): Long {
-        var operateTime = getBleOptions()?.operateMillisTimeOut?: BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
-        if (operateTime <= 0) {
-            operateTime = BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
-        }
-        return operateTime
-    }
-
     /**
      * 配置Notify
      */

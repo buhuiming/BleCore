@@ -6,6 +6,7 @@
 package com.bhm.ble.request
 
 import com.bhm.ble.BleManager
+import com.bhm.ble.attribute.BleOptions
 
 
 /**
@@ -18,6 +19,14 @@ internal open class Request {
     fun getBleManager() = BleManager.get()
 
     fun getBleOptions() = getBleManager().getOptions()
+
+    fun getOperateTime(): Long {
+        var operateTime = getBleOptions()?.operateMillisTimeOut?: BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
+        if (operateTime <= 0) {
+            operateTime = BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT
+        }
+        return operateTime
+    }
 }
 
 const val CANCEL_WAIT_JOB_MESSAGE = "cancelWaitJobMessage"

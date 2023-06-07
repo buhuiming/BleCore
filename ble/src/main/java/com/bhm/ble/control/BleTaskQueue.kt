@@ -194,10 +194,10 @@ class BleTaskQueue {
             removeTask(it)
             it.setTimingJob(null)
         }
+        taskList.clear()
         mChannel?.close()
         mChannel = null
         mCoroutineScope?.cancel()
         mCoroutineScope = null
-        taskList.clear()
     }
 }
