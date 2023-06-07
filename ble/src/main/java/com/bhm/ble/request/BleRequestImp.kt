@@ -285,7 +285,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
-     * 读数据
+     * 读特征值数据
      */
     override fun readData(bleDevice: BleDevice,
                       serviceUUID: String,
@@ -298,7 +298,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             it.readData(serviceUUID, readUUID, callback)
             return
         }
-        callback.callReadFail(UnConnectedException("读数据失败，设备未连接"))
+        callback.callReadFail(UnConnectedException("读特征值数据失败，设备未连接"))
     }
 
     /**

@@ -208,17 +208,17 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
     }
 
     /**
-     * 读数据
+     * 读特征值数据
      */
     fun readData(bleDevice: BleDevice,
                  serviceUUID: String,
                  readUUID: String) {
         BleManager.get().readData(bleDevice, serviceUUID, readUUID) {
             onReadFail {
-                addLogMsg(LogEntity(Level.OFF, "读数据失败，${readUUID}：${it.message}"))
+                addLogMsg(LogEntity(Level.OFF, "读特征值数据失败，${readUUID}：${it.message}"))
             }
             onReadSuccess {
-                addLogMsg(LogEntity(Level.FINE, "读数据成功，${readUUID}：${BleUtil.bytesToHex(it)}"))
+                addLogMsg(LogEntity(Level.FINE, "读特征值数据成功，${readUUID}：${BleUtil.bytesToHex(it)}"))
             }
         }
     }

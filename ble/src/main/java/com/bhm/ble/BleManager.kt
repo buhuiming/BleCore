@@ -294,12 +294,12 @@ class BleManager private constructor() {
     }
 
     /**
-     * 读数据
+     * 读特征值数据
      */
     fun readData(bleDevice: BleDevice,
-             serviceUUID: String,
-             readUUID: String,
-             bleIndicateCallback: BleReadCallback.() -> Unit) {
+                 serviceUUID: String,
+                 readUUID: String,
+                 bleIndicateCallback: BleReadCallback.() -> Unit) {
         bleBaseRequest?.readData(bleDevice, serviceUUID, readUUID, bleIndicateCallback)
     }
 

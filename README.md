@@ -176,13 +176,19 @@
 
 *    设置连接的优先级，一般用于高速传输大量数据的时候可以进行设置。
 
-#### 17、断开某个设备的连接 释放资源
+#### 17、读特征值数据
+    BleManager.get().readData(bleDevice: BleDevice,
+                              serviceUUID: String,
+                              readUUID: String,
+                              bleIndicateCallback: BleReadCallback)
+
+#### 18、断开某个设备的连接 释放资源
     BleManager.get().release(bleDevice: BleDevice)
 
-#### 18、断开所有连接 释放资源
+#### 19、断开所有连接 释放资源
     BleManager.get().releaseAll()
 
-#### 19、一些移除监听的函数
+#### 20、一些移除监听的函数
     BleManager.get().removeBleScanCallback()
     BleManager.get().removeBleConnectCallback(bleDevice: BleDevice)
     BleManager.get().removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String)

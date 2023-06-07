@@ -230,7 +230,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     }
 
     /**
-     * 读数据
+     * 读特征值数据
      */
     fun readData(serviceUUID: String,
              readUUID: String,
