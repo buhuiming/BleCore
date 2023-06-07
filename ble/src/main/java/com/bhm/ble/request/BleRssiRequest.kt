@@ -12,8 +12,8 @@ import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.BleRssiCallback
 import com.bhm.ble.control.BleTask
 import com.bhm.ble.control.BleTaskQueue
+import com.bhm.ble.data.Constants.SET_RSSI_TASK_ID
 import com.bhm.ble.data.TimeoutCancelException
-import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.utils.BleLogger
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlin.coroutines.Continuation
@@ -57,7 +57,7 @@ internal class BleRssiRequest(private val bluetoothGatt: BluetoothGatt?,
         addRssiCallback(bleRssiCallback)
         var mContinuation: Continuation<Throwable?>? = null
         val task = BleTask (
-            BleConnectedDeviceManager.SET_RSSI_TASK_ID,
+            SET_RSSI_TASK_ID,
             durationTimeMillis = getOperateTime(),
             callInMainThread = false,
             autoDoNextTask = true,
@@ -89,6 +89,6 @@ internal class BleRssiRequest(private val bluetoothGatt: BluetoothGatt?,
      * 取消读取Rssi任务
      */
     private fun cancelReadRssiJob() {
-        bleTaskQueue.removeTask(taskId = BleConnectedDeviceManager.SET_RSSI_TASK_ID)
+        bleTaskQueue.removeTask(taskId = SET_RSSI_TASK_ID)
     }
 }

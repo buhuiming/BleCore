@@ -7,6 +7,20 @@ package com.bhm.demo.ui
 
 import com.bhm.ble.BleManager
 import com.bhm.ble.attribute.BleOptions
+import com.bhm.ble.data.Constants.AUTO_CONNECT
+import com.bhm.ble.data.Constants.CONTAIN_SCAN_DEVICE_NAME
+import com.bhm.ble.data.Constants.DEFAULT_AUTO_SET_MTU
+import com.bhm.ble.data.Constants.DEFAULT_CONNECT_MILLIS_TIMEOUT
+import com.bhm.ble.data.Constants.DEFAULT_CONNECT_RETRY_COUNT
+import com.bhm.ble.data.Constants.DEFAULT_CONNECT_RETRY_INTERVAL
+import com.bhm.ble.data.Constants.DEFAULT_MAX_CONNECT_NUM
+import com.bhm.ble.data.Constants.DEFAULT_MTU
+import com.bhm.ble.data.Constants.DEFAULT_OPERATE_MILLIS_TIMEOUT
+import com.bhm.ble.data.Constants.DEFAULT_SCAN_MILLIS_TIMEOUT
+import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_COUNT
+import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_INTERVAL
+import com.bhm.ble.data.Constants.DEFAULT_WRITE_INTERVAL
+import com.bhm.ble.data.Constants.ENABLE_LOG
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.R
 import com.bhm.demo.databinding.ActivitySettingBinding
@@ -89,20 +103,20 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
             viewBinding.etScanServiceUuid.setText("")
             viewBinding.etScanDeviceName.setText("")
             viewBinding.etScanDeviceAddress.setText("")
-            viewBinding.etScanOutTime.setText(BleOptions.DEFAULT_SCAN_MILLIS_TIMEOUT.toString())
-            viewBinding.etScanRetryCount.setText(BleOptions.DEFAULT_SCAN_RETRY_COUNT.toString())
-            viewBinding.etScanRetryInterval.setText(BleOptions.DEFAULT_SCAN_RETRY_INTERVAL.toString())
-            viewBinding.etConnectOutTime.setText(BleOptions.DEFAULT_CONNECT_MILLIS_TIMEOUT.toString())
-            viewBinding.etConnectRetryCount.setText(BleOptions.DEFAULT_CONNECT_RETRY_COUNT.toString())
-            viewBinding.etConnectRetryInterval.setText(BleOptions.DEFAULT_CONNECT_RETRY_INTERVAL.toString())
-            viewBinding.etOperateMillisTimeOut.setText(BleOptions.DEFAULT_OPERATE_MILLIS_TIMEOUT.toString())
-            viewBinding.etWriteInterval.setText(BleOptions.DEFAULT_WRITE_INTERVAL.toString())
-            viewBinding.etMaxConnectNum.setText(BleOptions.DEFAULT_MAX_CONNECT_NUM.toString())
-            viewBinding.etMTU.setText(BleOptions.DEFAULT_MTU.toString())
-            viewBinding.cbContainScanDeviceName.isChecked = BleOptions.CONTAIN_SCAN_DEVICE_NAME
-            viewBinding.cbLogger.isChecked = BleOptions.ENABLE_LOG
-            viewBinding.cbMtu.isChecked = BleOptions.DEFAULT_AUTO_SET_MTU
-            viewBinding.cbAutoConnect.isChecked = BleOptions.AUTO_CONNECT
+            viewBinding.etScanOutTime.setText(DEFAULT_SCAN_MILLIS_TIMEOUT.toString())
+            viewBinding.etScanRetryCount.setText(DEFAULT_SCAN_RETRY_COUNT.toString())
+            viewBinding.etScanRetryInterval.setText(DEFAULT_SCAN_RETRY_INTERVAL.toString())
+            viewBinding.etConnectOutTime.setText(DEFAULT_CONNECT_MILLIS_TIMEOUT.toString())
+            viewBinding.etConnectRetryCount.setText(DEFAULT_CONNECT_RETRY_COUNT.toString())
+            viewBinding.etConnectRetryInterval.setText(DEFAULT_CONNECT_RETRY_INTERVAL.toString())
+            viewBinding.etOperateMillisTimeOut.setText(DEFAULT_OPERATE_MILLIS_TIMEOUT.toString())
+            viewBinding.etWriteInterval.setText(DEFAULT_WRITE_INTERVAL.toString())
+            viewBinding.etMaxConnectNum.setText(DEFAULT_MAX_CONNECT_NUM.toString())
+            viewBinding.etMTU.setText(DEFAULT_MTU.toString())
+            viewBinding.cbContainScanDeviceName.isChecked = CONTAIN_SCAN_DEVICE_NAME
+            viewBinding.cbLogger.isChecked = ENABLE_LOG
+            viewBinding.cbMtu.isChecked = DEFAULT_AUTO_SET_MTU
+            viewBinding.cbAutoConnect.isChecked = AUTO_CONNECT
             BleManager.get().init(application)
         }
         viewBinding.btnSave.setOnClickListener { view ->

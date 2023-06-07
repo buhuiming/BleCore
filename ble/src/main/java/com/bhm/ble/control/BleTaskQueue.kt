@@ -7,11 +7,11 @@
 
 package com.bhm.ble.control
 
-import com.bhm.ble.control.BleTask.Companion.CANCEL_UN_COMPLETE
-import com.bhm.ble.control.BleTask.Companion.COMPLETED
-import com.bhm.ble.control.BleTask.Companion.UN_COMPLETE
 import com.bhm.ble.data.CancelException
 import com.bhm.ble.data.CompleteException
+import com.bhm.ble.data.Constants.CANCEL_UN_COMPLETE
+import com.bhm.ble.data.Constants.COMPLETED
+import com.bhm.ble.data.Constants.UN_COMPLETE
 import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.utils.BleLogger
 import kotlinx.coroutines.*

@@ -5,6 +5,21 @@
  */
 package com.bhm.ble.attribute
 
+import com.bhm.ble.data.Constants.AUTO_CONNECT
+import com.bhm.ble.data.Constants.CONTAIN_SCAN_DEVICE_NAME
+import com.bhm.ble.data.Constants.DEFAULT_AUTO_SET_MTU
+import com.bhm.ble.data.Constants.DEFAULT_CONNECT_MILLIS_TIMEOUT
+import com.bhm.ble.data.Constants.DEFAULT_CONNECT_RETRY_COUNT
+import com.bhm.ble.data.Constants.DEFAULT_CONNECT_RETRY_INTERVAL
+import com.bhm.ble.data.Constants.DEFAULT_MAX_CONNECT_NUM
+import com.bhm.ble.data.Constants.DEFAULT_MTU
+import com.bhm.ble.data.Constants.DEFAULT_OPERATE_MILLIS_TIMEOUT
+import com.bhm.ble.data.Constants.DEFAULT_SCAN_MILLIS_TIMEOUT
+import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_COUNT
+import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_INTERVAL
+import com.bhm.ble.data.Constants.DEFAULT_WRITE_INTERVAL
+import com.bhm.ble.data.Constants.ENABLE_LOG
+
 
 /**
  * 配置项
@@ -49,38 +64,6 @@ class BleOptions private constructor(builder: Builder) {
     var autoSetMtu = builder.autoSetMtu
 
     companion object {
-
-        const val CONTAIN_SCAN_DEVICE_NAME = false
-
-        const val AUTO_CONNECT = true
-
-        const val ENABLE_LOG = true
-
-        const val DEFAULT_SCAN_MILLIS_TIMEOUT: Long = 10000
-
-        const val DEFAULT_SCAN_RETRY_COUNT: Int = 0
-
-        const val DEFAULT_SCAN_RETRY_INTERVAL: Long = 1000
-
-        const val DEFAULT_CONNECT_MILLIS_TIMEOUT: Long = 10000
-
-        const val DEFAULT_CONNECT_RETRY_COUNT: Int = 0
-
-        const val DEFAULT_CONNECT_RETRY_INTERVAL: Long = 1000
-
-        const val DEFAULT_OPERATE_MILLIS_TIMEOUT: Long = 10000
-
-        const val DEFAULT_WRITE_INTERVAL: Long = 100
-
-        const val DEFAULT_MAX_CONNECT_NUM: Int = 7
-
-        const val DEFAULT_MTU: Int = 23
-
-        const val DEFAULT_AUTO_SET_MTU = true
-
-        //系统提供接受通知自带的UUID
-        const val UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR =
-            "00002902-0000-1000-8000-00805f9b34fb"
 
         @JvmStatic
         fun getDefaultBleOptions() : BleOptions = BleOptions(Builder())

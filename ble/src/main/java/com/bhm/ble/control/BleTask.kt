@@ -5,6 +5,9 @@
  */
 package com.bhm.ble.control
 
+import com.bhm.ble.data.Constants.CANCEL_UN_COMPLETE
+import com.bhm.ble.data.Constants.COMPLETED
+import com.bhm.ble.data.Constants.UN_COMPLETE
 import kotlinx.coroutines.*
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -64,11 +67,5 @@ class BleTask(val taskId: Int,
      */
     fun remove() {
         interrupt?.invoke(this@BleTask, CancellationException())
-    }
-
-    companion object {
-        const val UN_COMPLETE = 0
-        const val COMPLETED = 1
-        const val CANCEL_UN_COMPLETE = 2
     }
 }

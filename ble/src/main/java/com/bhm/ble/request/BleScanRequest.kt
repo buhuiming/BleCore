@@ -10,11 +10,12 @@ package com.bhm.ble.request
 import android.annotation.SuppressLint
 import android.bluetooth.le.*
 import android.os.ParcelUuid
-import com.bhm.ble.attribute.BleOptions.Companion.DEFAULT_SCAN_MILLIS_TIMEOUT
-import com.bhm.ble.attribute.BleOptions.Companion.DEFAULT_SCAN_RETRY_INTERVAL
 import com.bhm.ble.callback.BleScanCallback
-import com.bhm.ble.device.BleDevice
 import com.bhm.ble.data.BleScanFailType
+import com.bhm.ble.data.Constants.CANCEL_WAIT_JOB_MESSAGE
+import com.bhm.ble.data.Constants.DEFAULT_SCAN_MILLIS_TIMEOUT
+import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_INTERVAL
+import com.bhm.ble.device.BleDevice
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.*

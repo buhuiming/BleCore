@@ -6,6 +6,7 @@
 package com.bhm.ble.utils
 
 import android.util.Log
+import com.bhm.ble.data.Constants.MARK
 
 
 /**
@@ -17,8 +18,6 @@ import android.util.Log
 object BleLogger {
 
     var isLogger = true
-
-    private const val MARK = "#######----> "
 
     fun d(msg: String?) {
         if (isLogger && msg != null) {

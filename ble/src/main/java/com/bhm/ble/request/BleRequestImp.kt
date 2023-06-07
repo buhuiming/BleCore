@@ -11,6 +11,8 @@ import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.*
 import com.bhm.ble.control.*
 import com.bhm.ble.data.*
+import com.bhm.ble.data.Constants.INDICATE
+import com.bhm.ble.data.Constants.NOTIFY
 import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
 import kotlinx.coroutines.*
@@ -27,6 +29,8 @@ import kotlin.coroutines.suspendCoroutine
 internal class BleRequestImp private constructor() : BleBaseRequest {
 
     private val mainScope = MainScope()
+
+    private val bleConnectedDeviceManager = BleConnectedDeviceManager.get()
 
     companion object {
 
@@ -137,8 +141,8 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     override fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit) {
         val callback = BleConnectCallback()
         callback.apply(bleConnectCallback)
-        BleConnectedDeviceManager.get()
-            .buildBleConnectRequest(bleDevice)
+        bleConnectedDeviceManager
+            .buildBleConnectedDevice(bleDevice)
             ?.connect(callback)
     }
 
@@ -146,8 +150,8 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      * 断开连接
      */
     override fun disConnect(bleDevice: BleDevice) {
-        BleConnectedDeviceManager.get()
-            .getBleConnectRequest(bleDevice)
+        bleConnectedDeviceManager
+            .getBleConnectedDevice(bleDevice)
             ?.disConnect()
     }
 
@@ -155,21 +159,21 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      * 是否已连接
      */
     override fun isConnected(bleDevice: BleDevice): Boolean {
-        return BleConnectedDeviceManager.get().isContainDevice(bleDevice)
+        return bleConnectedDeviceManager.isContainDevice(bleDevice)
     }
 
     /**
      * 移除该设备的连接回调
      */
     override fun removeBleConnectCallback(bleDevice: BleDevice) {
-        BleConnectedDeviceManager.get().getBleConnectRequest(bleDevice)?.removeBleConnectCallback()
+        bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)?.removeBleConnectCallback()
     }
 
     /**
      * 获取设备的BluetoothGatt对象
      */
     override fun getBluetoothGatt(bleDevice: BleDevice): BluetoothGatt? {
-        return BleConnectedDeviceManager.get().getBleConnectRequest(bleDevice)?.getBluetoothGatt()
+        return bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)?.getBluetoothGatt()
     }
 
     /**
@@ -182,7 +186,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                         bleNotifyCallback: BleNotifyCallback.() -> Unit) {
         val callback = BleNotifyCallback()
         callback.apply(bleNotifyCallback)
-        val request = BleConnectedDeviceManager.get().getBleConnectRequest(bleDevice)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.let {
             it.enableCharacteristicNotify(serviceUUID, notifyUUID, useCharacteristicDescriptor, callback)
             return
@@ -199,7 +203,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         notifyUUID: String,
         useCharacteristicDescriptor: Boolean
     ): Boolean {
-        val request = BleConnectedDeviceManager.get().getBleConnectRequest(bleDevice)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.let {
             return it.disableCharacteristicNotify(serviceUUID, notifyUUID, useCharacteristicDescriptor)
         }
@@ -216,7 +220,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                           bleIndicateCallback: BleIndicateCallback.() -> Unit) {
         val callback = BleIndicateCallback()
         callback.apply(bleIndicateCallback)
-        val request = BleConnectedDeviceManager.get().getBleConnectRequest(bleDevice)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.let {
             it.enableCharacteristicIndicate(serviceUUID, indicateUUID, useCharacteristicDescriptor, callback)
             return
@@ -233,7 +237,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         indicateUUID: String,
         useCharacteristicDescriptor: Boolean
     ): Boolean {
-        val request = BleConnectedDeviceManager.get().getBleConnectRequest(bleDevice)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.let {
             return it.disableCharacteristicIndicate(serviceUUID, indicateUUID, useCharacteristicDescriptor)
         }
@@ -246,7 +250,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     override fun readRssi(bleDevice: BleDevice, bleRssiCallback: BleRssiCallback.() -> Unit) {
         val callback = BleRssiCallback()
         callback.apply(bleRssiCallback)
-        val request = BleConnectedDeviceManager.get().getBleConnectRequest(bleDevice)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.let {
             it.readRemoteRssi(callback)
             return
@@ -260,7 +264,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     override fun setMtu(bleDevice: BleDevice, mtu: Int, bleMtuChangedCallback: BleMtuChangedCallback.() -> Unit) {
         val callback = BleMtuChangedCallback()
         callback.apply(bleMtuChangedCallback)
-        val request = BleConnectedDeviceManager.get().getBleConnectRequest(bleDevice)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.let {
             it.setMtu(mtu, callback)
             return
@@ -276,7 +280,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      *
      */
     override fun setConnectionPriority(bleDevice: BleDevice, connectionPriority: Int): Boolean {
-        val request = BleConnectedDeviceManager.get().getBleConnectRequest(bleDevice)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         return request?.setConnectionPriority(connectionPriority)?: false
     }
 
@@ -284,7 +288,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      * 移除该设备的Indicate回调
      */
     override fun removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String) {
-        val request = BleConnectedDeviceManager.get().getBleConnectRequest(bleDevice)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.removeIndicateCallback(indicateUUID)
     }
 
@@ -292,7 +296,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      * 移除该设备的Notify回调
      */
     override fun removeBleNotifyCallback(bleDevice: BleDevice, notifyUUID: String) {
-        val request = BleConnectedDeviceManager.get().getBleConnectRequest(bleDevice)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.removeNotifyCallback(notifyUUID)
     }
 
@@ -300,7 +304,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      * 移除该设备的Read回调
      */
     override fun removeBleReadCallback(bleDevice: BleDevice, readUUID: String) {
-        val request = BleConnectedDeviceManager.get().getBleConnectRequest(bleDevice)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.removeReadCallback(readUUID)
     }
 
@@ -308,7 +312,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      * 移除该设备的MtuChanged回调
      */
     override fun removeBleMtuChangedCallback(bleDevice: BleDevice) {
-        val request = BleConnectedDeviceManager.get().getBleConnectRequest(bleDevice)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.removeMtuChangedCallback()
     }
 
@@ -316,7 +320,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      * 移除该设备的Rssi回调
      */
     override fun removeBleRssiCallback(bleDevice: BleDevice) {
-        val request = BleConnectedDeviceManager.get().getBleConnectRequest(bleDevice)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.removeRssiCallback()
     }
 
@@ -324,7 +328,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      * 移除该设备的Write回调
      */
     override fun removeBleWriteCallback(bleDevice: BleDevice, writeUUID: String) {
-        val request = BleConnectedDeviceManager.get().getBleConnectRequest(bleDevice)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.removeWriteCallback(writeUUID)
     }
 
@@ -340,7 +344,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      */
     override fun releaseAll() {
         mainScope.cancel()
-        BleConnectedDeviceManager.get().releaseAll()
+        bleConnectedDeviceManager.releaseAll()
         BleTaskQueue.get().clear()
     }
 
@@ -348,6 +352,6 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      * 断开某个设备的连接 释放资源
      */
     override fun release(bleDevice: BleDevice) {
-        BleConnectedDeviceManager.get().release(bleDevice)
+        bleConnectedDeviceManager.release(bleDevice)
     }
 }

@@ -10,17 +10,22 @@ package com.bhm.ble.request
 import android.annotation.SuppressLint
 import android.bluetooth.*
 import android.os.Build
-import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.callback.*
 import com.bhm.ble.control.*
 import com.bhm.ble.data.*
-import com.bhm.ble.data.BleConnectLastState
+import com.bhm.ble.data.Constants.AUTO_CONNECT
+import com.bhm.ble.data.Constants.DEFAULT_CONNECT_MILLIS_TIMEOUT
+import com.bhm.ble.data.Constants.DEFAULT_CONNECT_RETRY_INTERVAL
+import com.bhm.ble.data.Constants.DEFAULT_MTU
+import com.bhm.ble.data.Constants.INDICATE
+import com.bhm.ble.data.Constants.INDICATE_TASK_ID
+import com.bhm.ble.data.Constants.NOTIFY
+import com.bhm.ble.data.Constants.NOTIFY_TASK_ID
+import com.bhm.ble.data.Constants.SET_MTU_TASK_ID
+import com.bhm.ble.data.Constants.SET_RSSI_TASK_ID
+import com.bhm.ble.data.Constants.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR
 import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
-import com.bhm.ble.device.BleConnectedDeviceManager.Companion.INDICATE_TASK_ID
-import com.bhm.ble.device.BleConnectedDeviceManager.Companion.NOTIFY_TASK_ID
-import com.bhm.ble.device.BleConnectedDeviceManager.Companion.SET_MTU_TASK_ID
-import com.bhm.ble.device.BleConnectedDeviceManager.Companion.SET_RSSI_TASK_ID
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.*
@@ -66,7 +71,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
 
     private var waitConnectJob: Job? = null
 
-    private val autoConnect = getBleOptions()?.autoConnect?: BleOptions.AUTO_CONNECT
+    private val autoConnect = getBleOptions()?.autoConnect?: AUTO_CONNECT
 
     private val waitTime = 100L
 
@@ -80,32 +85,32 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         this.bleConnectCallback = bleConnectCallback
         if (bleDevice.deviceInfo == null) {
             BleLogger.e("连接失败：BluetoothDevice为空")
-            BleConnectedDeviceManager.get().removeBleConnectRequest(bleDevice.getKey())
+            removeBleConnectedDevice()
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.NullableBluetoothDevice)
             return
         }
         val bleManager = getBleManager()
         if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext)) {
             BleLogger.e("权限不足，请检查")
-            BleConnectedDeviceManager.get().removeBleConnectRequest(bleDevice.getKey())
+            removeBleConnectedDevice()
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.NoBlePermissionType)
             return
         }
         if (!bleManager.isBleSupport()) {
             BleLogger.e("设备不支持蓝牙")
-            BleConnectedDeviceManager.get().removeBleConnectRequest(bleDevice.getKey())
+            removeBleConnectedDevice()
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.UnTypeSupportBle)
             return
         }
         if (!bleManager.isBleEnable()) {
             BleLogger.e("蓝牙未打开")
-            BleConnectedDeviceManager.get().removeBleConnectRequest(bleDevice.getKey())
+            removeBleConnectedDevice()
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.BleDisable)
             return
         }
         if (lastState == BleConnectLastState.Connecting || lastState == BleConnectLastState.ConnectIdle) {
             BleLogger.e("连接中")
-            BleConnectedDeviceManager.get().removeBleConnectRequest(bleDevice.getKey())
+            removeBleConnectedDevice()
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.AlreadyConnecting)
             return
         }
@@ -157,8 +162,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             disConnectGatt()
             refreshDeviceCache()
             closeBluetoothGatt()
-            BleConnectedDeviceManager.get()
-                .removeBleConnectRequest(bleDevice.getKey())
+            removeBleConnectedDevice()
             removeRssiCallback()
             removeMtuChangedCallback()
             clearCharacterCallback()
@@ -176,7 +180,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     @Synchronized
     fun enableCharacteristicNotify(serviceUUID: String,
                                    notifyUUID: String,
-                                   userCharacteristicDescriptor: Boolean,
+                                   useCharacteristicDescriptor: Boolean,
                                    bleNotifyCallback: BleNotifyCallback) {
         val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
         val characteristic = gattService?.getCharacteristic(UUID.fromString(notifyUUID))
@@ -196,7 +200,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
 //                    suspendCoroutine<Throwable?> { continuation ->
 //                        job = CoroutineScope(Dispatchers.IO).launch {
 //                            withTimeout(operateTime) {
-////                            setCharacteristicNotify(characteristic, userCharacteristicDescriptor, true, bleNotifyCallback)
+////                            setCharacteristicNotify(characteristic, useCharacteristicDescriptor, true, bleNotifyCallback)
 //                                delay(operateTime)
 //                            }
 //                        }
@@ -206,7 +210,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
 //                    }
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation
-                        setCharacteristicNotify(characteristic, userCharacteristicDescriptor, true, bleNotifyCallback)
+                        setCharacteristicNotify(characteristic, useCharacteristicDescriptor, true, bleNotifyCallback)
                     }
                 },
                 interrupt = { _, throwable ->
@@ -242,14 +246,14 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     @Synchronized
     fun disableCharacteristicNotify(serviceUUID: String,
                                     notifyUUID: String,
-                                    userCharacteristicDescriptor: Boolean): Boolean {
+                                    useCharacteristicDescriptor: Boolean): Boolean {
         val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
         val characteristic = gattService?.getCharacteristic(UUID.fromString(notifyUUID))
         if (bluetoothGatt != null && gattService != null && characteristic != null &&
             (characteristic.properties or BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0
         ) {
             cancelNotifyJob()
-            val success = setCharacteristicNotify(characteristic, userCharacteristicDescriptor, false, null)
+            val success = setCharacteristicNotify(characteristic, useCharacteristicDescriptor, false, null)
             if (success) {
                 removeNotifyCallback(notifyUUID)
             }
@@ -264,7 +268,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     @Synchronized
     fun enableCharacteristicIndicate(serviceUUID: String,
                                      indicateUUID: String,
-                                     userCharacteristicDescriptor: Boolean,
+                                     useCharacteristicDescriptor: Boolean,
                                      bleIndicateCallback: BleIndicateCallback) {
         val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
         val characteristic = gattService?.getCharacteristic(UUID.fromString(indicateUUID))
@@ -282,7 +286,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                 block = {
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation
-                        setCharacteristicIndicate(characteristic, userCharacteristicDescriptor, true, bleIndicateCallback)
+                        setCharacteristicIndicate(characteristic, useCharacteristicDescriptor, true, bleIndicateCallback)
                     }
                 },
                 interrupt = { _, throwable ->
@@ -295,7 +299,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                             BleLogger.e("设置Indicate超时")
                             bleIndicateCallback.callIndicateFail(
                                 BleNotificationFailType.TimeoutCancellationFailType(
-                                INDICATE
+                                    INDICATE
                                 ))
                         }
                     }
@@ -317,14 +321,14 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     @Synchronized
     fun disableCharacteristicIndicate(serviceUUID: String,
                                       indicateUUID: String,
-                                      userCharacteristicDescriptor: Boolean): Boolean {
+                                      useCharacteristicDescriptor: Boolean): Boolean {
         val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
         val characteristic = gattService?.getCharacteristic(UUID.fromString(indicateUUID))
         if (bluetoothGatt != null && gattService != null && characteristic != null &&
             (characteristic.properties or BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0
         ) {
             cancelIndicateJob()
-            val success = setCharacteristicIndicate(characteristic, userCharacteristicDescriptor, false, null)
+            val success = setCharacteristicIndicate(characteristic, useCharacteristicDescriptor, false, null)
             if (success) {
                 removeIndicateCallback(indicateUUID)
             }
@@ -414,7 +418,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
      *
      */
     fun setConnectionPriority(connectionPriority: Int): Boolean {
-       return bluetoothGatt?.requestConnectionPriority(connectionPriority)?: false
+        return bluetoothGatt?.requestConnectionPriority(connectionPriority)?: false
     }
 
     @Synchronized
@@ -525,9 +529,9 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         //初始化，待coreGattCallback回调再设置为连接中
         lastState = BleConnectLastState.ConnectIdle
         isActiveDisconnect.set(false)
-        var connectTime = getBleOptions()?.connectMillisTimeOut?: BleOptions.DEFAULT_CONNECT_MILLIS_TIMEOUT
+        var connectTime = getBleOptions()?.connectMillisTimeOut?: DEFAULT_CONNECT_MILLIS_TIMEOUT
         if (connectTime <= 0) {
-            connectTime = BleOptions.DEFAULT_CONNECT_MILLIS_TIMEOUT
+            connectTime = DEFAULT_CONNECT_MILLIS_TIMEOUT
         }
         connectJob = bleConnectCallback?.launchInMainThread {
             withTimeout(connectTime) {
@@ -553,7 +557,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
      */
     private fun onCompletion(throwable: Throwable?) {
         if (isContinueConnect(throwable)) {
-            val retryInterval = getBleOptions()?.connectRetryInterval?: BleOptions.DEFAULT_CONNECT_RETRY_INTERVAL
+            val retryInterval = getBleOptions()?.connectRetryInterval?: DEFAULT_CONNECT_RETRY_INTERVAL
             waitConnectJob = bleConnectCallback?.launchInMainThread {
                 delay(retryInterval)
                 currentConnectRetryCount ++
@@ -645,8 +649,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                             lastState = BleConnectLastState.Disconnect
                             refreshDeviceCache()
                             closeBluetoothGatt()
-                            BleConnectedDeviceManager.get()
-                                .removeBleConnectRequest(bleDevice.getKey())
+                            removeBleConnectedDevice()
                             removeRssiCallback()
                             removeMtuChangedCallback()
                             clearCharacterCallback()
@@ -852,11 +855,18 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
     }
 
     /**
+     * 移除设备管理池中的设备
+     */
+    private fun removeBleConnectedDevice() {
+        BleConnectedDeviceManager.get().removeBleConnectedDevice(bleDevice.getKey())
+    }
+
+    /**
      * 自动设置mtu
      */
     private fun autoSetMtu() {
         if (getBleOptions()?.autoSetMtu == true) {
-            setMtu(getBleOptions()?.mtu?: BleOptions.DEFAULT_MTU, object : BleMtuChangedCallback(){
+            setMtu(getBleOptions()?.mtu?: DEFAULT_MTU, object : BleMtuChangedCallback(){
                 override fun callMtuChanged(mtu: Int) {
                     super.callMtuChanged(mtu)
                     BleLogger.d("自动设置Mtu成功: $mtu")
@@ -877,7 +887,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         lastState = BleConnectLastState.ConnectFailure
         refreshDeviceCache()
         closeBluetoothGatt()
-        BleConnectedDeviceManager.get().removeBleConnectRequest(bleDevice.getKey())
+        removeBleConnectedDevice()
     }
 
     /**
@@ -961,7 +971,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         val descriptor = if (useCharacteristicDescriptor) {
             characteristic.getDescriptor(characteristic.uuid)
         } else {
-            characteristic.getDescriptor(UUID.fromString(BleOptions.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR))
+            characteristic.getDescriptor(UUID.fromString(UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR))
         }
         if (descriptor == null) {
             val exception = BleNotificationFailType.SetCharacteristicNotificationFailType(
@@ -1021,7 +1031,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         val descriptor = if (useCharacteristicDescriptor) {
             characteristic.getDescriptor(characteristic.uuid)
         } else {
-            characteristic.getDescriptor(UUID.fromString(BleOptions.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR))
+            characteristic.getDescriptor(UUID.fromString(UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR))
         }
         if (descriptor == null) {
             val exception = BleNotificationFailType.SetCharacteristicNotificationFailType(

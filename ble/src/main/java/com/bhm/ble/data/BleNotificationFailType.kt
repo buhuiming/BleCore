@@ -31,7 +31,3 @@ sealed class BleNotificationFailType(message: String): CancellationException(mes
     class TimeoutCancellationFailType(type: String = "通知")
         : BleNotificationFailType("设置${type}失败，设置超时")
 }
-
-const val NOTIFY = "Notify"
-
-const val INDICATE = "Indicate"
