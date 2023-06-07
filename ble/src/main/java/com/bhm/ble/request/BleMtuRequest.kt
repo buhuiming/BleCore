@@ -9,10 +9,10 @@ package com.bhm.ble.request
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
-import com.bhm.ble.callback.BleRssiCallback
+import com.bhm.ble.callback.BleMtuChangedCallback
 import com.bhm.ble.control.BleTask
 import com.bhm.ble.control.BleTaskQueue
-import com.bhm.ble.data.Constants.SET_RSSI_TASK_ID
+import com.bhm.ble.data.Constants
 import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.utils.BleLogger
@@ -23,47 +23,46 @@ import kotlin.coroutines.suspendCoroutine
 
 
 /**
- * 读取设备Rssi请求
+ * 设置Mtu请求
  *
  * @author Buhuiming
- * @date 2023年06月07日 11时05分
+ * @date 2023年06月07日 15时25分
  */
-internal class BleRssiRequest(
-    private val bleDevice: BleDevice,
-    private val bleTaskQueue: BleTaskQueue
+internal class BleMtuRequest(private val bleDevice: BleDevice,
+                             private val bleTaskQueue: BleTaskQueue
 ) : Request(){
 
-    private var bleRssiCallback: BleRssiCallback? = null
+    private var bleMtuChangedCallback: BleMtuChangedCallback? = null
 
     @Synchronized
-    fun addRssiCallback(callback: BleRssiCallback) {
-        bleRssiCallback = callback
+    fun addMtuChangedCallback(callback: BleMtuChangedCallback) {
+        bleMtuChangedCallback = callback
     }
 
     @Synchronized
-    fun removeRssiCallback() {
-        bleRssiCallback = null
+    fun removeMtuChangedCallback() {
+        bleMtuChangedCallback = null
     }
 
     /**
-     * 读取信号值
+     * 设置mtu
      */
     @SuppressLint("MissingPermission")
     @Synchronized
-    fun readRemoteRssi(bleRssiCallback: BleRssiCallback) {
-        cancelReadRssiJob()
-        addRssiCallback(bleRssiCallback)
+    fun setMtu(mtu: Int, bleMtuChangedCallback: BleMtuChangedCallback) {
+        cancelSetMtuJob()
+        addMtuChangedCallback(bleMtuChangedCallback)
         var mContinuation: Continuation<Throwable?>? = null
         val task = BleTask (
-            SET_RSSI_TASK_ID,
+            Constants.SET_MTU_TASK_ID,
             durationTimeMillis = getOperateTime(),
             callInMainThread = false,
             autoDoNextTask = true,
             block = {
                 suspendCoroutine<Throwable?> { continuation ->
                     mContinuation = continuation
-                    if (getBleConnectedDevice(bleDevice)?.getBluetoothGatt()?.readRemoteRssi() == false) {
-                        continuation.resume(Throwable("Gatt读取Rssi失败"))
+                    if (getBleConnectedDevice(bleDevice)?.getBluetoothGatt()?.requestMtu(mtu) == false) {
+                        continuation.resume(Throwable("Gatt设置mtu失败"))
                     }
                 }
             },
@@ -74,8 +73,8 @@ internal class BleRssiRequest(
                 throwable?.let {
                     BleLogger.e(it.message)
                     if (it is TimeoutCancellationException || it is TimeoutCancelException) {
-                        BleLogger.e("读取Rssi超时")
-                        bleRssiCallback.callRssiFail(TimeoutCancelException("读取Rssi失败，超时"))
+                        BleLogger.e("设置Mtu超时")
+                        bleMtuChangedCallback.callSetMtuFail(TimeoutCancelException("设置mtu失败，超时"))
                     }
                 }
             }
@@ -84,26 +83,26 @@ internal class BleRssiRequest(
     }
 
     /**
-     * 读取信号值后会触发
+     * 设置Mtu值后会触发
      */
-    fun onReadRemoteRssi(rssi: Int, status: Int) {
-        cancelReadRssiJob()
-        bleRssiCallback?.let {
+    fun onMtuChanged(mtu: Int, status: Int) {
+        cancelSetMtuJob()
+        bleMtuChangedCallback?.let {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                BleLogger.d("读取Rssi成功：$rssi")
-                it.callRssiSuccess(rssi)
+                BleLogger.d("设置Mtu成功：$mtu")
+                it.callMtuChanged(mtu)
             } else {
-                BleLogger.e("读取Rssi失败，status = $status")
-                it.callRssiFail(Throwable("读取Rssi失败，status = $status"))
+                BleLogger.e("设置Mtu失败，status = $status")
+                it.callSetMtuFail(Throwable("设置Mtu失败，status = $status"))
             }
         }
     }
 
     /**
-     * 取消读取Rssi任务
+     * 取消设置Mtu任务
      */
     @Synchronized
-    private fun cancelReadRssiJob() {
-        bleTaskQueue.removeTask(taskId = SET_RSSI_TASK_ID)
+    private fun cancelSetMtuJob() {
+        bleTaskQueue.removeTask(taskId = Constants.SET_MTU_TASK_ID)
     }
 }

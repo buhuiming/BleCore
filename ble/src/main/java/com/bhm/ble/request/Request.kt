@@ -7,6 +7,9 @@ package com.bhm.ble.request
 
 import com.bhm.ble.BleManager
 import com.bhm.ble.data.Constants.DEFAULT_OPERATE_MILLIS_TIMEOUT
+import com.bhm.ble.device.BleConnectedDevice
+import com.bhm.ble.device.BleConnectedDeviceManager
+import com.bhm.ble.device.BleDevice
 
 
 /**
@@ -26,5 +29,9 @@ internal open class Request {
             operateTime = DEFAULT_OPERATE_MILLIS_TIMEOUT
         }
         return operateTime
+    }
+
+    fun getBleConnectedDevice(bleDevice: BleDevice): BleConnectedDevice? {
+        return BleConnectedDeviceManager.get().getBleConnectedDevice(bleDevice)
     }
 }

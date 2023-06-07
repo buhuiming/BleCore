@@ -10,7 +10,6 @@ import android.bluetooth.BluetoothProfile
 import android.content.Context
 import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.callback.*
-import com.bhm.ble.data.Constants
 import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.BleBaseRequest

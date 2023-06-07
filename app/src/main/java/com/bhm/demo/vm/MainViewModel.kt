@@ -10,8 +10,8 @@ import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.data.BleConnectFailType
-import com.bhm.ble.device.BleDevice
 import com.bhm.ble.data.BleScanFailType
+import com.bhm.ble.device.BleDevice
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import com.bhm.demo.BaseActivity
@@ -59,7 +59,6 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
     fun initBle() {
         BleManager.get().init(application,
             BleOptions.Builder()
-                .setScanDeviceAddress("7C:DF:A1:A3:5A:BE")
                 .setScanMillisTimeOut(2000)
                 .setConnectMillisTimeOut(5000)
                 .setMaxConnectNum(7)
