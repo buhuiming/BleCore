@@ -95,15 +95,15 @@ internal class BleReadRequest(
                     throwable?.let {
                         BleLogger.e(it.message)
                         if (it is TimeoutCancellationException || it is TimeoutCancelException) {
-                            BleLogger.e("读特征值数据超时")
-                            bleReadCallback.callReadFail(TimeoutCancelException("读特征值数据失败，超时"))
+                            BleLogger.e("${bleDevice.deviceAddress}读特征值数据超时")
+                            bleReadCallback.callReadFail(TimeoutCancelException("${bleDevice.deviceAddress}读特征值数据失败，超时"))
                         }
                     }
                 }
             )
             bleTaskQueue.addTask(task)
         } else {
-            val exception = UnSupportException("读特征值数据失败，此特性不支持读特征值数据")
+            val exception = UnSupportException("${bleDevice.deviceAddress}读特征值数据失败，此特性不支持读特征值数据")
             BleLogger.e(exception.message)
             bleReadCallback.callReadFail(exception)
         }
@@ -122,11 +122,11 @@ internal class BleReadRequest(
             if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     if (BleLogger.isLogger) {
-                        BleLogger.d("读特征值数据成功：${BleUtil.bytesToHex(value)}")
+                        BleLogger.d("${bleDevice.deviceAddress}读特征值数据成功：${BleUtil.bytesToHex(value)}")
                     }
                     it.callReadSuccess(value)
                 } else {
-                    val throwable = Throwable("读特征值数据失败，status = $status")
+                    val throwable = Throwable("${bleDevice.deviceAddress}读特征值数据失败，status = $status")
                     BleLogger.e(throwable.message)
                     it.callReadFail(throwable)
                 }

@@ -173,13 +173,13 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
             }
             onScanFail {
                 val msg: String = when (it) {
-                    is BleScanFailType.UnTypeSupportBle -> "BleScanFailType.UnTypeSupportBle: 设备不支持蓝牙"
-                    is BleScanFailType.NoBlePermissionType -> "BleScanFailType.NoBlePermissionType: 权限不足，请检查"
-                    is BleScanFailType.GPSDisable -> "BleScanFailType.BleDisable: 设备未打开GPS定位"
-                    is BleScanFailType.BleDisable -> "BleScanFailType.BleDisable: 蓝牙未打开"
-                    is BleScanFailType.AlReadyScanning -> "BleScanFailType.AlReadyScanning: 正在扫描"
+                    is BleScanFailType.UnTypeSupportBle -> "设备不支持蓝牙"
+                    is BleScanFailType.NoBlePermissionType -> "权限不足，请检查"
+                    is BleScanFailType.GPSDisable -> "设备未打开GPS定位"
+                    is BleScanFailType.BleDisable -> "蓝牙未打开"
+                    is BleScanFailType.AlReadyScanning -> "正在扫描"
                     is BleScanFailType.ScanError -> {
-                        "BleScanFailType.ScanError: ${it.throwable?.message}"
+                        "${it.throwable?.message}"
                     }
                 }
                 BleLogger.e(msg)
@@ -238,16 +238,14 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
         }
         onConnectFail { bleDevice, connectFailType ->
             val msg: String = when (connectFailType) {
-                is BleConnectFailType.UnTypeSupportBle -> "BleConnectFailType.UnTypeSupportBle：设备不支持蓝牙"
-                is BleConnectFailType.NoBlePermissionType -> "BleConnectFailType.NoBlePermissionType: 权限不足，请检查"
-                is BleConnectFailType.NullableBluetoothDevice -> "BleConnectFailType.NullableBluetoothDevice: 设备为空"
-                is BleConnectFailType.BleDisable -> "BleConnectFailType.BleDisable: 蓝牙未打开"
-                is BleConnectFailType.ConnectException -> "BleConnectFailType.ConnectException: " +
-                        "连接异常(${connectFailType.throwable.message})"
-                is BleConnectFailType.ConnectTimeOut -> "BleConnectFailType.ConnectTimeOut: 连接超时"
-                is BleConnectFailType.AlreadyConnecting -> "BleConnectFailType.AlreadyConnecting: 连接中"
-                is BleConnectFailType.ScanNullableBluetoothDevice -> "BleConnectFailType.ScanNullableBluetoothDevice: " +
-                        "连接失败，扫描数据为空"
+                is BleConnectFailType.UnTypeSupportBle -> "设备不支持蓝牙"
+                is BleConnectFailType.NoBlePermissionType -> "权限不足，请检查"
+                is BleConnectFailType.NullableBluetoothDevice -> "设备为空"
+                is BleConnectFailType.BleDisable -> "蓝牙未打开"
+                is BleConnectFailType.ConnectException -> "连接异常(${connectFailType.throwable.message})"
+                is BleConnectFailType.ConnectTimeOut -> "连接超时"
+                is BleConnectFailType.AlreadyConnecting -> "连接中"
+                is BleConnectFailType.ScanNullableBluetoothDevice -> "连接失败，扫描数据为空"
             }
             BleLogger.e(msg)
             Toast.makeText(application, msg, Toast.LENGTH_SHORT).show()
@@ -256,7 +254,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
         onDisConnected { isActiveDisConnected, bleDevice, _, _ ->
             Toast.makeText(application, "断开连接(${bleDevice.deviceAddress}，isActiveDisConnected: " +
                     "$isActiveDisConnected)", Toast.LENGTH_SHORT).show()
-            BleLogger.e("-----onDisConnected: $isActiveDisConnected")
+            BleLogger.e("-----${bleDevice.deviceAddress}onDisConnected: $isActiveDisConnected")
             refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
             //发送断开的通知
             val message = MessageEvent()

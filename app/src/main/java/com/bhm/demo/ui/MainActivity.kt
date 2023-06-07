@@ -74,7 +74,6 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
                         listAdapter?.notifyItemChanged(position)
                     }
                     val isConnected= viewModel.isConnected(bleDevice)
-                    BleLogger.i("item isConnected: $isConnected")
                     if (isConnected && autoOpenDetailsActivity) {
                         openDetails(it.bleDevice)
                     }
@@ -172,7 +171,6 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
             if (index >= 0) {
                 listAdapter?.notifyItemChanged(index)
             }
-            BleLogger.i("item isConnected: ${viewModel.isConnected(bleDevice)}")
         }
     }
 

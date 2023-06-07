@@ -141,7 +141,7 @@ internal class BleConnectRequest(
             refreshDeviceCache()
             closeBluetoothGatt()
             removeAllCallback()
-            BleLogger.e("主动断开连接")
+            BleLogger.e("${bleDevice.deviceAddress}主动断开连接")
             bleConnectCallback?.callDisConnected(
                 isActiveDisconnect.get(),
                 bleDevice, bluetoothGatt, BluetoothGatt.GATT_SUCCESS
@@ -190,7 +190,7 @@ internal class BleConnectRequest(
                         refreshDeviceCache()
                         closeBluetoothGatt()
                         removeAllCallback()
-                        BleLogger.e("自动断开连接")
+                        BleLogger.e("${bleDevice.deviceAddress}自动断开连接")
                         bleConnectCallback?.callDisConnected(
                             isActiveDisconnect.get(),
                             bleDevice, gatt, status
@@ -207,7 +207,7 @@ internal class BleConnectRequest(
     fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
         bluetoothGatt = gatt
         if (status == BluetoothGatt.GATT_SUCCESS) {
-            BleLogger.i("连接成功，发现服务")
+            BleLogger.i("${bleDevice.deviceAddress}连接成功，发现服务")
             currentConnectRetryCount = 0
             lastState = BleConnectLastState.Connected
             isActiveDisconnect.set(false)
@@ -215,7 +215,7 @@ internal class BleConnectRequest(
             autoSetMtu()
         } else {
             connectFail()
-            BleLogger.e("连接失败：未发现服务")
+            BleLogger.e("${bleDevice.deviceAddress}连接失败：未发现服务")
             bleConnectCallback?.callConnectFail(
                 bleDevice,
                 BleConnectFailType.ConnectException(Throwable("发现服务失败"))
@@ -312,7 +312,7 @@ internal class BleConnectRequest(
                     //连接超时
                     is TimeoutCancellationException -> {
                         connectFail()
-                        BleLogger.e("连接失败：超时")
+                        BleLogger.e("${bleDevice.deviceAddress}连接失败：超时")
                         bleConnectCallback?.callConnectFail(
                             bleDevice,
                             BleConnectFailType.ConnectTimeOut
@@ -330,7 +330,7 @@ internal class BleConnectRequest(
                     //连接失败
                     else -> {
                         connectFail()
-                        BleLogger.e("连接失败：${it.message}")
+                        BleLogger.e("${bleDevice.deviceAddress}连接失败：${it.message}")
                         bleConnectCallback?.callConnectFail(
                             bleDevice,
                             BleConnectFailType.ConnectException(it)
@@ -365,7 +365,7 @@ internal class BleConnectRequest(
                 retryCount = 0
             }
             if (retryCount > 0 && currentConnectRetryCount < retryCount) {
-                BleLogger.i("满足重连条件：currentConnectRetryCount = $currentConnectRetryCount")
+                BleLogger.i("${bleDevice.deviceAddress}满足重连条件：currentConnectRetryCount = $currentConnectRetryCount")
                 return true
             }
         }
@@ -380,7 +380,7 @@ internal class BleConnectRequest(
             delay(waitTime * 5)
             if (bluetoothGatt == null || bluetoothGatt?.discoverServices() == false) {
                 connectFail()
-                val throwable = Throwable("发现服务失败")
+                val throwable = Throwable("${bleDevice.deviceAddress}发现服务失败")
                 BleLogger.e(throwable.message)
                 bleConnectCallback?.callConnectFail(
                     bleDevice,
@@ -414,12 +414,12 @@ internal class BleConnectRequest(
                 object : BleMtuChangedCallback(){
                     override fun callMtuChanged(mtu: Int) {
                         super.callMtuChanged(mtu)
-                        BleLogger.d("自动设置Mtu成功: $mtu")
+                        BleLogger.d("${bleDevice.deviceAddress}自动设置Mtu成功: $mtu")
                     }
 
                     override fun callSetMtuFail(throwable: Throwable) {
                         super.callSetMtuFail(throwable)
-                        BleLogger.e("自动设置Mtu: ${throwable.message}")
+                        BleLogger.e("${bleDevice.deviceAddress}自动设置Mtu失败: ${throwable.message}")
                     }
                 })
         }

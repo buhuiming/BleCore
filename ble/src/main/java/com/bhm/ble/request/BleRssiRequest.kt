@@ -74,8 +74,8 @@ internal class BleRssiRequest(
                 throwable?.let {
                     BleLogger.e(it.message)
                     if (it is TimeoutCancellationException || it is TimeoutCancelException) {
-                        BleLogger.e("读取Rssi超时")
-                        bleRssiCallback.callRssiFail(TimeoutCancelException("读取Rssi失败，超时"))
+                        BleLogger.e("${bleDevice.deviceAddress}读取Rssi超时")
+                        bleRssiCallback.callRssiFail(TimeoutCancelException("${bleDevice.deviceAddress}读取Rssi失败，超时"))
                     }
                 }
             }
@@ -90,11 +90,12 @@ internal class BleRssiRequest(
         cancelReadRssiJob()
         bleRssiCallback?.let {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                BleLogger.d("读取Rssi成功：$rssi")
+                BleLogger.d("${bleDevice.deviceAddress}读取Rssi成功：$rssi")
                 it.callRssiSuccess(rssi)
             } else {
-                BleLogger.e("读取Rssi失败，status = $status")
-                it.callRssiFail(Throwable("读取Rssi失败，status = $status"))
+                val throwable = Throwable("${bleDevice.deviceAddress}读取Rssi失败，status = $status")
+                BleLogger.e(throwable.message)
+                it.callRssiFail(throwable)
             }
         }
     }
