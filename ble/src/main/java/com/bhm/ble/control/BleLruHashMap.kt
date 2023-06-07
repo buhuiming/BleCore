@@ -6,6 +6,7 @@
 package com.bhm.ble.control
 
 import com.bhm.ble.request.BleConnectRequest
+import com.bhm.ble.utils.BleLogger
 import kotlin.math.ceil
 
 
@@ -23,6 +24,7 @@ class BleLruHashMap<K, V>(saveSize: Int) : LinkedHashMap<K, V>(
     override fun removeEldestEntry(eldest: MutableMap.MutableEntry<K, V>?): Boolean {
         eldest?.let {
             if (size > maxSize && it.value is BleConnectRequest) {
+                BleLogger.e("超出最大连接设备数：${maxSize}，断开第一个设备的连接")
                 (it.value as BleConnectRequest).disConnect()
             }
         }

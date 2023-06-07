@@ -60,7 +60,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                 .setScanDeviceAddress("7C:DF:A1:A3:5A:BE")
                 .setScanMillisTimeOut(2000)
                 .setConnectMillisTimeOut(5000)
-                .setMaxConnectNum(3)
+                .setMaxConnectNum(7)
                 .setConnectRetryCountAndInterval(1, 1000)
                 .build()
         )
