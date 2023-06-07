@@ -23,6 +23,7 @@ import com.bhm.ble.data.Constants.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR
 import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
 import java.util.*
 import kotlin.coroutines.Continuation
@@ -146,7 +147,9 @@ internal class BleIndicateRequest(
     ) {
         bleIndicateCallbackHashMap.values.forEach {
             if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
-                BleLogger.d("收到Indicate数据：${value}")
+                if (BleLogger.isLogger) {
+                    BleLogger.d("收到Indicate数据：${BleUtil.bytesToHex(value)}")
+                }
                 it.callCharacteristicChanged(value)
             }
         }

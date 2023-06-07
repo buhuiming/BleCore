@@ -9,6 +9,7 @@ import android.app.Application
 import android.bluetooth.BluetoothGattCharacteristic
 import com.bhm.ble.BleManager
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.utils.BleUtil
 import com.bhm.demo.entity.CharacteristicNode
 import com.bhm.demo.entity.LogEntity
 import com.bhm.demo.entity.ServiceNode
@@ -120,7 +121,7 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                 addLogMsg(LogEntity(Level.FINE, "notify成功：${notifyUUID}"))
             }
             onCharacteristicChanged {
-                addLogMsg(LogEntity(Level.INFO, "接收到${notifyUUID}的数据：$it"))
+                addLogMsg(LogEntity(Level.INFO, "接收到${notifyUUID}的数据：${BleUtil.bytesToHex(it)}"))
             }
         }
     }
@@ -157,7 +158,7 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                 addLogMsg(LogEntity(Level.FINE, "indicate成功：${indicateUUID}"))
             }
             onCharacteristicChanged {
-                addLogMsg(LogEntity(Level.INFO, "接收到${indicateUUID}的数据：$it"))
+                addLogMsg(LogEntity(Level.INFO, "接收到${indicateUUID}的数据：${BleUtil.bytesToHex(it)}"))
             }
         }
     }
@@ -217,7 +218,7 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                 addLogMsg(LogEntity(Level.OFF, "读数据失败，${readUUID}：${it.message}"))
             }
             onReadSuccess {
-                addLogMsg(LogEntity(Level.FINE, "读数据成功，${readUUID}：$it"))
+                addLogMsg(LogEntity(Level.FINE, "读数据成功，${readUUID}：${BleUtil.bytesToHex(it)}"))
             }
         }
     }

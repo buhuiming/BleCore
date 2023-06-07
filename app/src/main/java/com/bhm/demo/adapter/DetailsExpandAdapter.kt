@@ -13,6 +13,7 @@ import com.bhm.demo.R
 import com.bhm.demo.entity.CharacteristicNode
 import com.bhm.demo.entity.OperateType
 import com.bhm.demo.entity.ServiceNode
+import com.bhm.support.sdk.utils.ViewUtil
 import com.chad.library.adapter.base.BaseNodeAdapter
 import com.chad.library.adapter.base.entity.node.BaseNode
 import com.chad.library.adapter.base.provider.BaseNodeProvider
@@ -101,17 +102,29 @@ class DetailsExpandAdapter(nodeList: MutableList<BaseNode>,
             helper.setGone(R.id.cbIndicate, charaProp and BluetoothGattCharacteristic.PROPERTY_INDICATE <= 0)
 
             cbWrite.setOnClickListener { buttonView ->
+                if (ViewUtil.isInvalidClick(buttonView)) {
+                    return@setOnClickListener
+                }
                 val isChecked = cbWrite.isChecked
                 operateCallback?.invoke(buttonView as CheckBox, OperateType.Write, isChecked, node)
             }
             btnReadData.setOnClickListener {
+                if (ViewUtil.isInvalidClick(it)) {
+                    return@setOnClickListener
+                }
                 operateCallback?.invoke(null, OperateType.Read, false, node)
             }
             cbNotify.setOnClickListener { buttonView ->
+                if (ViewUtil.isInvalidClick(buttonView)) {
+                    return@setOnClickListener
+                }
                 val isChecked = cbNotify.isChecked
                 operateCallback?.invoke(buttonView as CheckBox, OperateType.Notify, isChecked, node)
             }
             cbIndicate.setOnClickListener { buttonView ->
+                if (ViewUtil.isInvalidClick(buttonView)) {
+                    return@setOnClickListener
+                }
                 val isChecked = cbIndicate.isChecked
                 operateCallback?.invoke(buttonView as CheckBox, OperateType.Indicate, isChecked, node)
             }

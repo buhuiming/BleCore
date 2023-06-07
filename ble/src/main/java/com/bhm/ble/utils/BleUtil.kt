@@ -87,4 +87,25 @@ object BleUtil {
             scanRecord = scanResult.scanRecord,
         )
     }
+
+    /**
+     * 字节数组转16进制字符串
+     *
+     * @param bytes 需要转换的byte数组
+     * @return 转换后的Hex字符串
+     */
+    fun bytesToHex(bytes: ByteArray?): String {
+        if (bytes == null) {
+            return ""
+        }
+        val sb = StringBuilder()
+        for (aByte in bytes) {
+            val hex = Integer.toHexString(aByte.toInt() and 0xFF)
+            if (hex.length < 2) {
+                sb.append(0)
+            }
+            sb.append(hex)
+        }
+        return sb.toString()
+    }
 }

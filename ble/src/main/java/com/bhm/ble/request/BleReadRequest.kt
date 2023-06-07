@@ -18,6 +18,7 @@ import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.data.UnSupportException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
 import java.util.*
 import kotlin.coroutines.Continuation
@@ -120,7 +121,9 @@ internal class BleReadRequest(
         bleReadCallbackHashMap.values.forEach {
             if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
-                    BleLogger.d("读数据成功：${value}")
+                    if (BleLogger.isLogger) {
+                        BleLogger.d("读数据成功：${BleUtil.bytesToHex(value)}")
+                    }
                     it.callReadSuccess(value)
                 } else {
                     val throwable = Throwable("读数据失败，status = $status")

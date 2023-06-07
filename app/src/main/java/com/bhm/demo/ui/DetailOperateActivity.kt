@@ -100,33 +100,23 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
                     }
                 }
                 is OperateType.Read -> {
-                    val logEntity = LogEntity(Level.INFO, "读： ${node.characteristicUUID}")
-                    viewModel.addLogMsg(logEntity)
                     viewModel.readData(getBleDevice(), node.serviceUUID, node.characteristicUUID)
                 }
                 is OperateType.Notify -> {
                     if (isChecked) {
-                        val logEntity = LogEntity(Level.INFO, "Notify： ${node.characteristicUUID}")
-                        viewModel.addLogMsg(logEntity)
                         viewModel.notify(getBleDevice(), node.serviceUUID, node.characteristicUUID) {
                             checkBox?.isChecked = false
                         }
                     } else {
-                        val logEntity = LogEntity(Level.WARNING, "取消Notify： ${node.characteristicUUID}")
-                        viewModel.addLogMsg(logEntity)
                         viewModel.stopNotify(getBleDevice(), node.serviceUUID, node.characteristicUUID)
                     }
                 }
                 is OperateType.Indicate -> {
                     if (isChecked) {
-                        val logEntity = LogEntity(Level.INFO, "Indicate： ${node.characteristicUUID}")
-                        viewModel.addLogMsg(logEntity)
                         viewModel.indicate(getBleDevice(), node.serviceUUID, node.characteristicUUID) {
                             checkBox?.isChecked = false
                         }
                     } else {
-                        val logEntity = LogEntity(Level.WARNING, "取消Indicate： ${node.characteristicUUID}")
-                        viewModel.addLogMsg(logEntity)
                         viewModel.stopIndicate(getBleDevice(), node.serviceUUID, node.characteristicUUID)
                     }
                 }
