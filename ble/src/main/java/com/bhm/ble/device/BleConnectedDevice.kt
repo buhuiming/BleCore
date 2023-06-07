@@ -83,7 +83,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     }
 
     /**
-     * 当读取设备时会触发
+     * 当读取设备数据时会触发
      */
     override fun onCharacteristicRead(
         gatt: BluetoothGatt,
@@ -92,7 +92,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         status: Int
     ) {
         super.onCharacteristicRead(gatt, characteristic, value, status)
-        bleReadRequest.onCharacteristicRead(gatt, characteristic, value, status)
+        bleReadRequest.onCharacteristicRead(characteristic, value, status)
     }
 
     /**
@@ -227,6 +227,15 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
      */
     fun setConnectionPriority(connectionPriority: Int): Boolean {
         return bleSetPriorityRequest.setConnectionPriority(connectionPriority)
+    }
+
+    /**
+     * 读数据
+     */
+    fun readData(serviceUUID: String,
+             readUUID: String,
+             bleIndicateCallback: BleReadCallback) {
+        bleReadRequest.readCharacteristic(serviceUUID, readUUID, bleIndicateCallback)
     }
 
     fun removeNotifyCallback(uuid: String?) {

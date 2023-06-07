@@ -55,16 +55,18 @@
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
-    <CheckBox
-            android:id="@+id/cbRead"
-            android:layout_width="wrap_content"
+    <Button
+            android:id="@+id/btnReadData"
+            android:layout_width="70dp"
             android:layout_height="40dp"
-            android:text="读"
-            android:textColor="@color/black"
-            android:textSize="14sp"
-            android:visibility="gone"
             android:layout_marginEnd="10dp"
-            android:checked="false"/>
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:textSize="13sp"
+            android:padding="0dp"
+            android:visibility="gone"
+            android:background="@color/purple_500"
+            android:text="读数据"/>
 
     <CheckBox
             android:id="@+id/cbWrite"

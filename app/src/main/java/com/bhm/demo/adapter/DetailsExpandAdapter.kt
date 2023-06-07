@@ -7,6 +7,7 @@ package com.bhm.demo.adapter
 
 import android.bluetooth.BluetoothGattCharacteristic
 import android.view.View
+import android.widget.Button
 import android.widget.CheckBox
 import com.bhm.demo.R
 import com.bhm.demo.entity.CharacteristicNode
@@ -25,7 +26,7 @@ import com.chad.library.adapter.base.viewholder.BaseViewHolder
  * @date 2023年06月01日 10时10分
  */
 class DetailsExpandAdapter(nodeList: MutableList<BaseNode>,
-                           operateCallback: ((checkBox: CheckBox,
+                           operateCallback: ((checkBox: CheckBox?,
                                               operateType: OperateType,
                                               isChecked: Boolean,
                                               node: CharacteristicNode) -> Unit)? = null
@@ -70,7 +71,7 @@ class DetailsExpandAdapter(nodeList: MutableList<BaseNode>,
         }
     }
 
-    class CharacteristicProvider(private val operateCallback: ((checkBox: CheckBox,
+    class CharacteristicProvider(private val operateCallback: ((checkBox: CheckBox?,
                                                                 operateType: OperateType,
                                                                 isChecked: Boolean,
                                                                 node: CharacteristicNode) -> Unit)? = null
@@ -88,12 +89,12 @@ class DetailsExpandAdapter(nodeList: MutableList<BaseNode>,
             helper.setGone(R.id.tvCharacteristicProperties, node.characteristicProperties.isEmpty())
 
             val cbWrite = helper.getView<CheckBox>(R.id.cbWrite)
-            val cbRead = helper.getView<CheckBox>(R.id.cbRead)
+            val btnReadData = helper.getView<Button>(R.id.btnReadData)
             val cbNotify = helper.getView<CheckBox>(R.id.cbNotify)
             val cbIndicate = helper.getView<CheckBox>(R.id.cbIndicate)
 
             val charaProp: Int = node.characteristicIntProperties
-            helper.setGone(R.id.cbRead, charaProp and BluetoothGattCharacteristic.PROPERTY_READ <= 0)
+            helper.setGone(R.id.btnReadData, charaProp and BluetoothGattCharacteristic.PROPERTY_READ <= 0)
             helper.setGone(R.id.cbWrite, charaProp and BluetoothGattCharacteristic.PROPERTY_WRITE <= 0 &&
                     charaProp and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE <= 0)
             helper.setGone(R.id.cbNotify, charaProp and BluetoothGattCharacteristic.PROPERTY_NOTIFY <= 0)
@@ -103,9 +104,8 @@ class DetailsExpandAdapter(nodeList: MutableList<BaseNode>,
                 val isChecked = cbWrite.isChecked
                 operateCallback?.invoke(buttonView as CheckBox, OperateType.Write, isChecked, node)
             }
-            cbRead.setOnClickListener { buttonView ->
-                val isChecked = cbRead.isChecked
-                operateCallback?.invoke(buttonView as CheckBox, OperateType.Read, isChecked, node)
+            btnReadData.setOnClickListener {
+                operateCallback?.invoke(null, OperateType.Read, false, node)
             }
             cbNotify.setOnClickListener { buttonView ->
                 val isChecked = cbNotify.isChecked

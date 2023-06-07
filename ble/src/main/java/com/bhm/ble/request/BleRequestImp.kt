@@ -74,7 +74,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      * 扫描并连接，如果扫描到多个设备，则会连接第一个
      */
     override fun startScanAndConnect(bleScanCallback: BleScanCallback.() -> Unit,
-                            bleConnectCallback: BleConnectCallback.() -> Unit) {
+                                     bleConnectCallback: BleConnectCallback.() -> Unit) {
         val scanCallback = BleScanCallback()
         scanCallback.apply(bleScanCallback)
         val connectCallback = BleConnectCallback()
@@ -109,13 +109,13 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             if (device == null || device?.deviceInfo == null) {
                 connectCallback.callConnectFail(
                     BleDevice(null,
-                    "",
-                    "",
-                    0,
-                    0,
-                    null,
-                    0
-                ), BleConnectFailType.ScanNullableBluetoothDevice)
+                        "",
+                        "",
+                        0,
+                        0,
+                        null,
+                        0
+                    ), BleConnectFailType.ScanNullableBluetoothDevice)
                 return@launchInMainThread
             }
             connect(device!!) {
@@ -282,6 +282,23 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     override fun setConnectionPriority(bleDevice: BleDevice, connectionPriority: Int): Boolean {
         val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         return request?.setConnectionPriority(connectionPriority)?: false
+    }
+
+    /**
+     * 读数据
+     */
+    override fun readData(bleDevice: BleDevice,
+                      serviceUUID: String,
+                      readUUID: String,
+                      bleIndicateCallback: BleReadCallback.() -> Unit) {
+        val callback = BleReadCallback()
+        callback.apply(bleIndicateCallback)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
+        request?.let {
+            it.readData(serviceUUID, readUUID, callback)
+            return
+        }
+        callback.callReadFail(UnConnectedException("读数据失败，设备未连接"))
     }
 
     /**

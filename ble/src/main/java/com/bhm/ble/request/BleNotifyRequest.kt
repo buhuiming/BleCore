@@ -18,6 +18,9 @@ import com.bhm.ble.control.BleTask
 import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.data.BleNotificationFailType
 import com.bhm.ble.data.Constants
+import com.bhm.ble.data.Constants.NOTIFY
+import com.bhm.ble.data.Constants.NOTIFY_TASK_ID
+import com.bhm.ble.data.Constants.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR
 import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.utils.BleLogger
@@ -77,7 +80,7 @@ internal class BleNotifyRequest(
 //            var job: Job? = null
             var mContinuation: Continuation<Throwable?>? = null
             val task = BleTask (
-                Constants.NOTIFY_TASK_ID,
+                NOTIFY_TASK_ID,
                 durationTimeMillis = getOperateTime(),
                 callInMainThread = false,
                 autoDoNextTask = true,
@@ -109,7 +112,7 @@ internal class BleNotifyRequest(
                             BleLogger.e("设置Notify超时")
                             bleNotifyCallback.callNotifyFail(
                                 BleNotificationFailType.TimeoutCancellationFailType(
-                                    Constants.NOTIFY
+                                    NOTIFY
                                 ))
                         }
                     }
@@ -120,7 +123,7 @@ internal class BleNotifyRequest(
             BleLogger.e("设置Notify失败，此特性不支持通知")
             bleNotifyCallback.callNotifyFail(
                 BleNotificationFailType.UnSupportNotifyFailType(
-                    Constants.NOTIFY
+                    NOTIFY
                 ))
         }
     }
@@ -177,7 +180,7 @@ internal class BleNotifyRequest(
                     BleLogger.d("设置Notify成功")
                     it.callNotifySuccess()
                 } else {
-                    val exception = BleNotificationFailType.DescriptorFailType(Constants.NOTIFY)
+                    val exception = BleNotificationFailType.DescriptorFailType(NOTIFY)
                     cancelNotifyJob()
                     BleLogger.e("设置Notify失败：${exception.message}")
                     it.callNotifyFail(exception)
@@ -198,7 +201,7 @@ internal class BleNotifyRequest(
         val setSuccess = bluetoothGatt?.setCharacteristicNotification(characteristic, enable)
         if (setSuccess != true) {
             val exception = BleNotificationFailType.SetCharacteristicNotificationFailType(
-                Constants.NOTIFY
+                NOTIFY
             )
             cancelNotifyJob()
             BleLogger.e("设置Notify失败，SetCharacteristicNotificationFail")
@@ -208,11 +211,11 @@ internal class BleNotifyRequest(
         val descriptor = if (useCharacteristicDescriptor) {
             characteristic.getDescriptor(characteristic.uuid)
         } else {
-            characteristic.getDescriptor(UUID.fromString(Constants.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR))
+            characteristic.getDescriptor(UUID.fromString(UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR))
         }
         if (descriptor == null) {
             val exception = BleNotificationFailType.SetCharacteristicNotificationFailType(
-                Constants.NOTIFY
+                NOTIFY
             )
             cancelNotifyJob()
             BleLogger.e("设置Notify失败，SetCharacteristicNotificationFail")
@@ -239,7 +242,7 @@ internal class BleNotifyRequest(
             success = writeDescriptor == true
         }
         if (!success) {
-            val exception = BleNotificationFailType.DescriptorFailType(Constants.NOTIFY)
+            val exception = BleNotificationFailType.DescriptorFailType(NOTIFY)
             cancelNotifyJob()
             BleLogger.e("设置Notify失败，Descriptor写数据失败")
             bleNotifyCallback?.callNotifyFail(exception)
@@ -252,6 +255,6 @@ internal class BleNotifyRequest(
      * 取消设置notify任务
      */
     private fun cancelNotifyJob() {
-        bleTaskQueue.removeTask(taskId = Constants.NOTIFY_TASK_ID)
+        bleTaskQueue.removeTask(taskId = NOTIFY_TASK_ID)
     }
 }

@@ -17,7 +17,9 @@ import com.bhm.ble.callback.BleIndicateCallback
 import com.bhm.ble.control.BleTask
 import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.data.BleNotificationFailType
-import com.bhm.ble.data.Constants
+import com.bhm.ble.data.Constants.INDICATE
+import com.bhm.ble.data.Constants.INDICATE_TASK_ID
+import com.bhm.ble.data.Constants.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR
 import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.utils.BleLogger
@@ -76,7 +78,7 @@ internal class BleIndicateRequest(
             addIndicateCallback(indicateUUID, bleIndicateCallback)
             var mContinuation: Continuation<Throwable?>? = null
             val task = BleTask (
-                Constants.INDICATE_TASK_ID,
+                INDICATE_TASK_ID,
                 durationTimeMillis = getOperateTime(),
                 callInMainThread = false,
                 autoDoNextTask = true,
@@ -96,7 +98,7 @@ internal class BleIndicateRequest(
                             BleLogger.e("设置Indicate超时")
                             bleIndicateCallback.callIndicateFail(
                                 BleNotificationFailType.TimeoutCancellationFailType(
-                                    Constants.INDICATE
+                                    INDICATE
                                 ))
                         }
                     }
@@ -107,7 +109,7 @@ internal class BleIndicateRequest(
             BleLogger.e("设置Indicate失败，此特性不支持通知")
             bleIndicateCallback.callIndicateFail(
                 BleNotificationFailType.UnSupportNotifyFailType(
-                    Constants.INDICATE
+                    INDICATE
                 ))
         }
     }
@@ -164,7 +166,7 @@ internal class BleIndicateRequest(
                     BleLogger.d("设置Indicate成功")
                     it.callIndicateSuccess()
                 } else {
-                    val exception = BleNotificationFailType.DescriptorFailType(Constants.INDICATE)
+                    val exception = BleNotificationFailType.DescriptorFailType(INDICATE)
                     cancelIndicateJob()
                     BleLogger.e("设置Indicate失败：${exception.message}")
                     it.callIndicateFail(exception)
@@ -185,7 +187,7 @@ internal class BleIndicateRequest(
         val setSuccess = bluetoothGatt?.setCharacteristicNotification(characteristic, enable)
         if (setSuccess != true) {
             val exception = BleNotificationFailType.SetCharacteristicNotificationFailType(
-                Constants.INDICATE
+                INDICATE
             )
             cancelIndicateJob()
             BleLogger.e("设置Indicate失败，SetCharacteristicNotificationFail")
@@ -195,11 +197,11 @@ internal class BleIndicateRequest(
         val descriptor = if (useCharacteristicDescriptor) {
             characteristic.getDescriptor(characteristic.uuid)
         } else {
-            characteristic.getDescriptor(UUID.fromString(Constants.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR))
+            characteristic.getDescriptor(UUID.fromString(UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR))
         }
         if (descriptor == null) {
             val exception = BleNotificationFailType.SetCharacteristicNotificationFailType(
-                Constants.INDICATE
+                INDICATE
             )
             cancelIndicateJob()
             BleLogger.e("设置Indicate失败，SetCharacteristicNotificationFail")
@@ -226,7 +228,7 @@ internal class BleIndicateRequest(
             success = writeDescriptor == true
         }
         if (!success) {
-            val exception = BleNotificationFailType.DescriptorFailType(Constants.INDICATE)
+            val exception = BleNotificationFailType.DescriptorFailType(INDICATE)
             cancelIndicateJob()
             BleLogger.e("设置Indicate失败，Descriptor写数据失败")
             bleIndicateCallback?.callIndicateFail(exception)
@@ -239,6 +241,6 @@ internal class BleIndicateRequest(
      * 取消设置indicate任务
      */
     private fun cancelIndicateJob() {
-        bleTaskQueue.removeTask(taskId = Constants.INDICATE_TASK_ID)
+        bleTaskQueue.removeTask(taskId = INDICATE_TASK_ID)
     }
 }

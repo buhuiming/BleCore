@@ -294,6 +294,16 @@ class BleManager private constructor() {
     }
 
     /**
+     * 读数据
+     */
+    fun readData(bleDevice: BleDevice,
+             serviceUUID: String,
+             readUUID: String,
+             bleIndicateCallback: BleReadCallback.() -> Unit) {
+        bleBaseRequest?.readData(bleDevice, serviceUUID, readUUID, bleIndicateCallback)
+    }
+
+    /**
      * 移除该设备的连接回调
      */
     fun removeBleConnectCallback(bleDevice: BleDevice) {

@@ -12,7 +12,7 @@ import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.BleMtuChangedCallback
 import com.bhm.ble.control.BleTask
 import com.bhm.ble.control.BleTaskQueue
-import com.bhm.ble.data.Constants
+import com.bhm.ble.data.Constants.SET_MTU_TASK_ID
 import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.utils.BleLogger
@@ -54,7 +54,7 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
         addMtuChangedCallback(bleMtuChangedCallback)
         var mContinuation: Continuation<Throwable?>? = null
         val task = BleTask (
-            Constants.SET_MTU_TASK_ID,
+            SET_MTU_TASK_ID,
             durationTimeMillis = getOperateTime(),
             callInMainThread = false,
             autoDoNextTask = true,
@@ -92,8 +92,9 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
                 BleLogger.d("设置Mtu成功：$mtu")
                 it.callMtuChanged(mtu)
             } else {
-                BleLogger.e("设置Mtu失败，status = $status")
-                it.callSetMtuFail(Throwable("设置Mtu失败，status = $status"))
+                val throwable = Throwable("设置Mtu失败，status = $status")
+                BleLogger.e(throwable.message)
+                it.callSetMtuFail(throwable)
             }
         }
     }
@@ -103,6 +104,6 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
      */
     @Synchronized
     private fun cancelSetMtuJob() {
-        bleTaskQueue.removeTask(taskId = Constants.SET_MTU_TASK_ID)
+        bleTaskQueue.removeTask(taskId = SET_MTU_TASK_ID)
     }
 }

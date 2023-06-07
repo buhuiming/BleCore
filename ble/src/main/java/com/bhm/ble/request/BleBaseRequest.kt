@@ -113,6 +113,14 @@ internal interface BleBaseRequest {
     fun setConnectionPriority(bleDevice: BleDevice, connectionPriority: Int): Boolean
 
     /**
+     * 读数据
+     */
+    fun readData(bleDevice: BleDevice,
+             serviceUUID: String,
+             readUUID: String,
+             bleIndicateCallback: BleReadCallback.() -> Unit)
+
+    /**
      * 移除该设备的连接回调
      */
     fun removeBleConnectCallback(bleDevice: BleDevice)
