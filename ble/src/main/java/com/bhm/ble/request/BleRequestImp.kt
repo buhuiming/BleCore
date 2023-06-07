@@ -10,8 +10,7 @@ package com.bhm.ble.request
 import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.*
 import com.bhm.ble.control.*
-import com.bhm.ble.data.BleConnectFailType
-import com.bhm.ble.data.BleDevice
+import com.bhm.ble.data.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -185,7 +184,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             it.enableCharacteristicNotify(serviceUUID, notifyUUID, useCharacteristicDescriptor, callback)
             return
         }
-        callback.callNotifyFail(NotificationFailException.UnConnectedException(NOTIFY))
+        callback.callNotifyFail(BleNotificationFailType.UnConnectedFailType(NOTIFY))
     }
 
     /**
@@ -219,7 +218,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             it.enableCharacteristicIndicate(serviceUUID, indicateUUID, useCharacteristicDescriptor, callback)
             return
         }
-        callback.callIndicateFail(NotificationFailException.UnConnectedException(INDICATE))
+        callback.callIndicateFail(BleNotificationFailType.UnConnectedFailType(INDICATE))
     }
 
     /**
@@ -249,7 +248,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             it.readRemoteRssi(callback)
             return
         }
-        callback.callRssiFail(UnConnectedThrowable("读取Rssi失败，设备未连接"))
+        callback.callRssiFail(UnConnectedException("读取Rssi失败，设备未连接"))
     }
 
     /**
@@ -263,7 +262,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             it.setMtu(mtu, callback)
             return
         }
-        callback.callSetMtuFail(UnConnectedThrowable("设置mtu失败，设备未连接"))
+        callback.callSetMtuFail(UnConnectedException("设置mtu失败，设备未连接"))
     }
 
     /**

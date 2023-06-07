@@ -10,6 +10,9 @@ package com.bhm.ble.control
 import com.bhm.ble.control.BleTask.Companion.CANCEL_UN_COMPLETE
 import com.bhm.ble.control.BleTask.Companion.COMPLETED
 import com.bhm.ble.control.BleTask.Companion.UN_COMPLETE
+import com.bhm.ble.data.CancelException
+import com.bhm.ble.data.CompleteException
+import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.utils.BleLogger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -68,9 +71,9 @@ class BleTaskQueue {
             task.doTask()
             if (task.completed() == UN_COMPLETE) {
                 task.setCompleted(COMPLETED)
-                task.callback?.invoke(task, CompleteThrowable())
+                task.callback?.invoke(task, CompleteException())
             } else if (task.completed() == CANCEL_UN_COMPLETE) {
-                task.callback?.invoke(task, CancellationThrowable())
+                task.callback?.invoke(task, CancelException())
             }
             taskList.remove(task)
             BleLogger.i("任务：${task}结束完毕，剩下${taskList.size}个任务")
@@ -126,7 +129,7 @@ class BleTaskQueue {
                 task.completed() == UN_COMPLETE) {
                 BleLogger.e("任务超时，即刻移除：$task")
                 removeTask(task)
-                task.callback?.invoke(task, TimeoutCancellationThrowable())
+                task.callback?.invoke(task, TimeoutCancelException())
             } else if (it is CancellationException){
                 BleLogger.i("任务未超时：$task")
             }

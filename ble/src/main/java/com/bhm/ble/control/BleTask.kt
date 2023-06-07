@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * callInMainThread：指定在主线程执行，默认为false
  * autoDoNextTask = true自动执行下一个任务，= false，则需要调用doNextTask()执行下一个任务
  * interrupt：中断任务执行
- * callback：任务执行回调，成功throwable = CompleteThrowable，超时throwable = TimeoutCancellationThrowable，
+ * callback：任务执行回调，成功throwable = CompleteException，超时throwable = TimeoutCancelException，
  * 任务中断抛异常 throwable = CancellationException
  * @author Buhuiming
  * @date 2023年06月02日 11时01分
