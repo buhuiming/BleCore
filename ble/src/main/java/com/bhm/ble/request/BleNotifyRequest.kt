@@ -17,7 +17,6 @@ import com.bhm.ble.callback.BleNotifyCallback
 import com.bhm.ble.control.BleTask
 import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.data.BleNotificationFailType
-import com.bhm.ble.data.Constants
 import com.bhm.ble.data.Constants.NOTIFY
 import com.bhm.ble.data.Constants.NOTIFY_TASK_ID
 import com.bhm.ble.data.Constants.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR
@@ -110,7 +109,7 @@ internal class BleNotifyRequest(
                     throwable?.let {
                         BleLogger.e(it.message)
                         if (it is TimeoutCancellationException || it is TimeoutCancelException) {
-                            BleLogger.e("${bleDevice.deviceAddress}设置Notify超时")
+                            BleLogger.e("${bleDevice.deviceAddress} -> 设置Notify超时")
                             bleNotifyCallback.callNotifyFail(
                                 BleNotificationFailType.TimeoutCancellationFailType(
                                     NOTIFY
@@ -121,7 +120,7 @@ internal class BleNotifyRequest(
             )
             bleTaskQueue.addTask(task)
         } else {
-            BleLogger.e("${bleDevice.deviceAddress}设置Notify失败，此特性不支持通知")
+            BleLogger.e("${bleDevice.deviceAddress} -> 设置Notify失败，此特性不支持通知")
             bleNotifyCallback.callNotifyFail(
                 BleNotificationFailType.UnSupportNotifyFailType(
                     NOTIFY
@@ -162,7 +161,7 @@ internal class BleNotifyRequest(
         bleNotifyCallbackHashMap.values.forEach {
             if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
                 if (BleLogger.isLogger) {
-                    BleLogger.d("${bleDevice.deviceAddress}收到Notify数据：${BleUtil.bytesToHex(value)}")
+                    BleLogger.d("${bleDevice.deviceAddress} -> 收到Notify数据：${BleUtil.bytesToHex(value)}")
                 }
                 it.callCharacteristicChanged(value)
             }
@@ -180,12 +179,12 @@ internal class BleNotifyRequest(
             if (descriptor?.characteristic?.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     cancelNotifyJob()
-                    BleLogger.d("${bleDevice.deviceAddress}设置Notify成功")
+                    BleLogger.d("${bleDevice.deviceAddress} -> 设置Notify成功")
                     it.callNotifySuccess()
                 } else {
                     val exception = BleNotificationFailType.DescriptorFailType(NOTIFY)
                     cancelNotifyJob()
-                    BleLogger.e("${bleDevice.deviceAddress}设置Notify失败：${exception.message}")
+                    BleLogger.e("${bleDevice.deviceAddress} -> 设置Notify失败：${exception.message}")
                     it.callNotifyFail(exception)
                 }
             }
@@ -207,7 +206,7 @@ internal class BleNotifyRequest(
                 NOTIFY
             )
             cancelNotifyJob()
-            BleLogger.e("${bleDevice.deviceAddress}设置Notify失败，SetCharacteristicNotificationFail")
+            BleLogger.e("${bleDevice.deviceAddress} -> 设置Notify失败，SetCharacteristicNotificationFail")
             bleNotifyCallback?.callNotifyFail(exception)
             return false
         }
@@ -221,7 +220,7 @@ internal class BleNotifyRequest(
                 NOTIFY
             )
             cancelNotifyJob()
-            BleLogger.e("${bleDevice.deviceAddress}设置Notify失败，SetCharacteristicNotificationFail")
+            BleLogger.e("${bleDevice.deviceAddress} -> 设置Notify失败，SetCharacteristicNotificationFail")
             bleNotifyCallback?.callNotifyFail(exception)
             return false
         }
@@ -247,7 +246,7 @@ internal class BleNotifyRequest(
         if (!success) {
             val exception = BleNotificationFailType.DescriptorFailType(NOTIFY)
             cancelNotifyJob()
-            BleLogger.e("${bleDevice.deviceAddress}设置Notify失败，Descriptor写数据失败")
+            BleLogger.e("${bleDevice.deviceAddress} -> 设置Notify失败，Descriptor写数据失败")
             bleNotifyCallback?.callNotifyFail(exception)
             return false
         }

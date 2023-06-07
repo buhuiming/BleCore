@@ -73,8 +73,8 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
                 throwable?.let {
                     BleLogger.e(it.message)
                     if (it is TimeoutCancellationException || it is TimeoutCancelException) {
-                        BleLogger.e("${bleDevice.deviceAddress}设置Mtu超时")
-                        bleMtuChangedCallback.callSetMtuFail(TimeoutCancelException("${bleDevice.deviceAddress}设置mtu失败，超时"))
+                        BleLogger.e("${bleDevice.deviceAddress} -> 设置Mtu超时")
+                        bleMtuChangedCallback.callSetMtuFail(TimeoutCancelException("${bleDevice.deviceAddress} -> 设置mtu失败，超时"))
                     }
                 }
             }
@@ -89,10 +89,10 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
         cancelSetMtuJob()
         bleMtuChangedCallback?.let {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                BleLogger.d("${bleDevice.deviceAddress}设置Mtu成功：$mtu")
+                BleLogger.d("${bleDevice.deviceAddress} -> 设置Mtu成功：$mtu")
                 it.callMtuChanged(mtu)
             } else {
-                val throwable = Throwable("${bleDevice.deviceAddress}设置Mtu失败，status = $status")
+                val throwable = Throwable("${bleDevice.deviceAddress} -> 设置Mtu失败，status = $status")
                 BleLogger.e(throwable.message)
                 it.callSetMtuFail(throwable)
             }
