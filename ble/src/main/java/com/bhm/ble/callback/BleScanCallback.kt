@@ -5,7 +5,7 @@
  */
 package com.bhm.ble.callback
 
-import com.bhm.ble.data.BleDevice
+import com.bhm.ble.device.BleDevice
 import com.bhm.ble.data.BleScanFailType
 
 
@@ -95,7 +95,7 @@ open class BleScanCallback : BleBaseCallback(){
     }
 
     open fun callScanComplete(bleDeviceList: MutableList<BleDevice>,
-                                  bleDeviceDuplicateRemovalList: MutableList<BleDevice>) {
+                              bleDeviceDuplicateRemovalList: MutableList<BleDevice>) {
         launchInMainThread {
             scanComplete?.invoke(bleDeviceList, bleDeviceDuplicateRemovalList)
         }

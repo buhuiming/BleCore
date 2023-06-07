@@ -7,7 +7,7 @@ package com.bhm.ble.callback
 
 import android.bluetooth.BluetoothGatt
 import com.bhm.ble.data.BleConnectFailType
-import com.bhm.ble.data.BleDevice
+import com.bhm.ble.device.BleDevice
 
 
 /**
@@ -78,7 +78,7 @@ open class BleConnectCallback : BleBaseCallback(){
     }
 
     open fun callDisConnected(isActiveDisConnected: Boolean, bleDevice: BleDevice,
-                                  gatt: BluetoothGatt?, status: Int) {
+                              gatt: BluetoothGatt?, status: Int) {
         launchInMainThread {
             disConnected?.invoke(isActiveDisConnected, bleDevice, gatt, status)
         }

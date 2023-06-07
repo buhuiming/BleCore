@@ -5,7 +5,7 @@
  */
 @file:Suppress("DEPRECATION")
 
-package com.bhm.ble.data
+package com.bhm.ble.device
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanRecord

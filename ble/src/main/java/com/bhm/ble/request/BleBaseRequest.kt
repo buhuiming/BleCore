@@ -7,7 +7,7 @@ package com.bhm.ble.request
 
 import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.*
-import com.bhm.ble.data.BleDevice
+import com.bhm.ble.device.BleDevice
 
 
 /**

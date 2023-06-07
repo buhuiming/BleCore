@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import com.bhm.ble.BleManager
-import com.bhm.ble.data.BleDevice
+import com.bhm.ble.device.BleDevice
 import com.bhm.demo.R
 import com.bhm.demo.databinding.LayoutRecyclerItemBinding
 import com.chad.library.adapter.base.BaseQuickAdapter

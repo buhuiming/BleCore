@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bhm.ble.BleManager
-import com.bhm.ble.data.BleDevice
+import com.bhm.ble.device.BleDevice
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.R
 import com.bhm.demo.adapter.DetailsExpandAdapter

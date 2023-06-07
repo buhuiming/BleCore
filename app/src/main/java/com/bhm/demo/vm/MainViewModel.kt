@@ -10,7 +10,7 @@ import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.data.BleConnectFailType
-import com.bhm.ble.data.BleDevice
+import com.bhm.ble.device.BleDevice
 import com.bhm.ble.data.BleScanFailType
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
@@ -34,8 +34,10 @@ import kotlin.coroutines.suspendCoroutine
  */
 class MainViewModel(private val application: Application) : BaseViewModel(application) {
 
-    private val listDRMutableStateFlow = MutableStateFlow(BleDevice(null,
-        null, null, null, null, null))
+    private val listDRMutableStateFlow = MutableStateFlow(
+        BleDevice(null,
+        null, null, null, null, null)
+    )
 
     val listDRStateFlow: StateFlow<BleDevice> = listDRMutableStateFlow
 

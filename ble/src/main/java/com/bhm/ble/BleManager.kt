@@ -10,7 +10,7 @@ import android.bluetooth.BluetoothProfile
 import android.content.Context
 import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.callback.*
-import com.bhm.ble.data.BleDevice
+import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.BleBaseRequest
 import com.bhm.ble.request.BleRequestImp
 import com.bhm.ble.utils.BleLogger

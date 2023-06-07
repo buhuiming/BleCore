@@ -12,7 +12,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
-import com.bhm.ble.data.BleDevice
+import com.bhm.ble.device.BleDevice
 
 
 /**

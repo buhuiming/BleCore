@@ -15,10 +15,12 @@ import com.bhm.ble.callback.*
 import com.bhm.ble.control.*
 import com.bhm.ble.data.*
 import com.bhm.ble.data.BleConnectLastState
-import com.bhm.ble.request.BleConnectRequestManager.Companion.INDICATE_TASK_ID
-import com.bhm.ble.request.BleConnectRequestManager.Companion.NOTIFY_TASK_ID
-import com.bhm.ble.request.BleConnectRequestManager.Companion.SET_MTU_TASK_ID
-import com.bhm.ble.request.BleConnectRequestManager.Companion.SET_RSSI_TASK_ID
+import com.bhm.ble.device.BleConnectedDeviceManager
+import com.bhm.ble.device.BleDevice
+import com.bhm.ble.device.BleConnectedDeviceManager.Companion.INDICATE_TASK_ID
+import com.bhm.ble.device.BleConnectedDeviceManager.Companion.NOTIFY_TASK_ID
+import com.bhm.ble.device.BleConnectedDeviceManager.Companion.SET_MTU_TASK_ID
+import com.bhm.ble.device.BleConnectedDeviceManager.Companion.SET_RSSI_TASK_ID
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.*
@@ -78,32 +80,32 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         this.bleConnectCallback = bleConnectCallback
         if (bleDevice.deviceInfo == null) {
             BleLogger.e("连接失败：BluetoothDevice为空")
-            BleConnectRequestManager.get().removeBleConnectRequest(bleDevice.getKey())
+            BleConnectedDeviceManager.get().removeBleConnectRequest(bleDevice.getKey())
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.NullableBluetoothDevice)
             return
         }
         val bleManager = getBleManager()
         if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext)) {
             BleLogger.e("权限不足，请检查")
-            BleConnectRequestManager.get().removeBleConnectRequest(bleDevice.getKey())
+            BleConnectedDeviceManager.get().removeBleConnectRequest(bleDevice.getKey())
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.NoBlePermissionType)
             return
         }
         if (!bleManager.isBleSupport()) {
             BleLogger.e("设备不支持蓝牙")
-            BleConnectRequestManager.get().removeBleConnectRequest(bleDevice.getKey())
+            BleConnectedDeviceManager.get().removeBleConnectRequest(bleDevice.getKey())
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.UnTypeSupportBle)
             return
         }
         if (!bleManager.isBleEnable()) {
             BleLogger.e("蓝牙未打开")
-            BleConnectRequestManager.get().removeBleConnectRequest(bleDevice.getKey())
+            BleConnectedDeviceManager.get().removeBleConnectRequest(bleDevice.getKey())
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.BleDisable)
             return
         }
         if (lastState == BleConnectLastState.Connecting || lastState == BleConnectLastState.ConnectIdle) {
             BleLogger.e("连接中")
-            BleConnectRequestManager.get().removeBleConnectRequest(bleDevice.getKey())
+            BleConnectedDeviceManager.get().removeBleConnectRequest(bleDevice.getKey())
             bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.AlreadyConnecting)
             return
         }
@@ -155,7 +157,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
             disConnectGatt()
             refreshDeviceCache()
             closeBluetoothGatt()
-            BleConnectRequestManager.get()
+            BleConnectedDeviceManager.get()
                 .removeBleConnectRequest(bleDevice.getKey())
             removeRssiCallback()
             removeMtuChangedCallback()
@@ -643,7 +645,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
                             lastState = BleConnectLastState.Disconnect
                             refreshDeviceCache()
                             closeBluetoothGatt()
-                            BleConnectRequestManager.get()
+                            BleConnectedDeviceManager.get()
                                 .removeBleConnectRequest(bleDevice.getKey())
                             removeRssiCallback()
                             removeMtuChangedCallback()
@@ -875,7 +877,7 @@ internal class BleConnectRequest(val bleDevice: BleDevice) : Request(){
         lastState = BleConnectLastState.ConnectFailure
         refreshDeviceCache()
         closeBluetoothGatt()
-        BleConnectRequestManager.get().removeBleConnectRequest(bleDevice.getKey())
+        BleConnectedDeviceManager.get().removeBleConnectRequest(bleDevice.getKey())
     }
 
     /**

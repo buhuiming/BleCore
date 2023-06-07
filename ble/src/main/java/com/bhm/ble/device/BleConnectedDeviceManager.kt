@@ -5,12 +5,12 @@
  */
 @file:Suppress("SENSELESS_COMPARISON")
 
-package com.bhm.ble.request
+package com.bhm.ble.device
 
 import com.bhm.ble.BleManager
 import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.control.BleLruHashMap
-import com.bhm.ble.data.BleDevice
+import com.bhm.ble.request.BleConnectRequest
 
 
 /**
@@ -19,7 +19,7 @@ import com.bhm.ble.data.BleDevice
  * @author Buhuiming
  * @date 2023年05月26日 08时54分
  */
-internal class BleConnectRequestManager private constructor() {
+internal class BleConnectedDeviceManager private constructor() {
 
     private val bleLruHashMap: BleLruHashMap<String, BleConnectRequest?> =
         BleLruHashMap(BleManager.get().getOptions()?.maxConnectNum
@@ -39,12 +39,12 @@ internal class BleConnectRequestManager private constructor() {
 
         const val WRITE_TASK_ID = 1005
 
-        private var instance: BleConnectRequestManager = BleConnectRequestManager()
+        private var instance: BleConnectedDeviceManager = BleConnectedDeviceManager()
 
         @Synchronized
-        fun get(): BleConnectRequestManager {
+        fun get(): BleConnectedDeviceManager {
             if (instance == null) {
-                instance = BleConnectRequestManager()
+                instance = BleConnectedDeviceManager()
             }
             return instance
         }

@@ -8,9 +8,7 @@ package com.bhm.demo.vm
 import android.app.Application
 import android.bluetooth.BluetoothGattCharacteristic
 import com.bhm.ble.BleManager
-import com.bhm.ble.attribute.BleOptions
-import com.bhm.ble.callback.BleMtuChangedCallback
-import com.bhm.ble.data.BleDevice
+import com.bhm.ble.device.BleDevice
 import com.bhm.demo.entity.CharacteristicNode
 import com.bhm.demo.entity.LogEntity
 import com.bhm.demo.entity.ServiceNode
@@ -147,9 +145,9 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
      * indicate
      */
     fun indicate(bleDevice: BleDevice,
-               serviceUUID: String,
-               indicateUUID: String,
-               failCall: () -> Unit) {
+                 serviceUUID: String,
+                 indicateUUID: String,
+                 failCall: () -> Unit) {
         BleManager.get().indicate(bleDevice, serviceUUID, indicateUUID, false) {
             onIndicateFail {
                 addLogMsg(LogEntity(Level.OFF, "indicate失败，${indicateUUID}：${it.message}"))
