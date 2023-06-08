@@ -85,6 +85,7 @@ internal class BleIndicateRequest(
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation
                         setCharacteristicIndicate(
+                            indicateUUID,
                             characteristic,
                             useCharacteristicDescriptor,
                             true,
@@ -99,20 +100,18 @@ internal class BleIndicateRequest(
                     throwable?.let {
                         BleLogger.e(it.message)
                         if (it is TimeoutCancellationException || it is TimeoutCancelException) {
-                            BleLogger.e("${bleDevice.deviceAddress} -> 设置Indicate超时")
-                            bleIndicateCallback.callIndicateFail(
-                                TimeoutCancelException("设置Indicate失败，设置超时")
-                            )
+                            val exception = TimeoutCancelException("$indicateUUID -> 设置Indicate失败，设置超时")
+                            BleLogger.e(exception.message)
+                            bleIndicateCallback.callIndicateFail(exception)
                         }
                     }
                 }
             )
             bleTaskQueue.addTask(task)
         } else {
-            BleLogger.e("${bleDevice.deviceAddress} -> 设置Indicate失败，此特性不支持通知")
-            bleIndicateCallback.callIndicateFail(
-                UnSupportException("设置Indicate失败，此特性不支持通知")
-            )
+            val exception = UnSupportException("$indicateUUID -> 设置Indicate失败，此特性不支持通知")
+            BleLogger.e(exception.message)
+            bleIndicateCallback.callIndicateFail(exception)
         }
     }
 
@@ -131,6 +130,7 @@ internal class BleIndicateRequest(
         ) {
             cancelIndicateJob()
             val success = setCharacteristicIndicate(
+                indicateUUID,
                 characteristic,
                 useCharacteristicDescriptor,
                 false,
@@ -154,7 +154,7 @@ internal class BleIndicateRequest(
         bleIndicateCallbackHashMap.values.forEach {
             if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
                 if (BleLogger.isLogger) {
-                    BleLogger.d("${bleDevice.deviceAddress} -> " +
+                    BleLogger.d("${it.getKey()} -> " +
                             "收到Indicate数据：${BleUtil.bytesToHex(value)}")
                 }
                 it.callCharacteristicChanged(value)
@@ -173,16 +173,15 @@ internal class BleIndicateRequest(
             if (descriptor?.characteristic?.uuid.toString().equals(it.getKey(), ignoreCase = true)) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     cancelIndicateJob()
-                    BleLogger.d("${bleDevice.deviceAddress} -> 设置Indicate成功")
+                    BleLogger.d("${it.getKey()} -> 设置Indicate成功")
                     it.callIndicateSuccess()
                 } else {
                     val exception = UnDefinedException(
-                        "设置Indicate失败，Descriptor写数据失败",
+                        "${it.getKey()} -> 设置Indicate失败，Descriptor写数据失败",
                         EXCEPTION_CODE_DESCRIPTOR_FAIL
                     )
                     cancelIndicateJob()
-                    BleLogger.e("${bleDevice.deviceAddress} -> " +
-                            "设置Indicate失败：${exception.message}")
+                    BleLogger.e(exception.message)
                     it.callIndicateFail(exception)
                 }
             }
@@ -193,7 +192,8 @@ internal class BleIndicateRequest(
      * 配置Indicate
      */
     @SuppressLint("MissingPermission")
-    private fun setCharacteristicIndicate(characteristic: BluetoothGattCharacteristic,
+    private fun setCharacteristicIndicate(indicateUUID: String,
+                                          characteristic: BluetoothGattCharacteristic,
                                           useCharacteristicDescriptor: Boolean,
                                           enable: Boolean,
                                           bleIndicateCallback: BleIndicateCallback?): Boolean {
@@ -201,11 +201,11 @@ internal class BleIndicateRequest(
         val setSuccess = bluetoothGatt?.setCharacteristicNotification(characteristic, enable)
         if (setSuccess != true) {
             val exception = UnDefinedException(
-                "设置Indicate失败，SetCharacteristicNotificationFail",
+                "$indicateUUID -> 设置Indicate失败，SetCharacteristicNotificationFail",
                 EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
             )
             cancelIndicateJob()
-            BleLogger.e("${bleDevice.deviceAddress} -> ${exception.message}")
+            BleLogger.e(exception.message)
             bleIndicateCallback?.callIndicateFail(exception)
             return false
         }
@@ -216,11 +216,11 @@ internal class BleIndicateRequest(
         }
         if (descriptor == null) {
             val exception = UnDefinedException(
-                "设置Indicate失败，SetCharacteristicNotificationFail",
+                "$indicateUUID -> 设置Indicate失败，SetCharacteristicNotificationFail",
                 EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
             )
             cancelIndicateJob()
-            BleLogger.e("${bleDevice.deviceAddress} -> ${exception.message}")
+            BleLogger.e(exception.message)
             bleIndicateCallback?.callIndicateFail(exception)
             return false
         }
@@ -245,11 +245,11 @@ internal class BleIndicateRequest(
         }
         if (!success) {
             val exception = UnDefinedException(
-                "设置Indicate失败，Descriptor写数据失败",
+                "$indicateUUID -> 设置Indicate失败，Descriptor写数据失败",
                 EXCEPTION_CODE_DESCRIPTOR_FAIL
             )
             cancelIndicateJob()
-            BleLogger.e("${bleDevice.deviceAddress} -> 设置Indicate失败，Descriptor写数据失败")
+            BleLogger.e(exception.message)
             bleIndicateCallback?.callIndicateFail(exception)
             return false
         }

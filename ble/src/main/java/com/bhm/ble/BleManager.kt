@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
+import android.util.SparseArray
 import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.callback.*
 import com.bhm.ble.data.Constants.DEFAULT_MTU
@@ -141,6 +142,7 @@ class BleManager private constructor() {
     @Synchronized
     fun startScanAndConnect(bleScanCallback: BleScanCallback.() -> Unit,
                             bleConnectCallback: BleConnectCallback.() -> Unit) {
+        checkInitialize()
         bleBaseRequest?.startScanAndConnect(bleScanCallback, bleConnectCallback)
     }
 
@@ -251,6 +253,7 @@ class BleManager private constructor() {
      */
     @Synchronized
     fun readRssi(bleDevice: BleDevice, bleRssiCallback: BleRssiCallback.() -> Unit) {
+        checkInitialize()
         bleBaseRequest?.readRssi(bleDevice, bleRssiCallback)
     }
 
@@ -259,7 +262,7 @@ class BleManager private constructor() {
      */
     @Synchronized
     fun setMtu(bleDevice: BleDevice, bleMtuChangedCallback: BleMtuChangedCallback.() -> Unit) {
-        setMtu(bleDevice, bleOptions?.mtu?: DEFAULT_MTU, bleMtuChangedCallback)
+        setMtu(bleDevice, getOptions()?.mtu?: DEFAULT_MTU, bleMtuChangedCallback)
     }
 
     /**
@@ -267,6 +270,7 @@ class BleManager private constructor() {
      */
     @Synchronized
     fun setMtu(bleDevice: BleDevice, mtu: Int, bleMtuChangedCallback: BleMtuChangedCallback.() -> Unit) {
+        checkInitialize()
         if (mtu > 512) {
             BleLogger.w("requiredMtu should lower than 512 !")
         }
@@ -285,6 +289,7 @@ class BleManager private constructor() {
      *
      */
     fun setConnectionPriority(bleDevice: BleDevice, connectionPriority: Int): Boolean {
+        checkInitialize()
         if (connectionPriority != BluetoothGatt.CONNECTION_PRIORITY_BALANCED &&
             connectionPriority != BluetoothGatt.CONNECTION_PRIORITY_HIGH &&
             connectionPriority != BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER) {
@@ -299,8 +304,42 @@ class BleManager private constructor() {
     fun readData(bleDevice: BleDevice,
                  serviceUUID: String,
                  readUUID: String,
-                 bleIndicateCallback: BleReadCallback.() -> Unit) {
-        bleBaseRequest?.readData(bleDevice, serviceUUID, readUUID, bleIndicateCallback)
+                 bleReadCallback: BleReadCallback.() -> Unit) {
+        checkInitialize()
+        bleBaseRequest?.readData(bleDevice, serviceUUID, readUUID, bleReadCallback)
+    }
+
+    /**
+     * 写数据
+     * 注意：因为分包后每一个包，可能是包含完整的协议，所以分包由业务层处理，组件只会根据包的长度和mtu值对比后是否拦截
+     */
+    fun writeData(bleDevice: BleDevice,
+                  serviceUUID: String,
+                  writeUUID: String,
+                  data: ByteArray,
+                  bleWriteCallback: BleWriteCallback.() -> Unit) {
+        writeData(
+            bleDevice,
+            serviceUUID,
+            writeUUID,
+            SparseArray<ByteArray>(1).apply {
+                put(0, data)
+            },
+            bleWriteCallback
+        )
+    }
+
+    /**
+     * 写数据
+     * 注意：因为分包后每一个包，可能是包含完整的协议，所以分包由业务层处理，组件只会根据包的长度和mtu值对比后是否拦截
+     */
+    fun writeData(bleDevice: BleDevice,
+                  serviceUUID: String,
+                  writeUUID: String,
+                  dataArray: SparseArray<ByteArray>,
+                  bleWriteCallback: BleWriteCallback.() -> Unit) {
+        checkInitialize()
+        bleBaseRequest?.writeData(bleDevice, serviceUUID, writeUUID, dataArray, bleWriteCallback)
     }
 
     /**
@@ -315,6 +354,7 @@ class BleManager private constructor() {
      * 移除该设备的Indicate回调
      */
     fun removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String) {
+        checkInitialize()
         bleBaseRequest?.removeBleIndicateCallback(bleDevice, indicateUUID)
     }
 
@@ -322,6 +362,7 @@ class BleManager private constructor() {
      * 移除该设备的Notify回调
      */
     fun removeBleNotifyCallback(bleDevice: BleDevice, notifyUUID: String) {
+        checkInitialize()
         bleBaseRequest?.removeBleNotifyCallback(bleDevice, notifyUUID)
     }
 
@@ -329,6 +370,7 @@ class BleManager private constructor() {
      * 移除该设备的Read回调
      */
     fun removeBleReadCallback(bleDevice: BleDevice, readUUID: String) {
+        checkInitialize()
         bleBaseRequest?.removeBleReadCallback(bleDevice, readUUID)
     }
 
@@ -336,6 +378,7 @@ class BleManager private constructor() {
      * 移除该设备的MtuChanged回调
      */
     fun removeBleMtuChangedCallback(bleDevice: BleDevice) {
+        checkInitialize()
         bleBaseRequest?.removeBleMtuChangedCallback(bleDevice)
     }
 
@@ -343,6 +386,7 @@ class BleManager private constructor() {
      * 移除该设备的Rssi回调
      */
     fun removeBleRssiCallback(bleDevice: BleDevice) {
+        checkInitialize()
         bleBaseRequest?.removeBleRssiCallback(bleDevice)
     }
 
@@ -350,6 +394,7 @@ class BleManager private constructor() {
      * 移除该设备的Write回调
      */
     fun removeBleWriteCallback(bleDevice: BleDevice, writeUUID: String) {
+        checkInitialize()
         bleBaseRequest?.removeBleWriteCallback(bleDevice, writeUUID)
     }
 
@@ -357,6 +402,7 @@ class BleManager private constructor() {
      * 移除该设备的Scan回调
      */
     fun removeBleScanCallback() {
+        checkInitialize()
         bleBaseRequest?.removeBleScanCallback()
     }
 
@@ -364,6 +410,7 @@ class BleManager private constructor() {
      * 移除该设备回调，BleConnectCallback除外
      */
     fun removeAllCharacterCallback(bleDevice: BleDevice) {
+        checkInitialize()
         bleBaseRequest?.removeAllCharacterCallback(bleDevice)
     }
 

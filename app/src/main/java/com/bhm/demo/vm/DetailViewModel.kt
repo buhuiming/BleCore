@@ -114,7 +114,7 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                failCall: () -> Unit) {
         BleManager.get().notify(bleDevice, serviceUUID, notifyUUID, false) {
             onNotifyFail {
-                addLogMsg(LogEntity(Level.OFF, "notify失败，${notifyUUID}：${it.message}"))
+                addLogMsg(LogEntity(Level.OFF, "notify失败：${it.message}"))
                 failCall.invoke()
             }
             onNotifySuccess {
@@ -151,7 +151,7 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                  failCall: () -> Unit) {
         BleManager.get().indicate(bleDevice, serviceUUID, indicateUUID, false) {
             onIndicateFail {
-                addLogMsg(LogEntity(Level.OFF, "indicate失败，${indicateUUID}：${it.message}"))
+                addLogMsg(LogEntity(Level.OFF, "indicate失败：${it.message}"))
                 failCall.invoke()
             }
             onIndicateSuccess {
@@ -188,7 +188,7 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                 addLogMsg(LogEntity(Level.OFF, "读取信号值失败：${it.message}"))
             }
             onRssiSuccess {
-                addLogMsg(LogEntity(Level.FINE, "读取信号值成功：${it}"))
+                addLogMsg(LogEntity(Level.FINE, "${bleDevice.deviceAddress} -> 读取信号值成功：${it}"))
             }
         }
     }
@@ -202,7 +202,7 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                 addLogMsg(LogEntity(Level.OFF, "设置mtu值失败：${it.message}"))
             }
             onMtuChanged {
-                addLogMsg(LogEntity(Level.FINE, "设置mtu值成功：${it}"))
+                addLogMsg(LogEntity(Level.FINE, "${bleDevice.deviceAddress} -> 设置mtu值成功：${it}"))
             }
         }
     }
@@ -215,10 +215,28 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                  readUUID: String) {
         BleManager.get().readData(bleDevice, serviceUUID, readUUID) {
             onReadFail {
-                addLogMsg(LogEntity(Level.OFF, "读特征值数据失败，${readUUID}：${it.message}"))
+                addLogMsg(LogEntity(Level.OFF, "读特征值数据失败：${it.message}"))
             }
             onReadSuccess {
-                addLogMsg(LogEntity(Level.FINE, "读特征值数据成功，${readUUID}：${BleUtil.bytesToHex(it)}"))
+                addLogMsg(LogEntity(Level.FINE, "$readUUID -> 读特征值数据成功：${BleUtil.bytesToHex(it)}"))
+            }
+        }
+    }
+
+    /**
+     * 写数据
+     * 注意：因为分包后每一个包，可能是包含完整的协议，所以分包由业务层处理，组件只会根据包的长度和mtu值对比后是否拦截
+     */
+    fun writeData(bleDevice: BleDevice,
+                  serviceUUID: String,
+                  writeUUID: String,
+                  text: String) {
+        BleManager.get().writeData(bleDevice, serviceUUID, writeUUID, text.toByteArray()) {
+            onWriteFail {
+                addLogMsg(LogEntity(Level.OFF, "写数据失败：${it.message}"))
+            }
+            onWriteSuccess { _, _, justWrite ->
+                addLogMsg(LogEntity(Level.FINE, "$writeUUID -> 写数据成功：${BleUtil.bytesToHex(justWrite)}"))
             }
         }
     }

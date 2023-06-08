@@ -8,11 +8,13 @@
 package com.bhm.ble.request
 
 import android.bluetooth.BluetoothGatt
+import android.util.SparseArray
 import com.bhm.ble.callback.*
 import com.bhm.ble.control.*
 import com.bhm.ble.data.*
 import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.utils.BleLogger
 import kotlinx.coroutines.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -147,9 +149,14 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     override fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit) {
         val callback = BleConnectCallback()
         callback.apply(bleConnectCallback)
-        bleConnectedDeviceManager
-            .buildBleConnectedDevice(bleDevice)
-            ?.connect(callback)
+        val request = bleConnectedDeviceManager.buildBleConnectedDevice(bleDevice)
+        request?.let {
+            it.connect(callback)
+            return
+        }
+        val exception = UnDefinedException("${bleDevice.deviceAddress} -> 连接失败，BleConnectedDevice为空")
+        BleLogger.e(exception.message)
+        callback.callConnectFail(bleDevice, BleConnectFailType.ConnectException(exception))
     }
 
     /**
@@ -202,7 +209,9 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             )
             return
         }
-        callback.callNotifyFail(UnConnectedException("设置Notify失败，设备未连接"))
+        val exception = UnConnectedException("$notifyUUID -> 设置Notify失败，设备未连接")
+        BleLogger.e(exception.message)
+        callback.callNotifyFail(exception)
     }
 
     /**
@@ -222,6 +231,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                 useCharacteristicDescriptor
             )
         }
+        BleLogger.e("$notifyUUID -> StopNotify失败，设备未连接")
         return false
     }
 
@@ -245,7 +255,9 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             )
             return
         }
-        callback.callIndicateFail(UnConnectedException("设置Indicate失败，设备未连接"))
+        val exception = UnConnectedException("$indicateUUID -> 设置Indicate失败，设备未连接")
+        BleLogger.e(exception.message)
+        callback.callIndicateFail(exception)
     }
 
     /**
@@ -279,7 +291,9 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             it.readRemoteRssi(callback)
             return
         }
-        callback.callRssiFail(UnConnectedException("读取Rssi失败，设备未连接"))
+        val exception = UnConnectedException("${bleDevice.deviceAddress} -> 读取Rssi失败，设备未连接")
+        BleLogger.e(exception.message)
+        callback.callRssiFail(exception)
     }
 
     /**
@@ -295,7 +309,9 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             it.setMtu(mtu, callback)
             return
         }
-        callback.callSetMtuFail(UnConnectedException("设置mtu失败，设备未连接"))
+        val exception = UnConnectedException("${bleDevice.deviceAddress} -> 设置mtu失败，设备未连接")
+        BleLogger.e(exception.message)
+        callback.callSetMtuFail(exception)
     }
 
     /**
@@ -316,15 +332,38 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     override fun readData(bleDevice: BleDevice,
                           serviceUUID: String,
                           readUUID: String,
-                          bleIndicateCallback: BleReadCallback.() -> Unit) {
+                          bleReadCallback: BleReadCallback.() -> Unit) {
         val callback = BleReadCallback()
-        callback.apply(bleIndicateCallback)
+        callback.apply(bleReadCallback)
         val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.let {
             it.readData(serviceUUID, readUUID, callback)
             return
         }
-        callback.callReadFail(UnConnectedException("读特征值数据失败，设备未连接"))
+        val exception = UnConnectedException("$readUUID -> 读特征值数据失败，设备未连接")
+        BleLogger.e(exception.message)
+        callback.callReadFail(exception)
+    }
+
+    /**
+     * 写数据
+     * 注意：因为分包后每一个包，可能是包含完整的协议，所以分包由业务层处理，组件只会根据包的长度和mtu值对比后是否拦截
+     */
+    override fun writeData(bleDevice: BleDevice,
+                  serviceUUID: String,
+                  writeUUID: String,
+                  dataArray: SparseArray<ByteArray>,
+                  bleWriteCallback: BleWriteCallback.() -> Unit) {
+        val callback = BleWriteCallback()
+        callback.apply(bleWriteCallback)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
+        request?.let {
+            it.writeData(serviceUUID, writeUUID, dataArray, callback)
+            return
+        }
+        val exception = UnConnectedException("$writeUUID -> 写数据失败，设备未连接")
+        BleLogger.e(exception.message)
+        callback.callWriteFail(exception)
     }
 
     /**

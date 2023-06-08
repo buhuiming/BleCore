@@ -20,14 +20,13 @@ import com.bhm.demo.R
 import com.bhm.demo.adapter.DetailsExpandAdapter
 import com.bhm.demo.adapter.LoggerListAdapter
 import com.bhm.demo.databinding.ActivityDetailBinding
-import com.bhm.demo.entity.LogEntity
+import com.bhm.demo.entity.CharacteristicNode
 import com.bhm.demo.entity.OperateType
 import com.bhm.demo.vm.DetailViewModel
 import com.bhm.support.sdk.core.AppTheme
 import com.bhm.support.sdk.entity.MessageEvent
 import com.bhm.support.sdk.utils.ViewUtil
 import kotlinx.coroutines.launch
-import java.util.logging.Level
 
 
 /**
@@ -47,6 +46,8 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
     private var loggerListAdapter: LoggerListAdapter? = null
 
     private var disConnectWhileClose = false // 关闭页面后是否断开连接
+
+    private var currentSendNode: CharacteristicNode? = null
 
     override fun initData() {
         super.initData()
@@ -93,13 +94,11 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
                         }
                         viewBinding.btnSend.isEnabled = true
                         viewBinding.etContent.isEnabled = true
-                        val logEntity = LogEntity(Level.INFO, "写： ${node.characteristicUUID}")
-                        viewModel.addLogMsg(logEntity)
+                        currentSendNode = node
                     } else {
                         viewBinding.btnSend.isEnabled = false
                         viewBinding.etContent.isEnabled = false
-                        val logEntity = LogEntity(Level.OFF, "取消写： ${node.characteristicUUID}")
-                        viewModel.addLogMsg(logEntity)
+                        currentSendNode = null
                     }
                 }
                 is OperateType.Read -> {
@@ -171,6 +170,28 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
                 return@setOnClickListener
             }
             viewModel.readRssi(getBleDevice())
+        }
+        viewBinding.btnSend.setOnClickListener {
+            if (ViewUtil.isInvalidClick(it)) {
+                return@setOnClickListener
+            }
+            val content = viewBinding.etContent.text.toString()
+            if (content.isEmpty()) {
+                Toast.makeText(this, "请输入数据", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            if (currentSendNode == null) {
+                Toast.makeText(this, "请选择特征值写操作", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            currentSendNode?.let { node ->
+                viewModel.writeData(
+                    getBleDevice(),
+                    node.serviceUUID,
+                    node.characteristicUUID,
+                    content
+                )
+            }
         }
     }
 

@@ -71,10 +71,9 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
                 throwable?.let {
                     BleLogger.e(it.message)
                     if (it is TimeoutCancellationException || it is TimeoutCancelException) {
-                        BleLogger.e("${bleDevice.deviceAddress} -> 设置Mtu超时")
-                        bleMtuChangedCallback.callSetMtuFail(TimeoutCancelException(
-                            "${bleDevice.deviceAddress} -> 设置mtu失败，超时")
-                        )
+                        val exception = TimeoutCancelException("${bleDevice.deviceAddress} -> 设置Mtu超时")
+                        BleLogger.e(exception.message)
+                        bleMtuChangedCallback.callSetMtuFail(exception)
                     }
                 }
             }

@@ -93,19 +93,16 @@ internal class BleReadRequest(
                     throwable?.let {
                         BleLogger.e(it.message)
                         if (it is TimeoutCancellationException || it is TimeoutCancelException) {
-                            BleLogger.e("${bleDevice.deviceAddress} -> 读特征值数据超时")
-                            bleReadCallback.callReadFail(
-                                TimeoutCancelException("${bleDevice.deviceAddress}" +
-                                        " -> 读特征值数据失败，超时")
-                            )
+                            val exception = TimeoutCancelException("$readUUID -> 读特征值数据失败，超时")
+                            BleLogger.e(exception.message)
+                            bleReadCallback.callReadFail(exception)
                         }
                     }
                 }
             )
             bleTaskQueue.addTask(task)
         } else {
-            val exception = UnSupportException("${bleDevice.deviceAddress} -> " +
-                    "读特征值数据失败，此特性不支持读特征值数据")
+            val exception = UnSupportException("$readUUID -> 读特征值数据失败，此特性不支持读特征值数据")
             BleLogger.e(exception.message)
             bleReadCallback.callReadFail(exception)
         }
@@ -124,12 +121,12 @@ internal class BleReadRequest(
             if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     if (BleLogger.isLogger) {
-                        BleLogger.d("${bleDevice.deviceAddress} -> " +
+                        BleLogger.d("${it.getKey()} -> " +
                                 "读特征值数据成功：${BleUtil.bytesToHex(value)}")
                     }
                     it.callReadSuccess(value)
                 } else {
-                    val exception = UnDefinedException("${bleDevice.deviceAddress} -> " +
+                    val exception = UnDefinedException("${it.getKey()} -> " +
                             "读特征值数据失败，status = $status")
                     BleLogger.e(exception.message)
                     it.callReadFail(exception)

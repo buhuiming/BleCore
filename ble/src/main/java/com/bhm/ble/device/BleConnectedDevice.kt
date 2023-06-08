@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
+import android.util.SparseArray
 import com.bhm.ble.callback.*
 import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.request.*
@@ -238,6 +239,16 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
                  readUUID: String,
                  bleIndicateCallback: BleReadCallback) {
         bleReadRequest.readCharacteristic(serviceUUID, readUUID, bleIndicateCallback)
+    }
+
+    /**
+     * 写数据
+     */
+    fun writeData(serviceUUID: String,
+                  writeUUID: String,
+                  dataArray: SparseArray<ByteArray>,
+                  bleWriteCallback: BleWriteCallback) {
+        bleWriteRequest.writeData(serviceUUID, writeUUID, dataArray, bleWriteCallback)
     }
 
     fun removeNotifyCallback(uuid: String?) {

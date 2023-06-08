@@ -6,6 +6,7 @@
 package com.bhm.ble.request
 
 import android.bluetooth.BluetoothGatt
+import android.util.SparseArray
 import com.bhm.ble.callback.*
 import com.bhm.ble.device.BleDevice
 
@@ -120,7 +121,16 @@ internal interface BleBaseRequest {
     fun readData(bleDevice: BleDevice,
                  serviceUUID: String,
                  readUUID: String,
-                 bleIndicateCallback: BleReadCallback.() -> Unit)
+                 bleReadCallback: BleReadCallback.() -> Unit)
+
+    /**
+     * 写数据
+     */
+    fun writeData(bleDevice: BleDevice,
+                  serviceUUID: String,
+                  writeUUID: String,
+                  dataArray: SparseArray<ByteArray>,
+                  bleWriteCallback: BleWriteCallback.() -> Unit)
 
     /**
      * 移除该设备的连接回调
