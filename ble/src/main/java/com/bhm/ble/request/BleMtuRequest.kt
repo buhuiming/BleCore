@@ -10,10 +10,10 @@ package com.bhm.ble.request
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.BleMtuChangedCallback
-import com.bhm.ble.control.BleTask
 import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.data.Constants.SET_MTU_TASK_ID
 import com.bhm.ble.data.TimeoutCancelException
+import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.utils.BleLogger
 import kotlinx.coroutines.TimeoutCancellationException
@@ -60,7 +60,7 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
                     mContinuation = continuation
                     if (getBleConnectedDevice(bleDevice)?.
                         getBluetoothGatt()?.requestMtu(mtu) == false) {
-                        continuation.resume(Throwable("Gatt设置mtu失败"))
+                        continuation.resume(UnDefinedException("Gatt设置mtu失败"))
                     }
                 }
             },
@@ -92,10 +92,10 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
                 BleLogger.d("${bleDevice.deviceAddress} -> 设置Mtu成功：$mtu")
                 it.callMtuChanged(mtu)
             } else {
-                val throwable = Throwable("${bleDevice.deviceAddress} -> " +
+                val exception = UnDefinedException("${bleDevice.deviceAddress} -> " +
                         "设置Mtu失败，status = $status")
-                BleLogger.e(throwable.message)
-                it.callSetMtuFail(throwable)
+                BleLogger.e(exception.message)
+                it.callSetMtuFail(exception)
             }
         }
     }

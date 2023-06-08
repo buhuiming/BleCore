@@ -174,7 +174,7 @@ internal class BleConnectRequest(
                 }
                 BleConnectLastState.Connecting -> {
                     //连接过程中断开，进入判断是否重连
-                    checkIfContinueConnect(Throwable("连接过程中断开"))
+                    checkIfContinueConnect(UnDefinedException("连接过程中断开"))
                 }
                 //所有断开连接的情况
                 else -> {
@@ -211,7 +211,7 @@ internal class BleConnectRequest(
             BleLogger.e("${bleDevice.deviceAddress} -> 连接失败：未发现服务")
             bleConnectCallback?.callConnectFail(
                 bleDevice,
-                BleConnectFailType.ConnectException(Throwable("发现服务失败"))
+                BleConnectFailType.ConnectException(UnDefinedException("发现服务失败"))
             )
         }
     }
@@ -341,7 +341,7 @@ internal class BleConnectRequest(
     private fun checkIfContinueConnect(throwable: Throwable?) {
         refreshDeviceCache()
         closeBluetoothGatt()
-        onCompletion(Throwable(throwable))
+        onCompletion(throwable)
     }
 
     /**
@@ -373,11 +373,11 @@ internal class BleConnectRequest(
             delay(waitTime * 5)
             if (bluetoothGatt == null || bluetoothGatt?.discoverServices() == false) {
                 connectFail()
-                val throwable = Throwable("${bleDevice.deviceAddress} -> 发现服务失败")
-                BleLogger.e(throwable.message)
+                val exception = UnDefinedException("${bleDevice.deviceAddress} -> 发现服务失败")
+                BleLogger.e(exception.message)
                 bleConnectCallback?.callConnectFail(
                     bleDevice,
-                    BleConnectFailType.ConnectException(throwable)
+                    BleConnectFailType.ConnectException(exception)
                 )
             }
         }

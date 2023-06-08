@@ -15,6 +15,7 @@ import com.bhm.ble.data.BleScanFailType
 import com.bhm.ble.data.Constants.CANCEL_WAIT_JOB_MESSAGE
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_MILLIS_TIMEOUT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_INTERVAL
+import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
@@ -277,7 +278,7 @@ internal class BleScanRequest private constructor() : Request() {
              * 由于应用程序尝试扫描过于频繁，无法开始扫描。
              * 7、errorCode = -1，具体看throwable
              */
-            val e =  Throwable("扫描失败，请查验[android.bluetooth.le.ScanCallback错误码]")
+            val e = UnDefinedException("扫描失败，请查验[android.bluetooth.le.ScanCallback错误码]")
             BleLogger.e(e.message)
             bleScanCallback?.callScanFail(BleScanFailType.ScanError(errorCode, e))
         }

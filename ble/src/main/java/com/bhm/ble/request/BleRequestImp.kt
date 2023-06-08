@@ -11,8 +11,6 @@ import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.*
 import com.bhm.ble.control.*
 import com.bhm.ble.data.*
-import com.bhm.ble.data.Constants.INDICATE
-import com.bhm.ble.data.Constants.NOTIFY
 import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
 import kotlinx.coroutines.*
@@ -204,7 +202,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             )
             return
         }
-        callback.callNotifyFail(BleNotificationFailType.UnConnectedFailType(NOTIFY))
+        callback.callNotifyFail(UnConnectedException("设置Notify失败，设备未连接"))
     }
 
     /**
@@ -247,7 +245,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             )
             return
         }
-        callback.callIndicateFail(BleNotificationFailType.UnConnectedFailType(INDICATE))
+        callback.callIndicateFail(UnConnectedException("设置Indicate失败，设备未连接"))
     }
 
     /**

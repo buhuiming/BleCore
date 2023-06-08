@@ -11,10 +11,10 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import com.bhm.ble.callback.BleReadCallback
-import com.bhm.ble.control.BleTask
 import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.data.Constants.READ_TASK_ID
 import com.bhm.ble.data.TimeoutCancelException
+import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.data.UnSupportException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.utils.BleLogger
@@ -82,7 +82,7 @@ internal class BleReadRequest(
                         mContinuation = continuation
                         if (getBleConnectedDevice(bleDevice)?.getBluetoothGatt()?.
                             readCharacteristic(characteristic) == false) {
-                            continuation.resume(Throwable("Gatt读特征值数据失败"))
+                            continuation.resume(UnDefinedException("Gatt读特征值数据失败"))
                         }
                     }
                 },
@@ -129,10 +129,10 @@ internal class BleReadRequest(
                     }
                     it.callReadSuccess(value)
                 } else {
-                    val throwable = Throwable("${bleDevice.deviceAddress} -> " +
+                    val exception = UnDefinedException("${bleDevice.deviceAddress} -> " +
                             "读特征值数据失败，status = $status")
-                    BleLogger.e(throwable.message)
-                    it.callReadFail(throwable)
+                    BleLogger.e(exception.message)
+                    it.callReadFail(exception)
                 }
             }
         }

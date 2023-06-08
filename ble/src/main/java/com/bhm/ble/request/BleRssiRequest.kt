@@ -10,10 +10,10 @@ package com.bhm.ble.request
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.BleRssiCallback
-import com.bhm.ble.control.BleTask
 import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.data.Constants.SET_RSSI_TASK_ID
 import com.bhm.ble.data.TimeoutCancelException
+import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.utils.BleLogger
 import kotlinx.coroutines.TimeoutCancellationException
@@ -61,7 +61,7 @@ internal class BleRssiRequest(
                     mContinuation = continuation
                     if (getBleConnectedDevice(bleDevice)?.
                         getBluetoothGatt()?.readRemoteRssi() == false) {
-                        continuation.resume(Throwable("Gatt读取Rssi失败"))
+                        continuation.resume(UnDefinedException("Gatt读取Rssi失败"))
                     }
                 }
             },
@@ -94,10 +94,10 @@ internal class BleRssiRequest(
                 BleLogger.d("${bleDevice.deviceAddress} -> 读取Rssi成功：$rssi")
                 it.callRssiSuccess(rssi)
             } else {
-                val throwable = Throwable("${bleDevice.deviceAddress} -> " +
+                val exception = UnDefinedException("${bleDevice.deviceAddress} -> " +
                         "读取Rssi失败，status = $status")
-                BleLogger.e(throwable.message)
-                it.callRssiFail(throwable)
+                BleLogger.e(exception.message)
+                it.callRssiFail(exception)
             }
         }
     }

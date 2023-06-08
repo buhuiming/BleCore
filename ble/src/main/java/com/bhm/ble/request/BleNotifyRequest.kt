@@ -14,13 +14,10 @@ import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothStatusCodes
 import android.os.Build
 import com.bhm.ble.callback.BleNotifyCallback
-import com.bhm.ble.control.BleTask
 import com.bhm.ble.control.BleTaskQueue
-import com.bhm.ble.data.BleNotificationFailType
-import com.bhm.ble.data.Constants.NOTIFY
+import com.bhm.ble.data.*
 import com.bhm.ble.data.Constants.NOTIFY_TASK_ID
 import com.bhm.ble.data.Constants.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR
-import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
@@ -100,9 +97,7 @@ internal class BleNotifyRequest(
                         if (it is TimeoutCancellationException || it is TimeoutCancelException) {
                             BleLogger.e("${bleDevice.deviceAddress} -> 设置Notify超时")
                             bleNotifyCallback.callNotifyFail(
-                                BleNotificationFailType.TimeoutCancellationFailType(
-                                    NOTIFY
-                                )
+                                TimeoutCancelException("设置Notify失败，设置超时")
                             )
                         }
                     }
@@ -112,9 +107,7 @@ internal class BleNotifyRequest(
         } else {
             BleLogger.e("${bleDevice.deviceAddress} -> 设置Notify失败，此特性不支持通知")
             bleNotifyCallback.callNotifyFail(
-                BleNotificationFailType.UnSupportNotifyFailType(
-                    NOTIFY
-                )
+                UnSupportException("设置Notify失败，此特性不支持通知")
             )
         }
     }
@@ -179,7 +172,10 @@ internal class BleNotifyRequest(
                     BleLogger.d("${bleDevice.deviceAddress} -> 设置Notify成功")
                     it.callNotifySuccess()
                 } else {
-                    val exception = BleNotificationFailType.DescriptorFailType(NOTIFY)
+                    val exception = UnDefinedException(
+                        "设置Notify失败，Descriptor写数据失败",
+                        Constants.EXCEPTION_CODE_DESCRIPTOR_FAIL
+                    )
                     cancelNotifyJob()
                     BleLogger.e("${bleDevice.deviceAddress} -> " +
                             "设置Notify失败：${exception.message}")
@@ -200,12 +196,12 @@ internal class BleNotifyRequest(
         val bluetoothGatt = getBleConnectedDevice(bleDevice)?.getBluetoothGatt()
         val setSuccess = bluetoothGatt?.setCharacteristicNotification(characteristic, enable)
         if (setSuccess != true) {
-            val exception = BleNotificationFailType.SetCharacteristicNotificationFailType(
-                NOTIFY
+            val exception = UnDefinedException(
+                "设置Notify失败，SetCharacteristicNotificationFail",
+                Constants.EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
             )
             cancelNotifyJob()
-            BleLogger.e("${bleDevice.deviceAddress} -> " +
-                    "设置Notify失败，SetCharacteristicNotificationFail")
+            BleLogger.e("${bleDevice.deviceAddress} -> ${exception.message}")
             bleNotifyCallback?.callNotifyFail(exception)
             return false
         }
@@ -215,12 +211,12 @@ internal class BleNotifyRequest(
             characteristic.getDescriptor(UUID.fromString(UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR))
         }
         if (descriptor == null) {
-            val exception = BleNotificationFailType.SetCharacteristicNotificationFailType(
-                NOTIFY
+            val exception = UnDefinedException(
+                "设置Notify失败，SetCharacteristicNotificationFail",
+                Constants.EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
             )
             cancelNotifyJob()
-            BleLogger.e("${bleDevice.deviceAddress} -> " +
-                    "设置Notify失败，SetCharacteristicNotificationFail")
+            BleLogger.e("${bleDevice.deviceAddress} -> ${exception.message}")
             bleNotifyCallback?.callNotifyFail(exception)
             return false
         }
@@ -244,7 +240,10 @@ internal class BleNotifyRequest(
             success = writeDescriptor == true
         }
         if (!success) {
-            val exception = BleNotificationFailType.DescriptorFailType(NOTIFY)
+            val exception = UnDefinedException(
+                "设置Notify失败，Descriptor写数据失败",
+                Constants.EXCEPTION_CODE_DESCRIPTOR_FAIL
+            )
             cancelNotifyJob()
             BleLogger.e("${bleDevice.deviceAddress} -> 设置Notify失败，Descriptor写数据失败")
             bleNotifyCallback?.callNotifyFail(exception)

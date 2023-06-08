@@ -71,4 +71,10 @@ object Constants {
     const val CANCEL_UN_COMPLETE = 2
 
     const val CANCEL_WAIT_JOB_MESSAGE = "cancelWaitJobMessage"
+
+    //Descriptor写数据失败
+    const val EXCEPTION_CODE_DESCRIPTOR_FAIL = 100
+
+    //设置通知失败，SetCharacteristicNotificationFail
+    const val EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL = 101
 }
