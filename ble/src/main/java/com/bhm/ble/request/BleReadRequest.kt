@@ -75,11 +75,8 @@ internal class BleReadRequest(
             bleReadCallback.setKey(readUUID)
             addReadCallback(readUUID, bleReadCallback)
             var mContinuation: Continuation<Throwable?>? = null
-            val task = BleTask (
+            val task = getTask(
                 READ_TASK_ID,
-                durationTimeMillis = getOperateTime(),
-                callInMainThread = false,
-                autoDoNextTask = true,
                 block = {
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation

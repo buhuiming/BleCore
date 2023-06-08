@@ -19,7 +19,7 @@ import com.bhm.ble.data.Constants.DEFAULT_OPERATE_MILLIS_TIMEOUT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_MILLIS_TIMEOUT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_COUNT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_INTERVAL
-import com.bhm.ble.data.Constants.DEFAULT_WRITE_INTERVAL
+import com.bhm.ble.data.Constants.DEFAULT_OPERATE_INTERVAL
 import com.bhm.ble.data.Constants.ENABLE_LOG
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.R
@@ -87,7 +87,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
             viewBinding.etConnectRetryCount.setText(it.connectRetryCount.toString())
             viewBinding.etConnectRetryInterval.setText(it.connectRetryInterval.toString())
             viewBinding.etOperateMillisTimeOut.setText(it.operateMillisTimeOut.toString())
-            viewBinding.etWriteInterval.setText(it.writeInterval.toString())
+            viewBinding.etOperateInterval.setText(it.operateInterval.toString())
             viewBinding.etMaxConnectNum.setText(it.maxConnectNum.toString())
             viewBinding.etMTU.setText(it.mtu.toString())
             viewBinding.cbContainScanDeviceName.isChecked = it.containScanDeviceName
@@ -113,7 +113,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
             viewBinding.etConnectRetryCount.setText(DEFAULT_CONNECT_RETRY_COUNT.toString())
             viewBinding.etConnectRetryInterval.setText(DEFAULT_CONNECT_RETRY_INTERVAL.toString())
             viewBinding.etOperateMillisTimeOut.setText(DEFAULT_OPERATE_MILLIS_TIMEOUT.toString())
-            viewBinding.etWriteInterval.setText(DEFAULT_WRITE_INTERVAL.toString())
+            viewBinding.etOperateInterval.setText(DEFAULT_OPERATE_INTERVAL.toString())
             viewBinding.etMaxConnectNum.setText(DEFAULT_MAX_CONNECT_NUM.toString())
             viewBinding.etMTU.setText(DEFAULT_MTU.toString())
             viewBinding.cbContainScanDeviceName.isChecked = CONTAIN_SCAN_DEVICE_NAME
@@ -157,7 +157,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
                     viewBinding.etConnectRetryInterval.text.toString().toLong())
                 .setAutoConnect(viewBinding.cbAutoConnect.isChecked)
                 .setOperateMillisTimeOut(viewBinding.etOperateMillisTimeOut.text.toString().toLong())
-                .setWriteInterval(viewBinding.etWriteInterval.text.toString().toLong())
+                .setOperateInterval(viewBinding.etOperateInterval.text.toString().toLong())
                 .setMaxConnectNum(viewBinding.etMaxConnectNum.text.toString().toInt())
                 .setMtu(viewBinding.etMTU.text.toString().toInt(), viewBinding.cbMtu.isChecked)
             BleManager.get().init(application, builder.build())

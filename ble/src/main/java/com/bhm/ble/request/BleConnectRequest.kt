@@ -15,6 +15,7 @@ import com.bhm.ble.data.Constants.AUTO_CONNECT
 import com.bhm.ble.data.Constants.DEFAULT_CONNECT_MILLIS_TIMEOUT
 import com.bhm.ble.data.Constants.DEFAULT_CONNECT_RETRY_INTERVAL
 import com.bhm.ble.data.Constants.DEFAULT_MTU
+import com.bhm.ble.data.Constants.DEFAULT_OPERATE_INTERVAL
 import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.utils.BleLogger
@@ -52,7 +53,7 @@ internal class BleConnectRequest(
 
     private val autoConnect = getBleOptions()?.autoConnect?: AUTO_CONNECT
 
-    private val waitTime = 100L
+    private val waitTime = getBleOptions()?.operateInterval?: DEFAULT_OPERATE_INTERVAL
 
     /**
      * 连接设备

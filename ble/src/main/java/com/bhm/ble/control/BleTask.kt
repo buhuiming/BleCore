@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 class BleTask(val taskId: Int,
               val durationTimeMillis: Long = 0,
+              val operateInterval: Long = 100,
               val callInMainThread: Boolean = false,
               val autoDoNextTask: Boolean = true,
               private val block: suspend BleTask.() -> Unit,

@@ -17,7 +17,7 @@ import com.bhm.ble.data.Constants.DEFAULT_OPERATE_MILLIS_TIMEOUT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_MILLIS_TIMEOUT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_COUNT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_INTERVAL
-import com.bhm.ble.data.Constants.DEFAULT_WRITE_INTERVAL
+import com.bhm.ble.data.Constants.DEFAULT_OPERATE_INTERVAL
 import com.bhm.ble.data.Constants.ENABLE_LOG
 
 
@@ -55,7 +55,7 @@ class BleOptions private constructor(builder: Builder) {
 
     var operateMillisTimeOut = builder.operateMillisTimeOut
 
-    var writeInterval = builder.writeInterval
+    var operateInterval = builder.operateInterval
 
     var maxConnectNum = builder.maxConnectNum
 
@@ -100,7 +100,7 @@ class BleOptions private constructor(builder: Builder) {
 
         internal var operateMillisTimeOut: Long = DEFAULT_OPERATE_MILLIS_TIMEOUT
 
-        internal var writeInterval: Long = DEFAULT_WRITE_INTERVAL
+        internal var operateInterval: Long = DEFAULT_OPERATE_INTERVAL
 
         internal var maxConnectNum: Int = DEFAULT_MAX_CONNECT_NUM
 
@@ -205,10 +205,10 @@ class BleOptions private constructor(builder: Builder) {
         }
 
         /**
-         * 设置写操作之间的间隔，单位毫秒，默认为[DEFAULT_WRITE_INTERVAL]
+         * 设置操作之间的间隔，单位毫秒，默认为[DEFAULT_OPERATE_INTERVAL]
          */
-        fun setWriteInterval(writeInterval: Long) = apply {
-            this.writeInterval = writeInterval
+        fun setOperateInterval(operateInterval: Long) = apply {
+            this.operateInterval = operateInterval
         }
 
         /**

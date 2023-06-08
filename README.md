@@ -55,7 +55,7 @@
                 .setConnectMillisTimeOut(10000)
                 .setConnectRetryCountAndInterval(2, 5000)
                 .setOperateMillisTimeOut(6000)
-                .setWriteInterval(80)
+                .setOperateInterval(80)
                 .setMaxConnectNum(5)
                 .setMtu(500)
                 .build()

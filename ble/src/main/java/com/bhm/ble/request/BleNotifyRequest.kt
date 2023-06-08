@@ -78,11 +78,8 @@ internal class BleNotifyRequest(
             bleNotifyCallback.setKey(notifyUUID)
             addNotifyCallback(notifyUUID, bleNotifyCallback)
             var mContinuation: Continuation<Throwable?>? = null
-            val task = BleTask (
+            val task = getTask(
                 NOTIFY_TASK_ID,
-                durationTimeMillis = getOperateTime(),
-                callInMainThread = false,
-                autoDoNextTask = true,
                 block = {
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation

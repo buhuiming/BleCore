@@ -34,7 +34,7 @@ object Constants {
 
     const val DEFAULT_OPERATE_MILLIS_TIMEOUT: Long = 10000
 
-    const val DEFAULT_WRITE_INTERVAL: Long = 100
+    const val DEFAULT_OPERATE_INTERVAL: Long = 100
 
     const val DEFAULT_MAX_CONNECT_NUM: Int = 7
 

@@ -53,11 +53,8 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
         cancelSetMtuJob()
         addMtuChangedCallback(bleMtuChangedCallback)
         var mContinuation: Continuation<Throwable?>? = null
-        val task = BleTask (
+        val task = getTask(
             SET_MTU_TASK_ID,
-            durationTimeMillis = getOperateTime(),
-            callInMainThread = false,
-            autoDoNextTask = true,
             block = {
                 suspendCoroutine<Throwable?> { continuation ->
                     mContinuation = continuation

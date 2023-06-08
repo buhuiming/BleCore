@@ -78,11 +78,8 @@ internal class BleIndicateRequest(
             bleIndicateCallback.setKey(indicateUUID)
             addIndicateCallback(indicateUUID, bleIndicateCallback)
             var mContinuation: Continuation<Throwable?>? = null
-            val task = BleTask (
+            val task = getTask(
                 INDICATE_TASK_ID,
-                durationTimeMillis = getOperateTime(),
-                callInMainThread = false,
-                autoDoNextTask = true,
                 block = {
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation

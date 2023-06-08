@@ -54,11 +54,8 @@ internal class BleRssiRequest(
         cancelReadRssiJob()
         addRssiCallback(bleRssiCallback)
         var mContinuation: Continuation<Throwable?>? = null
-        val task = BleTask (
+        val task = getTask(
             SET_RSSI_TASK_ID,
-            durationTimeMillis = getOperateTime(),
-            callInMainThread = false,
-            autoDoNextTask = true,
             block = {
                 suspendCoroutine<Throwable?> { continuation ->
                     mContinuation = continuation

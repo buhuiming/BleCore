@@ -185,6 +185,8 @@ class BleTaskQueue {
             return
         }
         mCoroutineScope?.launch {
+            //两次操作之间最好间隔一小段时间，如100ms（具体时间可以根据自己实际蓝牙外设自行尝试延长或缩短）
+            delay(task.operateInterval)
             mChannel?.send(task)
         }
     }
