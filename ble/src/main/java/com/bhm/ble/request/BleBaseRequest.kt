@@ -158,6 +158,11 @@ internal interface BleBaseRequest {
     fun removeBleWriteCallback(bleDevice: BleDevice, writeUUID: String)
 
     /**
+     * 移除该设备回调，BleConnectCallback除外
+     */
+    fun removeAllCharacterCallback(bleDevice: BleDevice)
+
+    /**
      * 移除该设备的Scan回调
      */
     fun removeBleScanCallback()

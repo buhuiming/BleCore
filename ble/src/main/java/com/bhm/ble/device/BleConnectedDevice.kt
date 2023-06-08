@@ -275,7 +275,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     }
 
     @Synchronized
-    fun removeAllCallback() {
+    fun removeAllCharacterCallback() {
         removeRssiCallback()
         removeMtuChangedCallback()
         clearCharacterCallback()

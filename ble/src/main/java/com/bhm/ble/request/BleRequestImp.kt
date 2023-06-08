@@ -383,6 +383,14 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
+     * 移除该设备回调，BleConnectCallback除外
+     */
+    override fun removeAllCharacterCallback(bleDevice: BleDevice) {
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
+        request?.removeAllCharacterCallback()
+    }
+
+    /**
      * 断开所有连接 释放资源
      */
     override fun releaseAll() {

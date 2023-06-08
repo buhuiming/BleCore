@@ -125,8 +125,8 @@
 
 *    扫描到首个符合扫描规则的设备后，便停止扫描，然后连接该设备。
 
-#### 9、移除该设备的连接回调
-    BleManager.get().removeBleConnectCallback(device)
+#### 9、获取设备的BluetoothGatt对象
+    BleManager.get().getBluetoothGatt(device)
 
 #### 10、设置Notify
     BleManager.get().notify(bleDevice: BleDevice,

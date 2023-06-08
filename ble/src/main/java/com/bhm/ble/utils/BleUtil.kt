@@ -92,9 +92,10 @@ object BleUtil {
      * 字节数组转16进制字符串
      *
      * @param bytes 需要转换的byte数组
+     * @param addSpace 是否添加空格
      * @return 转换后的Hex字符串
      */
-    fun bytesToHex(bytes: ByteArray?): String {
+    fun bytesToHex(bytes: ByteArray?, addSpace: Boolean = true): String {
         if (bytes == null) {
             return ""
         }
@@ -105,6 +106,9 @@ object BleUtil {
                 sb.append(0)
             }
             sb.append(hex)
+            if (addSpace) {
+                sb.append(" ")
+            }
         }
         return sb.toString()
     }

@@ -360,6 +360,13 @@ class BleManager private constructor() {
         bleBaseRequest?.removeBleScanCallback()
     }
 
+    /**
+     * 移除该设备回调，BleConnectCallback除外
+     */
+    fun removeAllCharacterCallback(bleDevice: BleDevice) {
+        bleBaseRequest?.removeAllCharacterCallback(bleDevice)
+    }
+
 
     /**
      * 断开所有连接 释放资源

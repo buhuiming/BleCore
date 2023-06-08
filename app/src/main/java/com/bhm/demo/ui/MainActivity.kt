@@ -43,6 +43,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
     override fun initEvent() {
         super.initEvent()
         lifecycleScope.launch {
+            //添加扫描到的设备 刷新列表
             viewModel.listDRStateFlow.collect {
                 if (it.deviceName != null && it.deviceAddress != null) {
                     val position = (listAdapter?.itemCount?: 1) - 1
@@ -64,6 +65,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
         }
 
         lifecycleScope.launch {
+            //连接设备后 刷新列表
             viewModel.refreshStateFlow.collect {
                 delay(300)
                 dismissLoading()
@@ -153,6 +155,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
         if (viewModel.isConnected(bleDevice)) {
             val intent = Intent(this@MainActivity, DetailOperateActivity::class.java)
             intent.putExtra("data", bleDevice)
+            intent.putExtra("disConnectWhileClose", autoOpenDetailsActivity)
             startActivity(intent) { _, resultIntent ->
                 if (resultIntent != null) {
                     showLoading("断开中...")

@@ -395,7 +395,7 @@ internal class BleConnectRequest(
      */
     private fun removeAllCallback() {
         removeBleConnectedDevice()
-        getBleConnectedDevice(bleDevice)?.removeAllCallback()
+        getBleConnectedDevice(bleDevice)?.removeAllCharacterCallback()
     }
 
     /**

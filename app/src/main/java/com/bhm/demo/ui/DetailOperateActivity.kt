@@ -46,6 +46,8 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
 
     private var loggerListAdapter: LoggerListAdapter? = null
 
+    private var disConnectWhileClose = false // 关闭页面后是否断开连接
+
     override fun initData() {
         super.initData()
         AppTheme.setStatusBarColor(this, R.color.purple_500)
@@ -55,6 +57,7 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
             @Suppress("DEPRECATION")
             intent.getParcelableExtra("data")
         }
+        disConnectWhileClose = intent.getBooleanExtra("disConnectWhileClose", false)
 
         if (bleDevice == null) {
             finish()
@@ -186,8 +189,13 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            BleManager.get().release(getBleDevice())
-            setResult(0, Intent())
+            if (disConnectWhileClose) {
+                BleManager.get().release(getBleDevice())
+                setResult(0, Intent())
+            } else {
+                BleManager.get().removeAllCharacterCallback(getBleDevice())
+                setResult(0, null)
+            }
             finish()
             return true
         }
