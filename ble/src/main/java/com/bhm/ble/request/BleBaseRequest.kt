@@ -101,7 +101,9 @@ internal interface BleBaseRequest {
     /**
      * 设置mtu
      */
-    fun setMtu(bleDevice: BleDevice, mtu: Int, bleMtuChangedCallback: BleMtuChangedCallback.() -> Unit)
+    fun setMtu(bleDevice:
+               BleDevice, mtu: Int,
+               bleMtuChangedCallback: BleMtuChangedCallback.() -> Unit)
 
     /**
      * 设置设备的优先级
@@ -116,9 +118,9 @@ internal interface BleBaseRequest {
      * 读特征值数据
      */
     fun readData(bleDevice: BleDevice,
-             serviceUUID: String,
-             readUUID: String,
-             bleIndicateCallback: BleReadCallback.() -> Unit)
+                 serviceUUID: String,
+                 readUUID: String,
+                 bleIndicateCallback: BleReadCallback.() -> Unit)
 
     /**
      * 移除该设备的连接回调

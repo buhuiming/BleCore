@@ -21,7 +21,7 @@ import com.bhm.ble.device.BleDevice
 internal class BleWriteRequest(
     bleDevice: BleDevice,
     private val bleTaskQueue: BleTaskQueue
-) : Request(){
+) : Request() {
 
     private val bleWriteCallbackHashMap: HashMap<String, BleWriteCallback> = HashMap()
 

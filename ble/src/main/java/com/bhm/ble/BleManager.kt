@@ -1,4 +1,4 @@
-@file:Suppress("SENSELESS_COMPARISON")
+@file:Suppress("SENSELESS_COMPARISON", "unused")
 
 package com.bhm.ble
 
@@ -368,6 +368,10 @@ class BleManager private constructor() {
     fun releaseAll() {
         checkInitialize()
         bleBaseRequest?.releaseAll()
+        application = null
+        bleOptions = null
+        bluetoothManager = null
+        bleBaseRequest = null
         BleLogger.i("资源释放完毕，BleCore SDK退出")
     }
 
@@ -383,9 +387,9 @@ class BleManager private constructor() {
 
     fun getOptions() = bleOptions
 
-    internal fun getContext() = application
+    fun getContext() = application
 
-    internal fun getBluetoothManager() = bluetoothManager
+    fun getBluetoothManager() = bluetoothManager
 
     private fun checkInitialize() {
         if (bleBaseRequest == null) {

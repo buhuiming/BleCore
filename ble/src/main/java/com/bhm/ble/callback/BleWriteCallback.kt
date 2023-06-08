@@ -12,7 +12,7 @@ package com.bhm.ble.callback
  * @author Buhuiming
  * @date 2023年05月26日 15时54分
  */
-open class BleWriteCallback : BleBaseCallback(){
+open class BleWriteCallback : BleBaseCallback() {
 
     private var writeSuccess: ((current: Int, total: Int, justWrite: ByteArray) -> Unit)? = null
 

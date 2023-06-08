@@ -13,7 +13,7 @@ package com.bhm.ble.callback
  * @author Buhuiming
  * @date 2023年05月29日 08时47分
  */
-open class BleNotifyCallback : BleBaseCallback(){
+open class BleNotifyCallback : BleBaseCallback() {
 
     private var notifySuccess: (() -> Unit)? = null
 

@@ -22,7 +22,7 @@ sealed class BleConnectFailType {
     /**
      * 设备不支持Ble
      */
-    object UnTypeSupportBle: BleConnectFailType()
+    object UnSupportBle: BleConnectFailType()
 
     /**
      * 设备未打开蓝牙

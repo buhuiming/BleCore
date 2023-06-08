@@ -12,7 +12,7 @@ package com.bhm.ble.callback
  * @author Buhuiming
  * @date 2023年05月26日 16时17分
  */
-open class BleMtuChangedCallback : BleBaseCallback(){
+open class BleMtuChangedCallback : BleBaseCallback() {
 
     private var mtuChanged: ((mtu: Int) -> Unit)? = null
 

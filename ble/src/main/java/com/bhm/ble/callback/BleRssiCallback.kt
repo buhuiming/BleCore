@@ -12,7 +12,7 @@ package com.bhm.ble.callback
  * @author Buhuiming
  * @date 2023年05月26日 15时54分
  */
-open class BleRssiCallback : BleBaseCallback(){
+open class BleRssiCallback : BleBaseCallback() {
 
     private var success: ((rssi: Int) -> Unit)? = null
 

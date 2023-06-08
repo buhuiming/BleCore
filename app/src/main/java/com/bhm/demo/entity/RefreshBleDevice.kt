@@ -12,4 +12,7 @@ import com.bhm.ble.device.BleDevice
  * @author Buhuiming
  * @date 2023年05月30日 11时57分
  */
-data class RefreshBleDevice(val bleDevice: BleDevice?, var tag: Long? = null)
+data class RefreshBleDevice(
+    val bleDevice: BleDevice?,
+    var tag: Long? = null
+)

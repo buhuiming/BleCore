@@ -30,7 +30,7 @@ import kotlin.coroutines.suspendCoroutine
  */
 internal class BleMtuRequest(private val bleDevice: BleDevice,
                              private val bleTaskQueue: BleTaskQueue
-) : Request(){
+) : Request() {
 
     private var bleMtuChangedCallback: BleMtuChangedCallback? = null
 
@@ -61,7 +61,8 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
             block = {
                 suspendCoroutine<Throwable?> { continuation ->
                     mContinuation = continuation
-                    if (getBleConnectedDevice(bleDevice)?.getBluetoothGatt()?.requestMtu(mtu) == false) {
+                    if (getBleConnectedDevice(bleDevice)?.
+                        getBluetoothGatt()?.requestMtu(mtu) == false) {
                         continuation.resume(Throwable("Gatt设置mtu失败"))
                     }
                 }
@@ -74,7 +75,9 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
                     BleLogger.e(it.message)
                     if (it is TimeoutCancellationException || it is TimeoutCancelException) {
                         BleLogger.e("${bleDevice.deviceAddress} -> 设置Mtu超时")
-                        bleMtuChangedCallback.callSetMtuFail(TimeoutCancelException("${bleDevice.deviceAddress} -> 设置mtu失败，超时"))
+                        bleMtuChangedCallback.callSetMtuFail(TimeoutCancelException(
+                            "${bleDevice.deviceAddress} -> 设置mtu失败，超时")
+                        )
                     }
                 }
             }
@@ -92,7 +95,8 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
                 BleLogger.d("${bleDevice.deviceAddress} -> 设置Mtu成功：$mtu")
                 it.callMtuChanged(mtu)
             } else {
-                val throwable = Throwable("${bleDevice.deviceAddress} -> 设置Mtu失败，status = $status")
+                val throwable = Throwable("${bleDevice.deviceAddress} -> " +
+                        "设置Mtu失败，status = $status")
                 BleLogger.e(throwable.message)
                 it.callSetMtuFail(throwable)
             }

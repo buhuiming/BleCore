@@ -15,7 +15,7 @@ import com.bhm.ble.data.BleScanFailType
  * @author Buhuiming
  * @date 2023年05月22日 09时08分
  */
-open class BleScanCallback : BleBaseCallback(){
+open class BleScanCallback : BleBaseCallback() {
 
     private var start: (() -> Unit)? = null
 

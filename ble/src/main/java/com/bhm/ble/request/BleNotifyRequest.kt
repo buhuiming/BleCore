@@ -40,7 +40,7 @@ import kotlin.coroutines.suspendCoroutine
 internal class BleNotifyRequest(
     private val bleDevice: BleDevice,
     private val bleTaskQueue: BleTaskQueue
-) : Request(){
+) : Request() {
 
     private val bleNotifyCallbackHashMap: HashMap<String, BleNotifyCallback> = HashMap()
 
@@ -77,7 +77,6 @@ internal class BleNotifyRequest(
         ) {
             bleNotifyCallback.setKey(notifyUUID)
             addNotifyCallback(notifyUUID, bleNotifyCallback)
-//            var job: Job? = null
             var mContinuation: Continuation<Throwable?>? = null
             val task = BleTask (
                 NOTIFY_TASK_ID,
@@ -85,24 +84,17 @@ internal class BleNotifyRequest(
                 callInMainThread = false,
                 autoDoNextTask = true,
                 block = {
-//                    suspendCoroutine<Throwable?> { continuation ->
-//                        job = CoroutineScope(Dispatchers.IO).launch {
-//                            withTimeout(operateTime) {
-////                            setCharacteristicNotify(characteristic, useCharacteristicDescriptor, true, bleNotifyCallback)
-//                                delay(operateTime)
-//                            }
-//                        }
-//                        job?.invokeOnCompletion {
-//                            continuation.resume(it)
-//                        }
-//                    }
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation
-                        setCharacteristicNotify(characteristic, useCharacteristicDescriptor, true, bleNotifyCallback)
+                        setCharacteristicNotify(
+                            characteristic,
+                            useCharacteristicDescriptor,
+                            true,
+                            bleNotifyCallback
+                        )
                     }
                 },
                 interrupt = { _, throwable ->
-//                    job?.cancel(CancellationException(throwable?.message))
                     mContinuation?.resume(throwable)
                 },
                 callback = { _, throwable ->
@@ -113,7 +105,8 @@ internal class BleNotifyRequest(
                             bleNotifyCallback.callNotifyFail(
                                 BleNotificationFailType.TimeoutCancellationFailType(
                                     NOTIFY
-                                ))
+                                )
+                            )
                         }
                     }
                 }
@@ -124,7 +117,8 @@ internal class BleNotifyRequest(
             bleNotifyCallback.callNotifyFail(
                 BleNotificationFailType.UnSupportNotifyFailType(
                     NOTIFY
-                ))
+                )
+            )
         }
     }
 
@@ -142,7 +136,12 @@ internal class BleNotifyRequest(
             (characteristic.properties or BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0
         ) {
             cancelNotifyJob()
-            val success = setCharacteristicNotify(characteristic, useCharacteristicDescriptor, false, null)
+            val success = setCharacteristicNotify(
+                characteristic,
+                useCharacteristicDescriptor,
+                false,
+                null
+            )
             if (success) {
                 removeNotifyCallback(notifyUUID)
             }
@@ -161,7 +160,8 @@ internal class BleNotifyRequest(
         bleNotifyCallbackHashMap.values.forEach {
             if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
                 if (BleLogger.isLogger) {
-                    BleLogger.d("${bleDevice.deviceAddress} -> 收到Notify数据：${BleUtil.bytesToHex(value)}")
+                    BleLogger.d("${bleDevice.deviceAddress} -> " +
+                            "收到Notify数据：${BleUtil.bytesToHex(value)}")
                 }
                 it.callCharacteristicChanged(value)
             }
@@ -184,7 +184,8 @@ internal class BleNotifyRequest(
                 } else {
                     val exception = BleNotificationFailType.DescriptorFailType(NOTIFY)
                     cancelNotifyJob()
-                    BleLogger.e("${bleDevice.deviceAddress} -> 设置Notify失败：${exception.message}")
+                    BleLogger.e("${bleDevice.deviceAddress} -> " +
+                            "设置Notify失败：${exception.message}")
                     it.callNotifyFail(exception)
                 }
             }
@@ -206,7 +207,8 @@ internal class BleNotifyRequest(
                 NOTIFY
             )
             cancelNotifyJob()
-            BleLogger.e("${bleDevice.deviceAddress} -> 设置Notify失败，SetCharacteristicNotificationFail")
+            BleLogger.e("${bleDevice.deviceAddress} -> " +
+                    "设置Notify失败，SetCharacteristicNotificationFail")
             bleNotifyCallback?.callNotifyFail(exception)
             return false
         }
@@ -220,7 +222,8 @@ internal class BleNotifyRequest(
                 NOTIFY
             )
             cancelNotifyJob()
-            BleLogger.e("${bleDevice.deviceAddress} -> 设置Notify失败，SetCharacteristicNotificationFail")
+            BleLogger.e("${bleDevice.deviceAddress} -> " +
+                    "设置Notify失败，SetCharacteristicNotificationFail")
             bleNotifyCallback?.callNotifyFail(exception)
             return false
         }

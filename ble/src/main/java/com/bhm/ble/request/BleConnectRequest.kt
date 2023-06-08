@@ -34,8 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 internal class BleConnectRequest(
     private val bleDevice: BleDevice,
     private val coreGattCallback: BluetoothGattCallback,
-    private val bleTaskQueue: BleTaskQueue
-) : Request(){
+) : Request() {
 
     private var bleConnectCallback: BleConnectCallback? = null
 
@@ -77,7 +76,7 @@ internal class BleConnectRequest(
         if (!bleManager.isBleSupport()) {
             BleLogger.e("设备不支持蓝牙")
             removeBleConnectedDevice()
-            bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.UnTypeSupportBle)
+            bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.UnSupportBle)
             return
         }
         if (!bleManager.isBleEnable()) {
@@ -121,7 +120,7 @@ internal class BleConnectRequest(
         }
         if (!bleManager.isBleSupport()) {
             BleLogger.e("设备不支持蓝牙")
-            bleConnectCallback?.callConnectFail(bleDevice, BleConnectFailType.UnTypeSupportBle)
+            bleConnectCallback?.callConnectFail(bleDevice, BleConnectFailType.UnSupportBle)
             return
         }
         if (!bleManager.isBleEnable()) {
@@ -153,16 +152,9 @@ internal class BleConnectRequest(
      * 当连接上设备或者失去连接时会触发
      */
     fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
-        BleLogger.i(
-            """
-                    BluetoothGattCallback：onConnectionStateChange 
-                    status: $status
-                    newState: $newState
-                    currentThread: ${Thread.currentThread().name}
-                    bleAddress: ${bleDevice.deviceAddress}
-                    lastState: $lastState
-                    """.trimIndent()
-        )
+        BleLogger.i("BluetoothGattCallback：onConnectionStateChange status: $status " +
+                "newState: $newState currentThread: ${Thread.currentThread().name} " +
+                "bleAddress: ${bleDevice.deviceAddress} lastState: $lastState")
         bluetoothGatt = gatt
         if (newState == BluetoothProfile.STATE_CONNECTED) {
             //连接成功
@@ -256,7 +248,6 @@ internal class BleConnectRequest(
         closeBluetoothGatt()
         removeBleConnectCallback()
         removeAllCallback()
-        bleTaskQueue.clear()
     }
 
     /**
@@ -365,7 +356,8 @@ internal class BleConnectRequest(
                 retryCount = 0
             }
             if (retryCount > 0 && currentConnectRetryCount < retryCount) {
-                BleLogger.i("${bleDevice.deviceAddress} -> 满足重连条件：currentConnectRetryCount = $currentConnectRetryCount")
+                BleLogger.i("${bleDevice.deviceAddress} -> 满足重连条件：" +
+                        "currentConnectRetryCount = $currentConnectRetryCount")
                 return true
             }
         }
@@ -411,7 +403,7 @@ internal class BleConnectRequest(
     private fun autoSetMtu() {
         if (getBleOptions()?.autoSetMtu == true) {
             getBleConnectedDevice(bleDevice)?.setMtu(getBleOptions()?.mtu?: DEFAULT_MTU,
-                object : BleMtuChangedCallback(){
+                object : BleMtuChangedCallback() {
                     override fun callMtuChanged(mtu: Int) {
                         super.callMtuChanged(mtu)
                         BleLogger.d("${bleDevice.deviceAddress} -> 自动设置Mtu成功: $mtu")
@@ -419,7 +411,8 @@ internal class BleConnectRequest(
 
                     override fun callSetMtuFail(throwable: Throwable) {
                         super.callSetMtuFail(throwable)
-                        BleLogger.e("${bleDevice.deviceAddress} -> 自动设置Mtu失败: ${throwable.message}")
+                        BleLogger.e("${bleDevice.deviceAddress} -> " +
+                                "自动设置Mtu失败: ${throwable.message}")
                     }
                 })
         }

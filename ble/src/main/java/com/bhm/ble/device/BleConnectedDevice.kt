@@ -16,15 +16,17 @@ import com.bhm.ble.request.*
 
 /**
  * 每个已连接设备对应一个BleConnectedDevice对象
+ * 每一个BleConnectedDevice对象包含一个请求队列、连接请求、Notify请求、Indicate请求、Rssi请求、mtu请求、
+ * 设置优先级请求、读特征值数据请求、写数据请求
  *
  * @author Buhuiming
  * @date 2023年06月07日 11时48分
  */
-internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallback(){
+internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallback() {
 
     private var bleTaskQueue = BleTaskQueue()
 
-    private val bleConnectRequest = BleConnectRequest(bleDevice, this, bleTaskQueue)
+    private val bleConnectRequest = BleConnectRequest(bleDevice, this)
 
     private val bleNotifyRequest = BleNotifyRequest(bleDevice, bleTaskQueue)
 
@@ -233,8 +235,8 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
      * 读特征值数据
      */
     fun readData(serviceUUID: String,
-             readUUID: String,
-             bleIndicateCallback: BleReadCallback) {
+                 readUUID: String,
+                 bleIndicateCallback: BleReadCallback) {
         bleReadRequest.readCharacteristic(serviceUUID, readUUID, bleIndicateCallback)
     }
 
@@ -289,5 +291,6 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
 
     fun release() {
         bleConnectRequest.release()
+        bleTaskQueue.clear()
     }
 }

@@ -16,7 +16,7 @@ import com.bhm.ble.device.BleDevice
  * @author Buhuiming
  * @date 2023年05月24日 14时00分
  */
-open class BleConnectCallback : BleBaseCallback(){
+open class BleConnectCallback : BleBaseCallback() {
 
     private var start: (() -> Unit)? = null
 

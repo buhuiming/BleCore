@@ -31,7 +31,7 @@ import kotlin.coroutines.suspendCoroutine
 internal class BleRssiRequest(
     private val bleDevice: BleDevice,
     private val bleTaskQueue: BleTaskQueue
-) : Request(){
+) : Request() {
 
     private var bleRssiCallback: BleRssiCallback? = null
 
@@ -62,7 +62,8 @@ internal class BleRssiRequest(
             block = {
                 suspendCoroutine<Throwable?> { continuation ->
                     mContinuation = continuation
-                    if (getBleConnectedDevice(bleDevice)?.getBluetoothGatt()?.readRemoteRssi() == false) {
+                    if (getBleConnectedDevice(bleDevice)?.
+                        getBluetoothGatt()?.readRemoteRssi() == false) {
                         continuation.resume(Throwable("Gatt读取Rssi失败"))
                     }
                 }
@@ -75,7 +76,10 @@ internal class BleRssiRequest(
                     BleLogger.e(it.message)
                     if (it is TimeoutCancellationException || it is TimeoutCancelException) {
                         BleLogger.e("${bleDevice.deviceAddress} -> 读取Rssi超时")
-                        bleRssiCallback.callRssiFail(TimeoutCancelException("${bleDevice.deviceAddress} -> 读取Rssi失败，超时"))
+                        bleRssiCallback.callRssiFail(
+                            TimeoutCancelException("${bleDevice.deviceAddress}" +
+                                    " -> 读取Rssi失败，超时")
+                        )
                     }
                 }
             }
@@ -93,7 +97,8 @@ internal class BleRssiRequest(
                 BleLogger.d("${bleDevice.deviceAddress} -> 读取Rssi成功：$rssi")
                 it.callRssiSuccess(rssi)
             } else {
-                val throwable = Throwable("${bleDevice.deviceAddress} -> 读取Rssi失败，status = $status")
+                val throwable = Throwable("${bleDevice.deviceAddress} -> " +
+                        "读取Rssi失败，status = $status")
                 BleLogger.e(throwable.message)
                 it.callRssiFail(throwable)
             }

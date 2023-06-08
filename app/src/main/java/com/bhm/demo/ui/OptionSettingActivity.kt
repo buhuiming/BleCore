@@ -35,7 +35,7 @@ import com.bhm.support.sdk.utils.ViewUtil
  * @author Buhuiming
  * @date 2023年05月24日 15时38分
  */
-class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding>(){
+class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding>() {
 
     override fun createViewModel() = BaseViewModel (application)
 
@@ -52,7 +52,8 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
                 }
             }
             if (etScanServiceUuidText.isNotEmpty()) {
-                etScanServiceUuidText.delete(etScanServiceUuidText.length - 1, etScanServiceUuidText.length)
+                etScanServiceUuidText.delete(etScanServiceUuidText.length - 1,
+                    etScanServiceUuidText.length)
             }
             val etScanDeviceNameText = StringBuilder()
             options.scanDeviceNames.forEach { string ->
@@ -62,7 +63,8 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
                 }
             }
             if (etScanDeviceNameText.isNotEmpty()) {
-                etScanDeviceNameText.delete(etScanDeviceNameText.length - 1, etScanDeviceNameText.length)
+                etScanDeviceNameText.delete(etScanDeviceNameText.length - 1,
+                    etScanDeviceNameText.length)
             }
             val etScanDeviceAddressText = StringBuilder()
             options.scanDeviceAddresses.forEach { string ->
@@ -72,7 +74,8 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
                 }
             }
             if (etScanDeviceAddressText.isNotEmpty()) {
-                etScanDeviceAddressText.delete(etScanDeviceAddressText.length - 1, etScanDeviceAddressText.length)
+                etScanDeviceAddressText.delete(etScanDeviceAddressText.length - 1,
+                    etScanDeviceAddressText.length)
             }
             viewBinding.etScanServiceUuid.setText(etScanServiceUuidText.toString())
             viewBinding.etScanDeviceName.setText(etScanDeviceNameText.toString())

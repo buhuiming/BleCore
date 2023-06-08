@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bhm.ble.device.BleDevice
-import com.bhm.ble.utils.BleLogger
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.R
 import com.bhm.demo.adapter.DeviceListAdapter
@@ -25,7 +24,7 @@ import leakcanary.LeakCanary
  * @author Buhuiming
  * @date :2023/5/24 15:39
  */
-class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
+class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
 
     private var listAdapter: DeviceListAdapter? = null
 
@@ -127,7 +126,6 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
             viewModel.startScan(this@MainActivity)
         }
 
-        viewBinding.btnStop.isEnabled = true
         viewBinding.btnStop.setOnClickListener {
             if (ViewUtil.isInvalidClick(it)) {
                 return@setOnClickListener
@@ -160,7 +158,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(){
                     showLoading("断开中...")
                     //断开需要一定的时间，才可以连接，这里防止没断开完成，马上点击连接
                     lifecycleScope.launch {
-                        delay(2000)
+                        delay(1200)
                         dismissLoading()
                     }
                 }

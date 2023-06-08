@@ -16,10 +16,10 @@ import com.chad.library.adapter.base.entity.node.BaseNode
  * @date 2023年06月01日 10时16分
  */
 class CharacteristicNode(var characteristicName: String,
-                              var serviceUUID: String,
-                              var characteristicUUID: String,
-                              var characteristicProperties: String,
-                              var characteristicIntProperties: Int,
+                         var serviceUUID: String,
+                         var characteristicUUID: String,
+                         var characteristicProperties: String,
+                         var characteristicIntProperties: Int,
 )  : BaseExpandNode() {
 
     init {

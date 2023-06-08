@@ -16,12 +16,14 @@ import com.chad.library.adapter.base.entity.node.BaseNode
  * @date 2023年06月01日 10时11分
  */
 class ServiceNode(var serviceName: String,
-                       var serviceUUID: String,
-                       var characteristicList: MutableList<BaseNode>?
+                  var serviceUUID: String,
+                  var characteristicList: MutableList<BaseNode>?
 ) : BaseExpandNode() {
+
     init {
         isExpanded = false
     }
+
     override val childNode: MutableList<BaseNode>?
         get() = characteristicList
 }

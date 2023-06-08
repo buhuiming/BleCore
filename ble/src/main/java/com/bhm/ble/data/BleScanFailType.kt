@@ -17,7 +17,7 @@ sealed class BleScanFailType {
     /**
      * 设备不支持Ble
      */
-    object UnTypeSupportBle: BleScanFailType()
+    object UnSupportBle: BleScanFailType()
 
     /**
      * 设备未打开蓝牙

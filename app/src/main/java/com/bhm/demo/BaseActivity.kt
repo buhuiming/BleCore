@@ -80,7 +80,11 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewBinding> : HttpActivity(
         httpOptions = HttpOptions.create(this)
             .setLoadingDialog(HttpLoadingDialog())
             .setLoadingTitle(msg)
-            .setDialogAttribute(true, cancelable = false, dialogDismissInterruptRequest = true)
+            .setDialogAttribute(
+                true,
+                cancelable = false,
+                dialogDismissInterruptRequest = true
+            )
             .build()
         httpOptions?.let {
             it.dialog?.showLoading(it)
@@ -107,14 +111,17 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewBinding> : HttpActivity(
      */
     private fun init() {
         viewModel = createViewModel(this, createViewModel())
-        activityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        activityLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
             if (result != null) {
                 arCallback?.let {
                     it(result.resultCode, result.data)
                 }
             }
         }
-        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()
+        permissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
         ) {
             val refusePermission: ArrayList<String> = ArrayList()
             it.keys.forEach { res ->
@@ -157,13 +164,16 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewBinding> : HttpActivity(
         activityLauncher?.launch(intent)
     }
 
-    fun requestPermission(permissions: Array<String>, agree: () -> Unit, refuse: (refusePermissions: ArrayList<String>) -> Unit) {
+    fun requestPermission(permissions: Array<String>,
+                          agree: () -> Unit,
+                          refuse: (refusePermissions: ArrayList<String>) -> Unit
+    ) {
         this.permissionAgree = agree
         this.permissionRefuse = refuse
         var allAgree = true
-        for (permission in permissions){
+        for (permission in permissions) {
             if( ContextCompat.checkSelfPermission(this, permission) !=
-                PackageManager.PERMISSION_GRANTED){
+                PackageManager.PERMISSION_GRANTED) {
                 allAgree=false
                 break
             }

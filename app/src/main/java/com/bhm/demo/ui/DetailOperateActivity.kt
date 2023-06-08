@@ -36,7 +36,7 @@ import java.util.logging.Level
  * @author Buhuiming
  * @date 2023年06月01日 09时17分
  */
-class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBinding>(){
+class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBinding>() {
 
     override fun createViewModel() = DetailViewModel(application)
 
@@ -147,6 +147,7 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
                 viewBinding.logRecyclerView.smoothScrollToPosition(position)
             }
         }
+
         viewBinding.btnClear.setOnClickListener {
             if (ViewUtil.isInvalidClick(it)) {
                 return@setOnClickListener
@@ -154,12 +155,14 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
             loggerListAdapter?.notifyItemRangeRemoved(0, viewModel.listLogData.size)
             viewModel.listLogData.clear()
         }
+
         viewBinding.btnSetMtu.setOnClickListener {
             if (ViewUtil.isInvalidClick(it)) {
                 return@setOnClickListener
             }
             viewModel.setMtu(getBleDevice())
         }
+
         viewBinding.btnReadRssi.setOnClickListener {
             if (ViewUtil.isInvalidClick(it)) {
                 return@setOnClickListener
@@ -174,7 +177,7 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
     override fun onMessageEvent(event: MessageEvent?) {
         super.onMessageEvent(event)
         event?.let {
-            val device = event.data as BleDevice
+            val device = it.data as BleDevice
             if (getBleDevice() == device) {
                 finish()
             }

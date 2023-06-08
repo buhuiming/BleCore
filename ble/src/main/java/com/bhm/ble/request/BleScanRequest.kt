@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @date 2023年05月22日 09时49分
  */
 @SuppressLint("MissingPermission")
-internal class BleScanRequest private constructor() : Request(){
+internal class BleScanRequest private constructor() : Request() {
 
     companion object {
 
@@ -82,7 +82,7 @@ internal class BleScanRequest private constructor() : Request(){
         }
         if (!bleManager.isBleSupport()) {
             BleLogger.e("设备不支持蓝牙")
-            bleScanCallback.callScanFail(BleScanFailType.UnTypeSupportBle)
+            bleScanCallback.callScanFail(BleScanFailType.UnSupportBle)
             return
         }
         if (!BleUtil.isGpsOpen(bleManager.getContext()?.applicationContext)) {
@@ -151,7 +151,10 @@ internal class BleScanRequest private constructor() : Request(){
     /**
      * 执行扫描
      */
-    private fun bleScan(scanner: BluetoothLeScanner?, scanFilters: ArrayList<ScanFilter>, scanSetting: ScanSettings?) {
+    private fun bleScan(scanner: BluetoothLeScanner?,
+                        scanFilters: ArrayList<ScanFilter>,
+                        scanSetting: ScanSettings?
+    ) {
         BleLogger.d("开始第${currentReyCount + 1}次扫描")
         isScanning.set(true)
         cancelScan.set(false)
@@ -160,7 +163,7 @@ internal class BleScanRequest private constructor() : Request(){
         if (scanTime <= 0) {
             scanTime = DEFAULT_SCAN_MILLIS_TIMEOUT
         }
-        scanJob = CoroutineScope(Dispatchers.IO).launch {
+        scanJob = bleScanCallback?.launchInIOThread {
             withTimeout(scanTime) {
                 scanner?.startScan(scanFilters, scanSetting, scanCallback)
                 delay(scanTime)
@@ -198,7 +201,7 @@ internal class BleScanRequest private constructor() : Request(){
         scanner?.stopScan(scanCallback)
         if (ifContinueScan()) {
             val retryInterval = getBleOptions()?.scanRetryInterval?: DEFAULT_SCAN_RETRY_INTERVAL
-            waitScanJob = CoroutineScope(Dispatchers.Default).launch {
+            waitScanJob = bleScanCallback?.launchInDefaultThread {
                 delay(retryInterval)
                 currentReyCount ++
                 bleScan(scanner, scanFilters, scanSetting)
@@ -221,7 +224,7 @@ internal class BleScanRequest private constructor() : Request(){
             if (results.isEmpty()) {
                 BleLogger.d("没有扫描到数据")
             }
-            CoroutineScope(Dispatchers.Default).launch {
+            bleScanCallback?.launchInDefaultThread {
                 delay(500)
                 BleLogger.d("扫描完毕，扫描次数${currentReyCount + 1}次")
                 currentReyCount = 0

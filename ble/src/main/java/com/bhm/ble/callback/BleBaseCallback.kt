@@ -21,10 +21,26 @@ open class BleBaseCallback {
 
     private val mainScope = BleRequestImp.get().getMainScope()
 
+    private val ioScope = BleRequestImp.get().getIOScope()
+
+    private val defaultScope = BleRequestImp.get().getDefaultScope()
+
     private var key: String? = null
 
     fun launchInMainThread(block: suspend CoroutineScope.() -> Unit): Job {
         return mainScope.launch {
+            block.invoke(this)
+        }
+    }
+
+    fun launchInIOThread(block: suspend CoroutineScope.() -> Unit): Job {
+        return ioScope.launch {
+            block.invoke(this)
+        }
+    }
+
+    fun launchInDefaultThread(block: suspend CoroutineScope.() -> Unit): Job {
+        return defaultScope.launch {
             block.invoke(this)
         }
     }

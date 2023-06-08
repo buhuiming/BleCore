@@ -130,7 +130,7 @@ class BleTaskQueue {
                 BleLogger.e("任务超时，即刻移除：$task")
                 removeTask(task)
                 task.callback?.invoke(task, TimeoutCancelException())
-            } else if (it is CancellationException){
+            } else if (it is CancellationException) {
                 BleLogger.i("任务未超时：$task")
             }
         }

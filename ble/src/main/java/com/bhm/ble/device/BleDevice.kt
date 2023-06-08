@@ -26,8 +26,8 @@ data class BleDevice(
     val rssi: Int?, //被扫描到时候的信号强度
     val timestampNanos: Long?, //当扫描记录被观察到时，返回自启动以来的时间戳。
     val scanRecord: ScanRecord?, // 被扫描到时候携带的广播数据
-    var tag: Int? = 0 //预留字段
-) : Parcelable{
+    var tag: Any? = null //预留字段
+) : Parcelable {
 
     constructor(parcel: Parcel) : this(
         parcel.readParcelable(BluetoothDevice::class.java.classLoader),

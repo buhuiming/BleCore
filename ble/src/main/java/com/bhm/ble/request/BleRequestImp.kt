@@ -30,6 +30,10 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
 
     private val mainScope = MainScope()
 
+    private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private val defaultScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
     private val bleConnectedDeviceManager = BleConnectedDeviceManager.get()
 
     companion object {
@@ -46,6 +50,10 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     fun getMainScope() = mainScope
+
+    fun getIOScope() = ioScope
+
+    fun getDefaultScope() = defaultScope
 
     /**
      * 开始扫描
@@ -188,7 +196,12 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         callback.apply(bleNotifyCallback)
         val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.let {
-            it.enableCharacteristicNotify(serviceUUID, notifyUUID, useCharacteristicDescriptor, callback)
+            it.enableCharacteristicNotify(
+                serviceUUID,
+                notifyUUID,
+                useCharacteristicDescriptor,
+                callback
+            )
             return
         }
         callback.callNotifyFail(BleNotificationFailType.UnConnectedFailType(NOTIFY))
@@ -205,7 +218,11 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     ): Boolean {
         val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.let {
-            return it.disableCharacteristicNotify(serviceUUID, notifyUUID, useCharacteristicDescriptor)
+            return it.disableCharacteristicNotify(
+                serviceUUID,
+                notifyUUID,
+                useCharacteristicDescriptor
+            )
         }
         return false
     }
@@ -222,7 +239,12 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         callback.apply(bleIndicateCallback)
         val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.let {
-            it.enableCharacteristicIndicate(serviceUUID, indicateUUID, useCharacteristicDescriptor, callback)
+            it.enableCharacteristicIndicate(
+                serviceUUID,
+                indicateUUID,
+                useCharacteristicDescriptor,
+                callback
+            )
             return
         }
         callback.callIndicateFail(BleNotificationFailType.UnConnectedFailType(INDICATE))
@@ -239,7 +261,11 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     ): Boolean {
         val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.let {
-            return it.disableCharacteristicIndicate(serviceUUID, indicateUUID, useCharacteristicDescriptor)
+            return it.disableCharacteristicIndicate(
+                serviceUUID,
+                indicateUUID,
+                useCharacteristicDescriptor
+            )
         }
         return false
     }
@@ -261,7 +287,9 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     /**
      * 设置mtu
      */
-    override fun setMtu(bleDevice: BleDevice, mtu: Int, bleMtuChangedCallback: BleMtuChangedCallback.() -> Unit) {
+    override fun setMtu(bleDevice: BleDevice,
+                        mtu: Int,
+                        bleMtuChangedCallback: BleMtuChangedCallback.() -> Unit) {
         val callback = BleMtuChangedCallback()
         callback.apply(bleMtuChangedCallback)
         val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
@@ -288,9 +316,9 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      * 读特征值数据
      */
     override fun readData(bleDevice: BleDevice,
-                      serviceUUID: String,
-                      readUUID: String,
-                      bleIndicateCallback: BleReadCallback.() -> Unit) {
+                          serviceUUID: String,
+                          readUUID: String,
+                          bleIndicateCallback: BleReadCallback.() -> Unit) {
         val callback = BleReadCallback()
         callback.apply(bleIndicateCallback)
         val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
@@ -361,6 +389,8 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      */
     override fun releaseAll() {
         mainScope.cancel()
+        ioScope.cancel()
+        defaultScope.cancel()
         bleConnectedDeviceManager.releaseAll()
         BleTaskQueue.get().clear()
     }

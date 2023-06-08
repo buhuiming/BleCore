@@ -12,7 +12,7 @@ package com.bhm.ble.callback
  * @author Buhuiming
  * @date 2023年05月26日 15时54分
  */
-open class BleReadCallback : BleBaseCallback(){
+open class BleReadCallback : BleBaseCallback() {
 
     private var readSuccess: ((data: ByteArray) -> Unit)? = null
 

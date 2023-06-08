@@ -40,7 +40,7 @@ import kotlin.coroutines.suspendCoroutine
 internal class BleIndicateRequest(
     private val bleDevice: BleDevice,
     private val bleTaskQueue: BleTaskQueue
-) : Request(){
+) : Request() {
 
     private val bleIndicateCallbackHashMap: HashMap<String, BleIndicateCallback> = HashMap()
 
@@ -86,7 +86,12 @@ internal class BleIndicateRequest(
                 block = {
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation
-                        setCharacteristicIndicate(characteristic, useCharacteristicDescriptor, true, bleIndicateCallback)
+                        setCharacteristicIndicate(
+                            characteristic,
+                            useCharacteristicDescriptor,
+                            true,
+                            bleIndicateCallback
+                        )
                     }
                 },
                 interrupt = { _, throwable ->
@@ -100,7 +105,8 @@ internal class BleIndicateRequest(
                             bleIndicateCallback.callIndicateFail(
                                 BleNotificationFailType.TimeoutCancellationFailType(
                                     INDICATE
-                                ))
+                                )
+                            )
                         }
                     }
                 }
@@ -111,7 +117,8 @@ internal class BleIndicateRequest(
             bleIndicateCallback.callIndicateFail(
                 BleNotificationFailType.UnSupportNotifyFailType(
                     INDICATE
-                ))
+                )
+            )
         }
     }
 
@@ -129,7 +136,12 @@ internal class BleIndicateRequest(
             (characteristic.properties or BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0
         ) {
             cancelIndicateJob()
-            val success = setCharacteristicIndicate(characteristic, useCharacteristicDescriptor, false, null)
+            val success = setCharacteristicIndicate(
+                characteristic,
+                useCharacteristicDescriptor,
+                false,
+                null
+            )
             if (success) {
                 removeIndicateCallback(indicateUUID)
             }
@@ -148,7 +160,8 @@ internal class BleIndicateRequest(
         bleIndicateCallbackHashMap.values.forEach {
             if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
                 if (BleLogger.isLogger) {
-                    BleLogger.d("${bleDevice.deviceAddress} -> 收到Indicate数据：${BleUtil.bytesToHex(value)}")
+                    BleLogger.d("${bleDevice.deviceAddress} -> " +
+                            "收到Indicate数据：${BleUtil.bytesToHex(value)}")
                 }
                 it.callCharacteristicChanged(value)
             }
@@ -171,7 +184,8 @@ internal class BleIndicateRequest(
                 } else {
                     val exception = BleNotificationFailType.DescriptorFailType(INDICATE)
                     cancelIndicateJob()
-                    BleLogger.e("${bleDevice.deviceAddress} -> 设置Indicate失败：${exception.message}")
+                    BleLogger.e("${bleDevice.deviceAddress} -> " +
+                            "设置Indicate失败：${exception.message}")
                     it.callIndicateFail(exception)
                 }
             }
@@ -193,7 +207,8 @@ internal class BleIndicateRequest(
                 INDICATE
             )
             cancelIndicateJob()
-            BleLogger.e("${bleDevice.deviceAddress} -> 设置Indicate失败，SetCharacteristicNotificationFail")
+            BleLogger.e("${bleDevice.deviceAddress} -> " +
+                    "设置Indicate失败，SetCharacteristicNotificationFail")
             bleIndicateCallback?.callIndicateFail(exception)
             return false
         }
@@ -207,7 +222,8 @@ internal class BleIndicateRequest(
                 INDICATE
             )
             cancelIndicateJob()
-            BleLogger.e("${bleDevice.deviceAddress} -> 设置Indicate失败，SetCharacteristicNotificationFail")
+            BleLogger.e("${bleDevice.deviceAddress} -> " +
+                    "设置Indicate失败，SetCharacteristicNotificationFail")
             bleIndicateCallback?.callIndicateFail(exception)
             return false
         }

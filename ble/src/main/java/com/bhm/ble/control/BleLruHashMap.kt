@@ -11,7 +11,7 @@ import kotlin.math.ceil
 
 
 /**
- * 存放BleConnectRequest的容器
+ * 存放BleConnectRequest的容器，控制连接设备数量
  *
  * @author Buhuiming
  * @date 2023年05月26日 08时59分

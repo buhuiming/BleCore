@@ -59,10 +59,10 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
     fun initBle() {
         BleManager.get().init(application,
             BleOptions.Builder()
-                .setScanMillisTimeOut(2000)
+                .setScanMillisTimeOut(5000)
                 .setConnectMillisTimeOut(5000)
                 .setMaxConnectNum(7)
-                .setConnectRetryCountAndInterval(1, 1000)
+                .setConnectRetryCountAndInterval(2, 1000)
                 .build()
         )
     }
@@ -173,7 +173,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
             }
             onScanFail {
                 val msg: String = when (it) {
-                    is BleScanFailType.UnTypeSupportBle -> "设备不支持蓝牙"
+                    is BleScanFailType.UnSupportBle -> "设备不支持蓝牙"
                     is BleScanFailType.NoBlePermissionType -> "权限不足，请检查"
                     is BleScanFailType.GPSDisable -> "设备未打开GPS定位"
                     is BleScanFailType.BleDisable -> "蓝牙未打开"
@@ -238,7 +238,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
         }
         onConnectFail { bleDevice, connectFailType ->
             val msg: String = when (connectFailType) {
-                is BleConnectFailType.UnTypeSupportBle -> "设备不支持蓝牙"
+                is BleConnectFailType.UnSupportBle -> "设备不支持蓝牙"
                 is BleConnectFailType.NoBlePermissionType -> "权限不足，请检查"
                 is BleConnectFailType.NullableBluetoothDevice -> "设备为空"
                 is BleConnectFailType.BleDisable -> "蓝牙未打开"

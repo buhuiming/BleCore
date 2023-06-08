@@ -83,7 +83,7 @@
         }
         onScanFail {
             val msg: String = when (it) {
-                is BleScanFailType.UnTypeSupportBle -> "BleScanFailType.UnTypeSupportBle: 设备不支持蓝牙"
+                is BleScanFailType.UnSupportBle -> "BleScanFailType.UnSupportBle: 设备不支持蓝牙"
                 is BleScanFailType.NoBlePermissionType -> "BleScanFailType.NoBlePermissionType: 权限不足，请检查"
                 is BleScanFailType.GPSDisable -> "BleScanFailType.BleDisable: 设备未打开GPS定位"
                 is BleScanFailType.BleDisable -> "BleScanFailType.BleDisable: 蓝牙未打开"
