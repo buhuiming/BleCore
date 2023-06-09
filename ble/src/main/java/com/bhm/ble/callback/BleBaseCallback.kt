@@ -5,7 +5,7 @@
  */
 package com.bhm.ble.callback
 
-import com.bhm.ble.request.BleRequestImp
+import com.bhm.ble.request.base.BleRequestImp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch

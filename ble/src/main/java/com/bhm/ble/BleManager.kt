@@ -13,8 +13,8 @@ import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.callback.*
 import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.device.BleDevice
-import com.bhm.ble.request.BleBaseRequest
-import com.bhm.ble.request.BleRequestImp
+import com.bhm.ble.request.base.BleBaseRequest
+import com.bhm.ble.request.base.BleRequestImp
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 

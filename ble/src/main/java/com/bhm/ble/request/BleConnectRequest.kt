@@ -18,6 +18,7 @@ import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.data.Constants.DEFAULT_OPERATE_INTERVAL
 import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.request.base.Request
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.*
@@ -153,9 +154,9 @@ internal class BleConnectRequest(
      * 当连接上设备或者失去连接时会触发
      */
     fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
-        BleLogger.i("BluetoothGattCallback：onConnectionStateChange status: $status " +
-                "newState: $newState currentThread: ${Thread.currentThread().name} " +
-                "bleAddress: ${bleDevice.deviceAddress} lastState: $lastState")
+        BleLogger.i("onConnectionStateChange： status = $status " +
+                ", newState = $newState , currentThread = ${Thread.currentThread().name} " +
+                ", bleAddress = ${bleDevice.deviceAddress} , lastState = $lastState")
         bluetoothGatt = gatt
         if (newState == BluetoothProfile.STATE_CONNECTED) {
             //连接成功

@@ -5,7 +5,7 @@
  */
 @file:Suppress("SENSELESS_COMPARISON")
 
-package com.bhm.ble.request
+package com.bhm.ble.request.base
 
 import android.bluetooth.BluetoothGatt
 import android.util.SparseArray
@@ -14,6 +14,7 @@ import com.bhm.ble.control.*
 import com.bhm.ble.data.*
 import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.request.BleScanRequest
 import com.bhm.ble.utils.BleLogger
 import kotlinx.coroutines.*
 import kotlin.coroutines.resume

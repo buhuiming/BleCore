@@ -3,7 +3,7 @@
  * 不能修改和删除上面的版权声明
  * 此代码属于buhuiming编写，在未经允许的情况下不得传播复制
  */
-package com.bhm.ble.request
+package com.bhm.ble.request.base
 
 import com.bhm.ble.BleManager
 import com.bhm.ble.control.BleTask

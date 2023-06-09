@@ -16,9 +16,12 @@ import android.os.Build
 import com.bhm.ble.callback.BleNotifyCallback
 import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.data.*
+import com.bhm.ble.data.Constants.EXCEPTION_CODE_DESCRIPTOR_FAIL
+import com.bhm.ble.data.Constants.EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
 import com.bhm.ble.data.Constants.NOTIFY_TASK_ID
 import com.bhm.ble.data.Constants.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.request.base.Request
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
@@ -70,7 +73,7 @@ internal class BleNotifyRequest(
         val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
         val characteristic = gattService?.getCharacteristic(UUID.fromString(notifyUUID))
         if (bluetoothGatt != null && gattService != null && characteristic != null &&
-            (characteristic.properties or BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0
+            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0
         ) {
             bleNotifyCallback.setKey(notifyUUID)
             addNotifyCallback(notifyUUID, bleNotifyCallback)
@@ -122,7 +125,7 @@ internal class BleNotifyRequest(
         val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
         val characteristic = gattService?.getCharacteristic(UUID.fromString(notifyUUID))
         if (bluetoothGatt != null && gattService != null && characteristic != null &&
-            (characteristic.properties or BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0
+            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0
         ) {
             cancelNotifyJob()
             val success = setCharacteristicNotify(
@@ -174,7 +177,7 @@ internal class BleNotifyRequest(
                 } else {
                     val exception = UnDefinedException(
                         "${it.getKey()} -> 设置Notify失败，Descriptor写数据失败",
-                        Constants.EXCEPTION_CODE_DESCRIPTOR_FAIL
+                        EXCEPTION_CODE_DESCRIPTOR_FAIL
                     )
                     cancelNotifyJob()
                     BleLogger.e(exception.message)
@@ -198,7 +201,7 @@ internal class BleNotifyRequest(
         if (setSuccess != true) {
             val exception = UnDefinedException(
                 "$notifyUUID -> 设置Notify失败，SetCharacteristicNotificationFail",
-                Constants.EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
+                EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
             )
             cancelNotifyJob()
             BleLogger.e(exception.message)
@@ -213,7 +216,7 @@ internal class BleNotifyRequest(
         if (descriptor == null) {
             val exception = UnDefinedException(
                 "$notifyUUID -> 设置Notify失败，SetCharacteristicNotificationFail",
-                Constants.EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
+                EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
             )
             cancelNotifyJob()
             BleLogger.e(exception.message)
@@ -240,9 +243,17 @@ internal class BleNotifyRequest(
             success = writeDescriptor == true
         }
         if (!success) {
+            //true, if the write operation was initiated successfully Value is
+            // BluetoothStatusCodes.SUCCESS,
+            // BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION,
+            // android.bluetooth.BluetoothStatusCodes.ERROR_DEVICE_NOT_CONNECTED,
+            // BluetoothStatusCodes.ERROR_PROFILE_SERVICE_NOT_BOUND,
+            // BluetoothStatusCodes.ERROR_GATT_WRITE_NOT_ALLOWED,
+            // BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY,
+            // BluetoothStatusCodes.ERROR_UNKNOWN
             val exception = UnDefinedException(
-                "$notifyUUID -> 设置Notify失败，Descriptor写数据失败",
-                Constants.EXCEPTION_CODE_DESCRIPTOR_FAIL
+                "$notifyUUID -> 设置Notify失败，错误可能是没有权限、未连接、服务未绑定、不可写、请求忙碌等",
+                EXCEPTION_CODE_DESCRIPTOR_FAIL
             )
             cancelNotifyJob()
             BleLogger.e(exception.message)

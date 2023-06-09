@@ -23,6 +23,7 @@ import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.data.UnSupportException
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.request.base.Request
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
@@ -74,7 +75,7 @@ internal class BleIndicateRequest(
         val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
         val characteristic = gattService?.getCharacteristic(UUID.fromString(indicateUUID))
         if (bluetoothGatt != null && gattService != null && characteristic != null &&
-            (characteristic.properties or BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0
+            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0
         ) {
             bleIndicateCallback.setKey(indicateUUID)
             addIndicateCallback(indicateUUID, bleIndicateCallback)
@@ -126,7 +127,7 @@ internal class BleIndicateRequest(
         val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
         val characteristic = gattService?.getCharacteristic(UUID.fromString(indicateUUID))
         if (bluetoothGatt != null && gattService != null && characteristic != null &&
-            (characteristic.properties or BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0
+            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0
         ) {
             cancelIndicateJob()
             val success = setCharacteristicIndicate(
@@ -244,8 +245,16 @@ internal class BleIndicateRequest(
             success = writeDescriptor == true
         }
         if (!success) {
+            //true, if the write operation was initiated successfully Value is
+            // BluetoothStatusCodes.SUCCESS,
+            // BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION,
+            // android.bluetooth.BluetoothStatusCodes.ERROR_DEVICE_NOT_CONNECTED,
+            // BluetoothStatusCodes.ERROR_PROFILE_SERVICE_NOT_BOUND,
+            // BluetoothStatusCodes.ERROR_GATT_WRITE_NOT_ALLOWED,
+            // BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY,
+            // BluetoothStatusCodes.ERROR_UNKNOWN
             val exception = UnDefinedException(
-                "$indicateUUID -> 设置Indicate失败，Descriptor写数据失败",
+                "$indicateUUID -> 设置Indicate失败，错误可能是没有权限、未连接、服务未绑定、不可写、请求忙碌等",
                 EXCEPTION_CODE_DESCRIPTOR_FAIL
             )
             cancelIndicateJob()

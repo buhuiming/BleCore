@@ -18,6 +18,8 @@ open class BleWriteCallback : BleBaseCallback() {
 
     private var writeFail: ((throwable: Throwable) -> Unit)? = null
 
+    private var writeComplete: (() -> Unit)? = null
+
     fun onWriteFail(value: ((throwable: Throwable) -> Unit)) {
         writeFail = value
     }

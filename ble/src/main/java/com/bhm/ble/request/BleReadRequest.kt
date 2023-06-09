@@ -17,6 +17,7 @@ import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.data.UnSupportException
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.request.base.Request
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
@@ -69,7 +70,7 @@ internal class BleReadRequest(
         val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
         val characteristic = gattService?.getCharacteristic(UUID.fromString(readUUID))
         if (bluetoothGatt != null && gattService != null && characteristic != null &&
-            (characteristic.properties or BluetoothGattCharacteristic.PROPERTY_READ) > 0
+            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_READ) > 0
         ) {
             cancelReadJob()
             bleReadCallback.setKey(readUUID)
@@ -80,8 +81,7 @@ internal class BleReadRequest(
                 block = {
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation
-                        if (getBleConnectedDevice(bleDevice)?.getBluetoothGatt()?.
-                            readCharacteristic(characteristic) == false) {
+                        if (!bluetoothGatt.readCharacteristic(characteristic)) {
                             continuation.resume(UnDefinedException("Gatt读特征值数据失败"))
                         }
                     }
@@ -136,7 +136,7 @@ internal class BleReadRequest(
     }
 
     /**
-     * 取消设置Mtu任务
+     * 取消读特征值数据任务
      */
     @Synchronized
     private fun cancelReadJob() {

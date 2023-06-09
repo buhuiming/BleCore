@@ -15,6 +15,7 @@ import com.bhm.ble.data.Constants.SET_RSSI_TASK_ID
 import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.request.base.Request
 import com.bhm.ble.utils.BleLogger
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlin.coroutines.Continuation

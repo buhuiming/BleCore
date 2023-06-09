@@ -16,7 +16,7 @@ import com.bhm.ble.request.*
 
 
 /**
- * 每个已连接设备对应一个BleConnectedDevice对象
+ * 每个连接设备对应一个BleConnectedDevice对象
  * 每一个BleConnectedDevice对象包含一个请求队列、连接请求、Notify请求、Indicate请求、Rssi请求、mtu请求、
  * 设置优先级请求、读特征值数据请求、写数据请求
  *
@@ -107,7 +107,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         status: Int
     ) {
         super.onCharacteristicWrite(gatt, characteristic, status)
-        bleWriteRequest.onCharacteristicWrite(gatt, characteristic, status)
+        bleWriteRequest.onCharacteristicWrite(characteristic, status)
     }
 
     /**
