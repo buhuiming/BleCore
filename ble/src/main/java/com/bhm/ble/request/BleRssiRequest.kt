@@ -61,8 +61,7 @@ internal class BleRssiRequest(
             block = {
                 suspendCoroutine<Throwable?> { continuation ->
                     mContinuation = continuation
-                    if (getBleConnectedDevice(bleDevice)?.
-                        getBluetoothGatt()?.readRemoteRssi() == false) {
+                    if (getBluetoothGatt(bleDevice)?.readRemoteRssi() == false) {
                         continuation.resume(UnDefinedException("Gatt读取Rssi失败"))
                     }
                 }

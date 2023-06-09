@@ -69,11 +69,9 @@ internal class BleNotifyRequest(
                                    notifyUUID: String,
                                    useCharacteristicDescriptor: Boolean,
                                    bleNotifyCallback: BleNotifyCallback) {
-        val bluetoothGatt = getBleConnectedDevice(bleDevice)?.getBluetoothGatt()
-        val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
-        val characteristic = gattService?.getCharacteristic(UUID.fromString(notifyUUID))
-        if (bluetoothGatt != null && gattService != null && characteristic != null &&
-            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0
+        val characteristic = getCharacteristic(bleDevice, serviceUUID, notifyUUID)
+        if (characteristic != null &&
+            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0
         ) {
             bleNotifyCallback.setKey(notifyUUID)
             addNotifyCallback(notifyUUID, bleNotifyCallback)
@@ -121,11 +119,9 @@ internal class BleNotifyRequest(
     fun disableCharacteristicNotify(serviceUUID: String,
                                     notifyUUID: String,
                                     useCharacteristicDescriptor: Boolean): Boolean {
-        val bluetoothGatt = getBleConnectedDevice(bleDevice)?.getBluetoothGatt()
-        val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
-        val characteristic = gattService?.getCharacteristic(UUID.fromString(notifyUUID))
-        if (bluetoothGatt != null && gattService != null && characteristic != null &&
-            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0
+        val characteristic = getCharacteristic(bleDevice, serviceUUID, notifyUUID)
+        if (characteristic != null &&
+            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0
         ) {
             cancelNotifyJob(getTaskId(notifyUUID))
             val success = setCharacteristicNotify(

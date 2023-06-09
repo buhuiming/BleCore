@@ -59,8 +59,7 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
             block = {
                 suspendCoroutine<Throwable?> { continuation ->
                     mContinuation = continuation
-                    if (getBleConnectedDevice(bleDevice)?.
-                        getBluetoothGatt()?.requestMtu(mtu) == false) {
+                    if (getBluetoothGatt(bleDevice)?.requestMtu(mtu) == false) {
                         continuation.resume(UnDefinedException("Gatt设置mtu失败"))
                     }
                 }

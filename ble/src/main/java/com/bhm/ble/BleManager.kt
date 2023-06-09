@@ -288,6 +288,7 @@ class BleManager private constructor() {
      * [BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER]的其中一个
      *
      */
+    @Synchronized
     fun setConnectionPriority(bleDevice: BleDevice, connectionPriority: Int): Boolean {
         checkInitialize()
         if (connectionPriority != BluetoothGatt.CONNECTION_PRIORITY_BALANCED &&
@@ -301,6 +302,7 @@ class BleManager private constructor() {
     /**
      * 读特征值数据
      */
+    @Synchronized
     fun readData(bleDevice: BleDevice,
                  serviceUUID: String,
                  readUUID: String,
@@ -313,6 +315,7 @@ class BleManager private constructor() {
      * 写数据
      * 注意：因为分包后每一个包，可能是包含完整的协议，所以分包由业务层处理，组件只会根据包的长度和mtu值对比后是否拦截
      */
+    @Synchronized
     fun writeData(bleDevice: BleDevice,
                   serviceUUID: String,
                   writeUUID: String,
@@ -333,6 +336,7 @@ class BleManager private constructor() {
      * 写数据
      * 注意：因为分包后每一个包，可能是包含完整的协议，所以分包由业务层处理，组件只会根据包的长度和mtu值对比后是否拦截
      */
+    @Synchronized
     fun writeData(bleDevice: BleDevice,
                   serviceUUID: String,
                   writeUUID: String,

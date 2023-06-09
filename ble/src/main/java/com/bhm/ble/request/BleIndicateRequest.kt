@@ -71,11 +71,9 @@ internal class BleIndicateRequest(
                                      indicateUUID: String,
                                      useCharacteristicDescriptor: Boolean,
                                      bleIndicateCallback: BleIndicateCallback) {
-        val bluetoothGatt = getBleConnectedDevice(bleDevice)?.getBluetoothGatt()
-        val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
-        val characteristic = gattService?.getCharacteristic(UUID.fromString(indicateUUID))
-        if (bluetoothGatt != null && gattService != null && characteristic != null &&
-            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0
+        val characteristic = getCharacteristic(bleDevice, serviceUUID, indicateUUID)
+        if (characteristic != null &&
+            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0
         ) {
             bleIndicateCallback.setKey(indicateUUID)
             addIndicateCallback(indicateUUID, bleIndicateCallback)
@@ -123,11 +121,9 @@ internal class BleIndicateRequest(
     fun disableCharacteristicIndicate(serviceUUID: String,
                                       indicateUUID: String,
                                       useCharacteristicDescriptor: Boolean): Boolean {
-        val bluetoothGatt = getBleConnectedDevice(bleDevice)?.getBluetoothGatt()
-        val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
-        val characteristic = gattService?.getCharacteristic(UUID.fromString(indicateUUID))
-        if (bluetoothGatt != null && gattService != null && characteristic != null &&
-            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0
+        val characteristic = getCharacteristic(bleDevice, serviceUUID, indicateUUID)
+        if (characteristic != null &&
+            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0
         ) {
             cancelIndicateJob(getTaskId(indicateUUID))
             val success = setCharacteristicIndicate(

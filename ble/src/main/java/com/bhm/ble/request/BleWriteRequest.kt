@@ -41,6 +41,8 @@ internal class BleWriteRequest(
     private val bleTaskQueue: BleTaskQueue
 ) : Request() {
 
+    private val bluetoothGatt = getBluetoothGatt(bleDevice)
+
     private val bleWriteCallbackHashMap: HashMap<String, BleWriteCallback> = HashMap()
 
 //    private var currentPackage = AtomicInteger(0)
@@ -69,10 +71,13 @@ internal class BleWriteRequest(
     @Synchronized
     fun writeData(serviceUUID: String,
                   writeUUID: String,
+                  operateRandomID: String,
                   dataArray: SparseArray<ByteArray>,
                   bleWriteCallback: BleWriteCallback) {
         if (dataArray.size() == 0) {
-            val exception = UnDefinedException("$writeUUID -> 写数据失败，数据为空")
+            val exception = UnDefinedException(
+                getTaskId(writeUUID, operateRandomID) + " -> 写数据失败，数据为空"
+            )
             BleLogger.e(exception.message)
             bleWriteCallback.callWriteFail(exception)
             return
@@ -80,15 +85,19 @@ internal class BleWriteRequest(
         for (i in 0..dataArray.size()) {
             val data = dataArray.get(i)
             if (data == null || data.isEmpty()) {
-                val exception = UnDefinedException("$writeUUID -> 写数据失败，第${i + 1}个数据包为空")
+                val exception = UnDefinedException(
+                    getTaskId(writeUUID, operateRandomID) + " -> 写数据失败，第${i + 1}个数据包为空"
+                )
                 BleLogger.e(exception.message)
                 bleWriteCallback.callWriteFail(exception)
                 return
             }
             val mtu = getBleOptions()?.mtu?: DEFAULT_MTU
-            if (data.size > mtu) {
-                val exception = UnDefinedException("$writeUUID -> 写数据失败，" +
-                        "第${i + 1}个数据包长度(${data.size})大于设定Mtu($mtu)")
+            //mtu长度包含了ATT的opcode一个字节以及ATT的handle2个字节
+            val maxWriteLength = mtu - 3
+            if (data.size > maxWriteLength) {
+                val exception = UnDefinedException("${getTaskId(writeUUID, operateRandomID)} -> " +
+                        "写数据失败，第${i + 1}个数据包长度(${data.size}) + 3大于设定Mtu($mtu)")
                 BleLogger.e(exception.message)
                 bleWriteCallback.callWriteFail(exception)
                 return
@@ -97,16 +106,16 @@ internal class BleWriteRequest(
 //        totalPackage = dataArray.size()
 //        this.dataArray = dataArray
 //        currentPackage.set(1)
-        val bluetoothGatt = getBleConnectedDevice(bleDevice)?.getBluetoothGatt()
-        val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
-        val characteristic = gattService?.getCharacteristic(UUID.fromString(writeUUID))
 
-        if (bluetoothGatt != null && gattService != null && characteristic != null &&
-            (characteristic.properties and (BluetoothGattCharacteristic.PROPERTY_WRITE
-                    or BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) == 0)
+        val characteristic = getCharacteristic(serviceUUID, writeUUID)
+
+        if (characteristic != null &&
+            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0 ||
+                    characteristic.properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0)
         ) {
-            cancelWriteJob()
             bleWriteCallback.setKey(writeUUID)
+            bleWriteCallback.setServiceUUID(serviceUUID)
+            bleWriteCallback.setSingleKey(operateRandomID)
             addWriteCallback(writeUUID, bleWriteCallback)
             startWriteJob(dataArray.get(0), bleWriteCallback)
         } else {
@@ -118,7 +127,7 @@ internal class BleWriteRequest(
 
     @SuppressLint("MissingPermission")
     private fun startWriteJob(data: ByteArray,
-                             bleWriteCallback: BleWriteCallback) {
+                              bleWriteCallback: BleWriteCallback) {
         var mContinuation: Continuation<Throwable?>? = null
         val task = getTask(
             WRITE_TASK_ID,
@@ -154,7 +163,6 @@ internal class BleWriteRequest(
         data: ByteArray,
         bleWriteCallback: BleWriteCallback
     ) {
-        val bluetoothGatt = getBleConnectedDevice(bleDevice)?.getBluetoothGatt()
         val success: Boolean? =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 bluetoothGatt?.writeCharacteristic(
@@ -163,6 +171,7 @@ internal class BleWriteRequest(
                     BluetoothGattCharacteristic.WRITE_TYPE_SIGNED
                 ) == BluetoothStatusCodes.SUCCESS
             } else {
+                characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_SIGNED
                 characteristic.value = data
                 bluetoothGatt?.writeCharacteristic(characteristic)
             }
@@ -191,7 +200,6 @@ internal class BleWriteRequest(
         characteristic: BluetoothGattCharacteristic?,
         status: Int
     ) {
-        cancelWriteJob()
         bleWriteCallbackHashMap.values.forEach {
             if (characteristic?.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
@@ -209,6 +217,14 @@ internal class BleWriteRequest(
             }
         }
     }
+
+    private fun getCharacteristic(serviceUUID: String, writeUUID: String): BluetoothGattCharacteristic? {
+        val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
+        return gattService?.getCharacteristic(UUID.fromString(writeUUID))
+    }
+
+    private fun getTaskId(uuid: String?, operateRandomID: String) =
+        WRITE_TASK_ID + uuid + operateRandomID
 
     /**
      * 取消写数据任务

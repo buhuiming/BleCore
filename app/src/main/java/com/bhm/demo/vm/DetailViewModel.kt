@@ -67,23 +67,23 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
     private fun getOperateType(characteristic: BluetoothGattCharacteristic): String {
         val property = StringBuilder()
         val charaProp: Int = characteristic.properties
-        if (charaProp and BluetoothGattCharacteristic.PROPERTY_READ > 0) {
+        if (charaProp and BluetoothGattCharacteristic.PROPERTY_READ != 0) {
             property.append("Read")
             property.append(" , ")
         }
-        if (charaProp and BluetoothGattCharacteristic.PROPERTY_WRITE > 0) {
+        if (charaProp and BluetoothGattCharacteristic.PROPERTY_WRITE != 0) {
             property.append("Write")
             property.append(" , ")
         }
-        if (charaProp and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE > 0) {
+        if (charaProp and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0) {
             property.append("Write No Response")
             property.append(" , ")
         }
-        if (charaProp and BluetoothGattCharacteristic.PROPERTY_NOTIFY > 0) {
+        if (charaProp and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0) {
             property.append("Notify")
             property.append(" , ")
         }
-        if (charaProp and BluetoothGattCharacteristic.PROPERTY_INDICATE > 0) {
+        if (charaProp and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) {
             property.append("Indicate")
             property.append(" , ")
         }

@@ -28,7 +28,6 @@ internal class BleSetPriorityRequest(private val bleDevice: BleDevice) : Request
      */
     @SuppressLint("MissingPermission")
     fun setConnectionPriority(connectionPriority: Int): Boolean {
-        return getBleConnectedDevice(bleDevice)?.getBluetoothGatt()
-            ?.requestConnectionPriority(connectionPriority)?: false
+        return getBluetoothGatt(bleDevice)?.requestConnectionPriority(connectionPriority)?: false
     }
 }

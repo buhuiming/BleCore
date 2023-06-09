@@ -248,7 +248,13 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
                   writeUUID: String,
                   dataArray: SparseArray<ByteArray>,
                   bleWriteCallback: BleWriteCallback) {
-        bleWriteRequest.writeData(serviceUUID, writeUUID, dataArray, bleWriteCallback)
+        //以时间戳为id，来标记一次写操作
+        bleWriteRequest.writeData(serviceUUID,
+            writeUUID,
+            System.currentTimeMillis().toString(),
+            dataArray,
+            bleWriteCallback
+        )
     }
 
     fun removeNotifyCallback(uuid: String?) {

@@ -5,6 +5,8 @@
  */
 package com.bhm.ble.request.base
 
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
 import com.bhm.ble.BleManager
 import com.bhm.ble.control.BleTask
 import com.bhm.ble.data.Constants.DEFAULT_OPERATE_INTERVAL
@@ -12,6 +14,7 @@ import com.bhm.ble.data.Constants.DEFAULT_OPERATE_MILLIS_TIMEOUT
 import com.bhm.ble.device.BleConnectedDevice
 import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
+import java.util.*
 
 
 /**
@@ -21,10 +24,19 @@ import com.bhm.ble.device.BleDevice
  */
 internal open class Request {
 
+    /**
+     * 获取BleManager
+     */
     fun getBleManager() = BleManager.get()
 
+    /**
+     * 获取BleOptions
+     */
     fun getBleOptions() = getBleManager().getOptions()
 
+    /**
+     * 获取操作时间
+     */
     fun getOperateTime(): Long {
         var operateTime = getBleOptions()?.operateMillisTimeOut ?: DEFAULT_OPERATE_MILLIS_TIMEOUT
         if (operateTime <= 0) {
@@ -33,6 +45,9 @@ internal open class Request {
         return operateTime
     }
 
+    /**
+     * 获取操作间隔
+     */
     fun getOperateInterval(): Long {
         var operateInterval = getBleOptions()?.operateInterval ?: DEFAULT_OPERATE_INTERVAL
         if (operateInterval <= 0) {
@@ -41,10 +56,9 @@ internal open class Request {
         return operateInterval
     }
 
-    fun getBleConnectedDevice(bleDevice: BleDevice): BleConnectedDevice? {
-        return BleConnectedDeviceManager.get().getBleConnectedDevice(bleDevice)
-    }
-
+    /**
+     * 生成一个任务
+     */
     fun getTask(
         taskId: String,
         block: suspend BleTask.() -> Unit,
@@ -61,5 +75,30 @@ internal open class Request {
             interrupt = interrupt,
             callback = callback
         )
+    }
+
+    /**
+     * 获取连接设备
+     */
+    fun getBleConnectedDevice(bleDevice: BleDevice): BleConnectedDevice? {
+        return BleConnectedDeviceManager.get().getBleConnectedDevice(bleDevice)
+    }
+
+    /**
+     * 获取BluetoothGatt
+     */
+    fun getBluetoothGatt(bleDevice: BleDevice): BluetoothGatt? {
+        return getBleConnectedDevice(bleDevice)?.getBluetoothGatt()
+    }
+
+    /**
+     * 获取Characteristic
+     */
+    fun getCharacteristic(bleDevice: BleDevice,
+                          serviceUUID: String,
+                          characteristicUUID: String
+    ): BluetoothGattCharacteristic? {
+        val gattService = getBluetoothGatt(bleDevice)?.getService(UUID.fromString(serviceUUID))
+        return gattService?.getCharacteristic(UUID.fromString(characteristicUUID))
     }
 }

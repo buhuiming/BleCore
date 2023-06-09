@@ -66,11 +66,9 @@ internal class BleReadRequest(
                            readUUID: String,
                            bleReadCallback: BleReadCallback
     ) {
-        val bluetoothGatt = getBleConnectedDevice(bleDevice)?.getBluetoothGatt()
-        val gattService = bluetoothGatt?.getService(UUID.fromString(serviceUUID))
-        val characteristic = gattService?.getCharacteristic(UUID.fromString(readUUID))
-        if (bluetoothGatt != null && gattService != null && characteristic != null &&
-            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_READ) > 0
+        val characteristic = getCharacteristic(bleDevice, serviceUUID, readUUID)
+        if (characteristic != null &&
+            (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_READ) != 0
         ) {
             cancelReadJob(getTaskId(readUUID))
             bleReadCallback.setKey(readUUID)
@@ -81,7 +79,7 @@ internal class BleReadRequest(
                 block = {
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation
-                        if (!bluetoothGatt.readCharacteristic(characteristic)) {
+                        if (getBluetoothGatt(bleDevice)?.readCharacteristic(characteristic) == false) {
                             continuation.resume(UnDefinedException("Gatt读特征值数据失败"))
                         }
                     }
