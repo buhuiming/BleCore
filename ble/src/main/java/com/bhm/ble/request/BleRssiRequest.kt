@@ -11,6 +11,7 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.BleRssiCallback
 import com.bhm.ble.control.BleTaskQueue
+import com.bhm.ble.data.CancelException
 import com.bhm.ble.data.Constants.SET_RSSI_TASK_ID
 import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.data.UnDefinedException
@@ -56,7 +57,7 @@ internal class BleRssiRequest(
         addRssiCallback(bleRssiCallback)
         var mContinuation: Continuation<Throwable?>? = null
         val task = getTask(
-            SET_RSSI_TASK_ID,
+            getTaskId(),
             block = {
                 suspendCoroutine<Throwable?> { continuation ->
                     mContinuation = continuation
@@ -67,6 +68,9 @@ internal class BleRssiRequest(
                 }
             },
             interrupt = { _, throwable ->
+                if (throwable is CancelException) {
+                    bleRssiCallback.callRssiFail(throwable)
+                }
                 mContinuation?.resume(throwable)
             },
             callback = { _, throwable ->
@@ -89,8 +93,8 @@ internal class BleRssiRequest(
      * 读取信号值后会触发
      */
     fun onReadRemoteRssi(rssi: Int, status: Int) {
-        cancelReadRssiJob()
         bleRssiCallback?.let {
+            cancelReadRssiJob()
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 BleLogger.d("${bleDevice.deviceAddress} -> 读取Rssi成功：$rssi")
                 it.callRssiSuccess(rssi)
@@ -103,11 +107,13 @@ internal class BleRssiRequest(
         }
     }
 
+    private fun getTaskId() = SET_RSSI_TASK_ID + bleDevice.deviceAddress
+
     /**
      * 取消读取Rssi任务
      */
     @Synchronized
     private fun cancelReadRssiJob() {
-        bleTaskQueue.removeTask(taskId = SET_RSSI_TASK_ID)
+        bleTaskQueue.removeTask(getTaskId())
     }
 }

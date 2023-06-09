@@ -16,7 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  */
 class BleTaskList : CopyOnWriteArrayList<BleTask>() {
 
-    private val taskIdList = CopyOnWriteArrayList<Int>()
+    private val taskIdList = CopyOnWriteArrayList<String>()
 
     override fun add(element: BleTask?): Boolean {
         taskIdList.add(element?.taskId)
@@ -30,7 +30,7 @@ class BleTaskList : CopyOnWriteArrayList<BleTask>() {
         return super.remove(element)
     }
 
-    fun containsTaskId(taskId: Int): Boolean {
+    fun containsTaskId(taskId: String): Boolean {
         return taskIdList.contains(taskId)
     }
 }

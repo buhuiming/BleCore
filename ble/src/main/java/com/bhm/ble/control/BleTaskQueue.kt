@@ -159,7 +159,7 @@ class BleTaskQueue {
      * 移除任务
      */
     @Synchronized
-    fun removeTask(taskId: Int) {
+    fun removeTask(taskId: String) {
         if (!taskList.containsTaskId(taskId)) {
             return
         }

@@ -46,21 +46,17 @@ object Constants {
     const val UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR =
         "00002902-0000-1000-8000-00805f9b34fb"
 
-    const val NOTIFY_TASK_ID = 1000
+    const val NOTIFY_TASK_ID = "1000"
 
-    const val INDICATE_TASK_ID = 1001
+    const val INDICATE_TASK_ID = "1001"
 
-    const val SET_RSSI_TASK_ID = 1002
+    const val SET_RSSI_TASK_ID = "1002"
 
-    const val SET_MTU_TASK_ID = 1003
+    const val SET_MTU_TASK_ID = "1003"
 
-    const val READ_TASK_ID = 1004
+    const val READ_TASK_ID = "1004"
 
-    const val WRITE_TASK_ID = 1005
-
-    const val NOTIFY = "Notify"
-
-    const val INDICATE = "Indicate"
+    const val WRITE_TASK_ID = "1005"
 
     const val MARK = "#######----> "
 

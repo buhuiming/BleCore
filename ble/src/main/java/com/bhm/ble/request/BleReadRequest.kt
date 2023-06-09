@@ -72,12 +72,12 @@ internal class BleReadRequest(
         if (bluetoothGatt != null && gattService != null && characteristic != null &&
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_READ) > 0
         ) {
-            cancelReadJob()
+            cancelReadJob(getTaskId(readUUID))
             bleReadCallback.setKey(readUUID)
             addReadCallback(readUUID, bleReadCallback)
             var mContinuation: Continuation<Throwable?>? = null
             val task = getTask(
-                READ_TASK_ID,
+                getTaskId(readUUID),
                 block = {
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation
@@ -116,9 +116,9 @@ internal class BleReadRequest(
         value: ByteArray,
         status: Int
     ) {
-        cancelReadJob()
         bleReadCallbackHashMap.values.forEach {
             if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
+                cancelReadJob(getTaskId(it.getKey()))
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     if (BleLogger.isLogger) {
                         BleLogger.d("${it.getKey()} -> " +
@@ -135,11 +135,13 @@ internal class BleReadRequest(
         }
     }
 
+    private fun getTaskId(uuid: String?) = READ_TASK_ID + uuid
+
     /**
      * 取消读特征值数据任务
      */
     @Synchronized
-    private fun cancelReadJob() {
-        bleTaskQueue.removeTask(taskId = READ_TASK_ID)
+    private fun cancelReadJob(taskId: String) {
+        bleTaskQueue.removeTask(taskId)
     }
 }

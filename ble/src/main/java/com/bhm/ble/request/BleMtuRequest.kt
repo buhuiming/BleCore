@@ -55,7 +55,7 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
         addMtuChangedCallback(bleMtuChangedCallback)
         var mContinuation: Continuation<Throwable?>? = null
         val task = getTask(
-            SET_MTU_TASK_ID,
+            getTaskId(),
             block = {
                 suspendCoroutine<Throwable?> { continuation ->
                     mContinuation = continuation
@@ -86,8 +86,8 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
      * 设置Mtu值后会触发
      */
     fun onMtuChanged(mtu: Int, status: Int) {
-        cancelSetMtuJob()
         bleMtuChangedCallback?.let {
+            cancelSetMtuJob()
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 BleLogger.d("${bleDevice.deviceAddress} -> 设置Mtu成功：$mtu")
                 it.callMtuChanged(mtu)
@@ -100,11 +100,13 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
         }
     }
 
+    private fun getTaskId() = SET_MTU_TASK_ID + bleDevice.deviceAddress
+
     /**
      * 取消设置Mtu任务
      */
     @Synchronized
     private fun cancelSetMtuJob() {
-        bleTaskQueue.removeTask(taskId = SET_MTU_TASK_ID)
+        bleTaskQueue.removeTask(getTaskId())
     }
 }

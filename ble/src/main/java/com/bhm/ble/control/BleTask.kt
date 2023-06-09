@@ -5,10 +5,14 @@
  */
 package com.bhm.ble.control
 
+import com.bhm.ble.data.CancelException
 import com.bhm.ble.data.Constants.CANCEL_UN_COMPLETE
 import com.bhm.ble.data.Constants.COMPLETED
 import com.bhm.ble.data.Constants.UN_COMPLETE
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicInteger
 
 
@@ -23,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * @author Buhuiming
  * @date 2023年06月02日 11时01分
  */
-class BleTask(val taskId: Int,
+class BleTask(val taskId: String,
               val durationTimeMillis: Long = 0,
               val operateInterval: Long = 100,
               val callInMainThread: Boolean = false,
@@ -67,6 +71,6 @@ class BleTask(val taskId: Int,
      * 中断任务
      */
     fun remove() {
-        interrupt?.invoke(this@BleTask, CancellationException())
+        interrupt?.invoke(this@BleTask, CancelException("主动取消任务"))
     }
 }

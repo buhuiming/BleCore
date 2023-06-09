@@ -46,7 +46,7 @@ internal open class Request {
     }
 
     fun getTask(
-        taskId: Int,
+        taskId: String,
         block: suspend BleTask.() -> Unit,
         interrupt: (task: BleTask, throwable: Throwable?) -> Unit,
         callback: (task: BleTask, throwable: Throwable?) -> Unit

@@ -23,7 +23,6 @@ import com.bhm.ble.data.UnSupportException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.Request
 import com.bhm.ble.utils.BleLogger
-import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
 import java.util.*
 import kotlin.coroutines.Continuation

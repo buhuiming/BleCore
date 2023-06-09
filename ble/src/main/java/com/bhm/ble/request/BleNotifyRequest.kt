@@ -79,7 +79,7 @@ internal class BleNotifyRequest(
             addNotifyCallback(notifyUUID, bleNotifyCallback)
             var mContinuation: Continuation<Throwable?>? = null
             val task = getTask(
-                NOTIFY_TASK_ID,
+                getTaskId(notifyUUID),
                 block = {
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation
@@ -127,7 +127,7 @@ internal class BleNotifyRequest(
         if (bluetoothGatt != null && gattService != null && characteristic != null &&
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0
         ) {
-            cancelNotifyJob()
+            cancelNotifyJob(getTaskId(notifyUUID))
             val success = setCharacteristicNotify(
                 notifyUUID,
                 characteristic,
@@ -170,8 +170,8 @@ internal class BleNotifyRequest(
     ) {
         bleNotifyCallbackHashMap.values.forEach {
             if (descriptor?.characteristic?.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
+                cancelNotifyJob(getTaskId(it.getKey()))
                 if (status == BluetoothGatt.GATT_SUCCESS) {
-                    cancelNotifyJob()
                     BleLogger.d("${it.getKey()} -> 设置Notify成功")
                     it.callNotifySuccess()
                 } else {
@@ -179,7 +179,6 @@ internal class BleNotifyRequest(
                         "${it.getKey()} -> 设置Notify失败，Descriptor写数据失败",
                         EXCEPTION_CODE_DESCRIPTOR_FAIL
                     )
-                    cancelNotifyJob()
                     BleLogger.e(exception.message)
                     it.callNotifyFail(exception)
                 }
@@ -203,7 +202,7 @@ internal class BleNotifyRequest(
                 "$notifyUUID -> 设置Notify失败，SetCharacteristicNotificationFail",
                 EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
             )
-            cancelNotifyJob()
+            cancelNotifyJob(getTaskId(notifyUUID))
             BleLogger.e(exception.message)
             bleNotifyCallback?.callNotifyFail(exception)
             return false
@@ -218,7 +217,7 @@ internal class BleNotifyRequest(
                 "$notifyUUID -> 设置Notify失败，SetCharacteristicNotificationFail",
                 EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
             )
-            cancelNotifyJob()
+            cancelNotifyJob(getTaskId(notifyUUID))
             BleLogger.e(exception.message)
             bleNotifyCallback?.callNotifyFail(exception)
             return false
@@ -255,7 +254,7 @@ internal class BleNotifyRequest(
                 "$notifyUUID -> 设置Notify失败，错误可能是没有权限、未连接、服务未绑定、不可写、请求忙碌等",
                 EXCEPTION_CODE_DESCRIPTOR_FAIL
             )
-            cancelNotifyJob()
+            cancelNotifyJob(getTaskId(notifyUUID))
             BleLogger.e(exception.message)
             bleNotifyCallback?.callNotifyFail(exception)
             return false
@@ -263,10 +262,12 @@ internal class BleNotifyRequest(
         return true
     }
 
+    private fun getTaskId(uuid: String?) = NOTIFY_TASK_ID + uuid
+
     /**
      * 取消设置notify任务
      */
-    private fun cancelNotifyJob() {
-        bleTaskQueue.removeTask(taskId = NOTIFY_TASK_ID)
+    private fun cancelNotifyJob(taskId: String) {
+        bleTaskQueue.removeTask(taskId)
     }
 }

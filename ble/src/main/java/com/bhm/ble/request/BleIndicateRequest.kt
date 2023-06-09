@@ -81,7 +81,7 @@ internal class BleIndicateRequest(
             addIndicateCallback(indicateUUID, bleIndicateCallback)
             var mContinuation: Continuation<Throwable?>? = null
             val task = getTask(
-                INDICATE_TASK_ID,
+                getTaskId(indicateUUID),
                 block = {
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation
@@ -129,7 +129,7 @@ internal class BleIndicateRequest(
         if (bluetoothGatt != null && gattService != null && characteristic != null &&
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0
         ) {
-            cancelIndicateJob()
+            cancelIndicateJob(getTaskId(indicateUUID))
             val success = setCharacteristicIndicate(
                 indicateUUID,
                 characteristic,
@@ -172,8 +172,8 @@ internal class BleIndicateRequest(
     ) {
         bleIndicateCallbackHashMap.values.forEach {
             if (descriptor?.characteristic?.uuid.toString().equals(it.getKey(), ignoreCase = true)) {
+                cancelIndicateJob(getTaskId(it.getKey()))
                 if (status == BluetoothGatt.GATT_SUCCESS) {
-                    cancelIndicateJob()
                     BleLogger.d("${it.getKey()} -> 设置Indicate成功")
                     it.callIndicateSuccess()
                 } else {
@@ -181,7 +181,6 @@ internal class BleIndicateRequest(
                         "${it.getKey()} -> 设置Indicate失败，Descriptor写数据失败",
                         EXCEPTION_CODE_DESCRIPTOR_FAIL
                     )
-                    cancelIndicateJob()
                     BleLogger.e(exception.message)
                     it.callIndicateFail(exception)
                 }
@@ -205,7 +204,7 @@ internal class BleIndicateRequest(
                 "$indicateUUID -> 设置Indicate失败，SetCharacteristicNotificationFail",
                 EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
             )
-            cancelIndicateJob()
+            cancelIndicateJob(getTaskId(indicateUUID))
             BleLogger.e(exception.message)
             bleIndicateCallback?.callIndicateFail(exception)
             return false
@@ -220,7 +219,7 @@ internal class BleIndicateRequest(
                 "$indicateUUID -> 设置Indicate失败，SetCharacteristicNotificationFail",
                 EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
             )
-            cancelIndicateJob()
+            cancelIndicateJob(getTaskId(indicateUUID))
             BleLogger.e(exception.message)
             bleIndicateCallback?.callIndicateFail(exception)
             return false
@@ -257,7 +256,7 @@ internal class BleIndicateRequest(
                 "$indicateUUID -> 设置Indicate失败，错误可能是没有权限、未连接、服务未绑定、不可写、请求忙碌等",
                 EXCEPTION_CODE_DESCRIPTOR_FAIL
             )
-            cancelIndicateJob()
+            cancelIndicateJob(getTaskId(indicateUUID))
             BleLogger.e(exception.message)
             bleIndicateCallback?.callIndicateFail(exception)
             return false
@@ -265,10 +264,12 @@ internal class BleIndicateRequest(
         return true
     }
 
+    private fun getTaskId(uuid: String?) = INDICATE_TASK_ID + uuid
+
     /**
      * 取消设置indicate任务
      */
-    private fun cancelIndicateJob() {
-        bleTaskQueue.removeTask(taskId = INDICATE_TASK_ID)
+    private fun cancelIndicateJob(taskId: String) {
+        bleTaskQueue.removeTask(taskId)
     }
 }
