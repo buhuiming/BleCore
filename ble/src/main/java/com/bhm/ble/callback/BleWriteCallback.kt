@@ -14,34 +14,13 @@ package com.bhm.ble.callback
  */
 open class BleWriteCallback : BleBaseCallback() {
 
-    /**
-     * [BleBaseCallback.key]和[singleKey]不一样，前者是特征值UUID，后者是触发写操作时根据时间戳生成。
-     * 前者可以用来移除写操作的回调，后者用来区分写操作任务，每个特征值(UUID)可能存在多个写操作任务(不同singleKey)，
-     * 一个写操作任务(共用一个singleKey)可能多个包，通过singleKey来取消一次写操作任务(不是取消一个包的写任务)
-     */
-    private var singleKey: String? = null
-
-    private var serviceUUID: String? = null
-
     private var writeSuccess: ((current: Int, total: Int, justWrite: ByteArray) -> Unit)? = null
 
-    private var writeFail: ((throwable: Throwable) -> Unit)? = null
+    private var writeFail: ((current: Int, total: Int, throwable: Throwable) -> Unit)? = null
 
-    private var writeComplete: (() -> Unit)? = null
+    private var writeComplete: ((allSuccess: Boolean) -> Unit)? = null
 
-    fun setSingleKey(singleKey: String) {
-        this.singleKey = singleKey
-    }
-
-    fun getSingleKey() = singleKey
-
-    fun setServiceUUID(serviceUUID: String) {
-        this.serviceUUID = serviceUUID
-    }
-
-    fun getServiceUUID() = serviceUUID
-
-    fun onWriteFail(value: ((throwable: Throwable) -> Unit)) {
+    fun onWriteFail(value: ((current: Int, total: Int, throwable: Throwable) -> Unit)) {
         writeFail = value
     }
 
@@ -49,13 +28,13 @@ open class BleWriteCallback : BleBaseCallback() {
         writeSuccess = value
     }
 
-    fun onWriteComplete(value: (() -> Unit)) {
+    fun onWriteComplete(value: ((allSuccess: Boolean) -> Unit)) {
         writeComplete = value
     }
 
-    open fun callWriteFail(throwable: Throwable) {
+    open fun callWriteFail(current: Int, total: Int, throwable: Throwable) {
         launchInMainThread {
-            writeFail?.invoke(throwable)
+            writeFail?.invoke(current, total, throwable)
         }
     }
 
@@ -65,9 +44,9 @@ open class BleWriteCallback : BleBaseCallback() {
         }
     }
 
-    open fun callWriteComplete() {
+    open fun callWriteComplete(allSuccess: Boolean) {
         launchInMainThread {
-            writeComplete?.invoke()
+            writeComplete?.invoke(allSuccess)
         }
     }
 }

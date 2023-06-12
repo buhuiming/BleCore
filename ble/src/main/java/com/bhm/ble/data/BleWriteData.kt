@@ -5,7 +5,8 @@
  */
 package com.bhm.ble.data
 
-import java.util.concurrent.atomic.AtomicInteger
+import com.bhm.ble.callback.BleWriteCallback
+import java.util.concurrent.atomic.AtomicBoolean
 
 
 /**
@@ -14,11 +15,15 @@ import java.util.concurrent.atomic.AtomicInteger
  * @author Buhuiming
  * @date 2023年06月12日 09时45分
  */
-data class BleWriteData(
-    var currentPackage: AtomicInteger = AtomicInteger(0),
-    var totalPackage: Int = 0,
-    var operateRandomID: String? = null,
-    var data: ByteArray? = null,
+internal data class BleWriteData(
+    var operateRandomID: String,
+    var serviceUUID: String,
+    var writeUUID: String,
+    var currentPackage: Int,
+    var totalPackage: Int,
+    var data: ByteArray,
+    var isWriting: AtomicBoolean = AtomicBoolean(false),
+    var bleWriteCallback: BleWriteCallback,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -26,22 +31,27 @@ data class BleWriteData(
 
         other as BleWriteData
 
+        if (operateRandomID != other.operateRandomID) return false
+        if (serviceUUID != other.serviceUUID) return false
+        if (writeUUID != other.writeUUID) return false
         if (currentPackage != other.currentPackage) return false
         if (totalPackage != other.totalPackage) return false
-        if (data != null) {
-            if (other.data == null) return false
-            if (!data.contentEquals(other.data)) return false
-        } else if (other.data != null) return false
-        if (operateRandomID != other.operateRandomID) return false
+        if (!data.contentEquals(other.data)) return false
+        if (isWriting != other.isWriting) return false
+        if (bleWriteCallback != other.bleWriteCallback) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = currentPackage.hashCode()
+        var result = operateRandomID.hashCode()
+        result = 31 * result + serviceUUID.hashCode()
+        result = 31 * result + writeUUID.hashCode()
+        result = 31 * result + currentPackage
         result = 31 * result + totalPackage
-        result = 31 * result + (data?.contentHashCode() ?: 0)
-        result = 31 * result + (operateRandomID?.hashCode() ?: 0)
+        result = 31 * result + data.contentHashCode()
+        result = 31 * result + isWriting.hashCode()
+        result = 31 * result + bleWriteCallback.hashCode()
         return result
     }
 }

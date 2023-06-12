@@ -120,12 +120,10 @@ internal class BleReadRequest(
             if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true) &&
                 cancelReadJob(getTaskId(it.getKey()))) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
-                    if (BleLogger.isLogger) {
-                        BleLogger.d(
-                            "${it.getKey()} -> " +
-                                    "读特征值数据成功：${BleUtil.bytesToHex(value)}"
-                        )
-                    }
+                    BleLogger.d(
+                        "${it.getKey()} -> " +
+                                "读特征值数据成功：${BleUtil.bytesToHex(value)}"
+                    )
                     it.callReadSuccess(value)
                 } else {
                     val exception = UnDefinedException(

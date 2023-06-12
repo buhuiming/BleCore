@@ -152,10 +152,8 @@ internal class BleIndicateRequest(
     ) {
         bleIndicateCallbackHashMap.values.forEach {
             if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
-                if (BleLogger.isLogger) {
-                    BleLogger.d("${it.getKey()} -> " +
-                            "收到Indicate数据：${BleUtil.bytesToHex(value)}")
-                }
+                BleLogger.d("${it.getKey()} -> " +
+                        "收到Indicate数据：${BleUtil.bytesToHex(value)}")
                 it.callCharacteristicChanged(value)
             }
         }

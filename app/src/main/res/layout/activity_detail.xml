@@ -94,6 +94,7 @@
                 android:hint="数据格式：aa00bb11cc22 (支持空格)"
                 android:textSize="14sp"
                 android:enabled="false"
+                android:text="221"
                 android:textColor="@color/black"
                 android:textColorHint="#999999"
                 android:maxLines="1"/>

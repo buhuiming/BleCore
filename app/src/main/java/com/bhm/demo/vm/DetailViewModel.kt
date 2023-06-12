@@ -7,6 +7,7 @@ package com.bhm.demo.vm
 
 import android.app.Application
 import android.bluetooth.BluetoothGattCharacteristic
+import android.util.SparseArray
 import com.bhm.ble.BleManager
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.utils.BleUtil
@@ -223,6 +224,8 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
         }
     }
 
+    private var index = 0
+
     /**
      * 写数据
      * 注意：因为分包后每一个包，可能是包含完整的协议，所以分包由业务层处理，组件只会根据包的长度和mtu值对比后是否拦截
@@ -231,12 +234,23 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                   serviceUUID: String,
                   writeUUID: String,
                   text: String) {
-        BleManager.get().writeData(bleDevice, serviceUUID, writeUUID, text.toByteArray()) {
-            onWriteFail {
-                addLogMsg(LogEntity(Level.OFF, "写数据失败：${it.message}"))
+        index ++
+        val listData = SparseArray<ByteArray>()
+        for (i in 0 until 22) {
+            listData.put(i, "${i}{i}{i}{i}{i}{i}--${index}".toByteArray())
+        }
+        BleManager.get().writeData(bleDevice, serviceUUID, writeUUID, listData) {
+            onWriteFail { currentPackage, _, t ->
+                addLogMsg(LogEntity(Level.OFF, "第${currentPackage}包数据写失败：${t.message}"))
             }
-            onWriteSuccess { _, _, justWrite ->
-                addLogMsg(LogEntity(Level.FINE, "$writeUUID -> 写数据成功：${BleUtil.bytesToHex(justWrite)}"))
+            onWriteSuccess { currentPackage, _, justWrite ->
+                addLogMsg(LogEntity(Level.FINE, "$writeUUID -> 第${currentPackage}包数据写成功：" +
+                        BleUtil.bytesToHex(justWrite)
+                ))
+            }
+            onWriteComplete { allSuccess ->
+                //代表所有数据写成功，可以在这个方法中处理成功的逻辑
+                addLogMsg(LogEntity(Level.FINE, "$writeUUID -> 写数据完成，是否成功：$allSuccess"))
             }
         }
     }

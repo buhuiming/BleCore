@@ -364,7 +364,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         }
         val exception = UnConnectedException("$writeUUID -> 写数据失败，设备未连接")
         BleLogger.e(exception.message)
-        callback.callWriteFail(exception)
+        callback.callWriteFail(0, dataArray.size(), exception)
     }
 
     /**

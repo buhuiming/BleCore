@@ -26,7 +26,7 @@ import java.util.*
  * @author Buhuiming
  * @date 2023年06月02日 08时32分
  */
-class BleTaskQueue {
+internal class BleTaskQueue {
 
     companion object {
 
@@ -56,7 +56,9 @@ class BleTaskQueue {
         mCoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         mCoroutineScope?.launch {
             mChannel?.consumeEach {
-                tryHandleTask(it)
+                if (taskList.contains(it)) {
+                    tryHandleTask(it)
+                }
             }
         }
     }
@@ -76,7 +78,7 @@ class BleTaskQueue {
                 task.callback?.invoke(task, CancelException())
             }
             taskList.remove(task)
-            BleLogger.i("任务：${task}结束完毕，剩下${taskList.size}个任务")
+            BleLogger.i("任务：${task}结束完毕，剩下${taskList.size()}个任务")
             if (task.autoDoNextTask) {
                 sendTask(taskList.firstOrNull())
             }
@@ -98,11 +100,11 @@ class BleTaskQueue {
         if (mCoroutineScope == null && mChannel == null) {
             initLoop()
         }
-        BleLogger.i("当前任务数量：${taskList.size}, 添加任务：$task")
+        BleLogger.i("当前任务数量：${taskList.size()}, 添加任务：$task")
         task.setCompleted(UN_COMPLETE)
         taskList.add(task)
         taskForTiming(task)
-        if (taskList.size == 1) {
+        if (taskList.size() == 1) {
             sendTask(task)
         }
     }
@@ -146,8 +148,11 @@ class BleTaskQueue {
             task?.setCompleted(CANCEL_UN_COMPLETE)
             if (task == taskList.firstOrNull()) {
                 //正在执行
+                BleLogger.e("移除正在执行的任务：$task")
                 task?.remove()
+                taskList.remove(task)
             } else {
+                BleLogger.e("移除队列中的任务：${task}")
                 taskList.remove(task)
             }
         }
@@ -162,19 +167,21 @@ class BleTaskQueue {
             return false
         }
         var success = false
-        val iterator = taskList.iterator()
-        while (iterator.hasNext()) {
-            val task = iterator.next()
-            if (task.taskId == taskId) {
-                task.setCompleted(CANCEL_UN_COMPLETE)
-                success = true
-                if (task == taskList.firstOrNull()) {
-                    //正在执行
-                    BleLogger.e("移除正在执行的任务：$task")
-                    task.remove()
-                } else {
-                    BleLogger.e("移除队列中的任务：${task}")
-                    iterator.remove()
+        synchronized(taskList.list()) {
+            val iterator = taskList.iterator()
+            while (iterator.hasNext()) {
+                val task = iterator.next()
+                if (task.taskId == taskId) {
+                    task.setCompleted(CANCEL_UN_COMPLETE)
+                    success = true
+                    if (task == taskList.firstOrNull()) {
+                        //正在执行
+                        BleLogger.e("移除正在执行的任务：$task")
+                        task.remove()
+                    } else {
+                        BleLogger.e("移除队列中的任务：${task}")
+                        iterator.remove()
+                    }
                 }
             }
         }
@@ -201,15 +208,17 @@ class BleTaskQueue {
      * 关闭并释放资源
      */
     fun clear() {
-        val iterator = taskList.iterator()
-        while (iterator.hasNext()) {
-            val task = iterator.next()
-            task.setTimingJob(null)
-            task.setCompleted(CANCEL_UN_COMPLETE)
-            if (task == taskList.firstOrNull()) {
-                task.remove()
-            } else {
-                iterator.remove()
+        synchronized(taskList.list()) {
+            val iterator = taskList.iterator()
+            while (iterator.hasNext()) {
+                val task = iterator.next()
+                task.setTimingJob(null)
+                task.setCompleted(CANCEL_UN_COMPLETE)
+                if (task == taskList.firstOrNull()) {
+                    task.remove()
+                } else {
+                    iterator.remove()
+                }
             }
         }
         taskList.clear()

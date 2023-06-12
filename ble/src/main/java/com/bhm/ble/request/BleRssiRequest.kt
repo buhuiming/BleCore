@@ -11,7 +11,6 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.BleRssiCallback
 import com.bhm.ble.control.BleTaskQueue
-import com.bhm.ble.data.CancelException
 import com.bhm.ble.data.Constants.SET_RSSI_TASK_ID
 import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.data.UnDefinedException

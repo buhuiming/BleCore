@@ -5,7 +5,7 @@
  */
 package com.bhm.ble.control
 
-import java.util.concurrent.CopyOnWriteArrayList
+import java.util.*
 
 
 /**
@@ -14,23 +14,38 @@ import java.util.concurrent.CopyOnWriteArrayList
  * @author Buhuiming
  * @date 2023年06月06日 10时41分
  */
-class BleTaskList : CopyOnWriteArrayList<BleTask>() {
+class BleTaskList {
 
-    private val taskIdList = CopyOnWriteArrayList<String>()
+    private val taskIdList = Collections.synchronizedList(LinkedList<String>())
 
-    override fun add(element: BleTask?): Boolean {
-        taskIdList.add(element?.taskId)
-        return super.add(element)
+    private val list = Collections.synchronizedList(LinkedList<BleTask>())
+
+    fun list(): MutableList<BleTask> = list
+
+    fun add(element: BleTask) {
+        taskIdList.add(element.taskId)
+        list.add(element)
     }
 
-    override fun remove(element: BleTask?): Boolean {
+    fun remove(element: BleTask?) {
         if (taskIdList.contains(element?.taskId)) {
             taskIdList.remove(element?.taskId)
         }
-        return super.remove(element)
+        list.remove(element)
     }
 
-    fun containsTaskId(taskId: String): Boolean {
-        return taskIdList.contains(taskId)
+    fun iterator() = list.iterator()
+
+    fun size() = list.size
+
+    fun contains(task: BleTask?) = list.contains(task)
+
+    fun clear() {
+        list.clear()
+        taskIdList.clear()
     }
+
+    fun firstOrNull() = list.firstOrNull()
+
+    fun containsTaskId(taskId: String) = taskIdList.contains(taskId)
 }
