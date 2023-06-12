@@ -165,8 +165,8 @@ internal class BleNotifyRequest(
         status: Int
     ) {
         bleNotifyCallbackHashMap.values.forEach {
-            if (descriptor?.characteristic?.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
-                cancelNotifyJob(getTaskId(it.getKey()))
+            if (descriptor?.characteristic?.uuid?.toString().equals(it.getKey(), ignoreCase = true)
+                && cancelNotifyJob(getTaskId(it.getKey()))) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     BleLogger.d("${it.getKey()} -> 设置Notify成功")
                     it.callNotifySuccess()
@@ -263,7 +263,7 @@ internal class BleNotifyRequest(
     /**
      * 取消设置notify任务
      */
-    private fun cancelNotifyJob(taskId: String) {
-        bleTaskQueue.removeTask(taskId)
+    private fun cancelNotifyJob(taskId: String): Boolean {
+        return bleTaskQueue.removeTask(taskId)
     }
 }

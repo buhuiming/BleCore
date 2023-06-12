@@ -141,7 +141,7 @@ class BleTaskQueue {
      * 移除任务
      */
     @Synchronized
-    fun removeTask(task: BleTask?) {
+    fun removeTask(task: BleTask?): Boolean {
         if (taskList.contains(task)) {
             task?.setCompleted(CANCEL_UN_COMPLETE)
             if (task == taskList.firstOrNull()) {
@@ -152,27 +152,30 @@ class BleTaskQueue {
                 BleLogger.e("移除队列中的任务：${task}")
                 taskList.remove(task)
             }
+            return true
         }
+        return false
     }
 
     /**
      * 移除任务
      */
     @Synchronized
-    fun removeTask(taskId: String) {
+    fun removeTask(taskId: String): Boolean {
         if (!taskList.containsTaskId(taskId)) {
-            return
+            return false
         }
         taskList.forEach {
             if (it.taskId == taskId) {
-                removeTask(it)
+                return removeTask(it)
             }
         }
+        return false
     }
 
     @Synchronized
-    fun removeRunningTask() {
-        removeTask(taskList.firstOrNull())
+    fun removeRunningTask(): Boolean {
+        return removeTask(taskList.firstOrNull())
     }
 
     /**

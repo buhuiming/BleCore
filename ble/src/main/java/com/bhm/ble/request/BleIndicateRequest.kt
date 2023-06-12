@@ -167,8 +167,8 @@ internal class BleIndicateRequest(
         status: Int
     ) {
         bleIndicateCallbackHashMap.values.forEach {
-            if (descriptor?.characteristic?.uuid.toString().equals(it.getKey(), ignoreCase = true)) {
-                cancelIndicateJob(getTaskId(it.getKey()))
+            if (descriptor?.characteristic?.uuid.toString().equals(it.getKey(), ignoreCase = true)
+                && cancelIndicateJob(getTaskId(it.getKey()))) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     BleLogger.d("${it.getKey()} -> 设置Indicate成功")
                     it.callIndicateSuccess()
@@ -265,7 +265,7 @@ internal class BleIndicateRequest(
     /**
      * 取消设置indicate任务
      */
-    private fun cancelIndicateJob(taskId: String) {
-        bleTaskQueue.removeTask(taskId)
+    private fun cancelIndicateJob(taskId: String): Boolean {
+        return bleTaskQueue.removeTask(taskId)
     }
 }

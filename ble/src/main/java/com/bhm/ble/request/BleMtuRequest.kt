@@ -86,15 +86,18 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
      */
     fun onMtuChanged(mtu: Int, status: Int) {
         bleMtuChangedCallback?.let {
-            cancelSetMtuJob()
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                BleLogger.d("${bleDevice.deviceAddress} -> 设置Mtu成功：$mtu")
-                it.callMtuChanged(mtu)
-            } else {
-                val exception = UnDefinedException("${bleDevice.deviceAddress} -> " +
-                        "设置Mtu失败，status = $status")
-                BleLogger.e(exception.message)
-                it.callSetMtuFail(exception)
+            if (cancelSetMtuJob()) {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    BleLogger.d("${bleDevice.deviceAddress} -> 设置Mtu成功：$mtu")
+                    it.callMtuChanged(mtu)
+                } else {
+                    val exception = UnDefinedException(
+                        "${bleDevice.deviceAddress} -> " +
+                                "设置Mtu失败，status = $status"
+                    )
+                    BleLogger.e(exception.message)
+                    it.callSetMtuFail(exception)
+                }
             }
         }
     }
@@ -105,7 +108,7 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
      * 取消设置Mtu任务
      */
     @Synchronized
-    private fun cancelSetMtuJob() {
-        bleTaskQueue.removeTask(getTaskId())
+    private fun cancelSetMtuJob(): Boolean {
+        return bleTaskQueue.removeTask(getTaskId())
     }
 }

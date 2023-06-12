@@ -93,15 +93,18 @@ internal class BleRssiRequest(
      */
     fun onReadRemoteRssi(rssi: Int, status: Int) {
         bleRssiCallback?.let {
-            cancelReadRssiJob()
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                BleLogger.d("${bleDevice.deviceAddress} -> 读取Rssi成功：$rssi")
-                it.callRssiSuccess(rssi)
-            } else {
-                val exception = UnDefinedException("${bleDevice.deviceAddress} -> " +
-                        "读取Rssi失败，status = $status")
-                BleLogger.e(exception.message)
-                it.callRssiFail(exception)
+            if (cancelReadRssiJob()) {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    BleLogger.d("${bleDevice.deviceAddress} -> 读取Rssi成功：$rssi")
+                    it.callRssiSuccess(rssi)
+                } else {
+                    val exception = UnDefinedException(
+                        "${bleDevice.deviceAddress} -> " +
+                                "读取Rssi失败，status = $status"
+                    )
+                    BleLogger.e(exception.message)
+                    it.callRssiFail(exception)
+                }
             }
         }
     }
@@ -112,7 +115,7 @@ internal class BleRssiRequest(
      * 取消读取Rssi任务
      */
     @Synchronized
-    private fun cancelReadRssiJob() {
-        bleTaskQueue.removeTask(getTaskId())
+    private fun cancelReadRssiJob(): Boolean {
+        return bleTaskQueue.removeTask(getTaskId())
     }
 }

@@ -115,17 +115,21 @@ internal class BleReadRequest(
         status: Int
     ) {
         bleReadCallbackHashMap.values.forEach {
-            if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
-                cancelReadJob(getTaskId(it.getKey()))
+            if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true) &&
+                cancelReadJob(getTaskId(it.getKey()))) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     if (BleLogger.isLogger) {
-                        BleLogger.d("${it.getKey()} -> " +
-                                "读特征值数据成功：${BleUtil.bytesToHex(value)}")
+                        BleLogger.d(
+                            "${it.getKey()} -> " +
+                                    "读特征值数据成功：${BleUtil.bytesToHex(value)}"
+                        )
                     }
                     it.callReadSuccess(value)
                 } else {
-                    val exception = UnDefinedException("${it.getKey()} -> " +
-                            "读特征值数据失败，status = $status")
+                    val exception = UnDefinedException(
+                        "${it.getKey()} -> " +
+                                "读特征值数据失败，status = $status"
+                    )
                     BleLogger.e(exception.message)
                     it.callReadFail(exception)
                 }
@@ -139,7 +143,7 @@ internal class BleReadRequest(
      * 取消读特征值数据任务
      */
     @Synchronized
-    private fun cancelReadJob(taskId: String) {
-        bleTaskQueue.removeTask(taskId)
+    private fun cancelReadJob(taskId: String): Boolean {
+        return bleTaskQueue.removeTask(taskId)
     }
 }
