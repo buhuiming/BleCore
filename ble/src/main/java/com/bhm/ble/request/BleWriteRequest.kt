@@ -15,6 +15,7 @@ import android.os.Build
 import android.util.SparseArray
 import com.bhm.ble.callback.BleWriteCallback
 import com.bhm.ble.control.BleTaskQueue
+import com.bhm.ble.data.BleWriteData
 import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.data.Constants.WRITE_TASK_ID
 import com.bhm.ble.data.TimeoutCancelException
@@ -25,6 +26,8 @@ import com.bhm.ble.request.base.Request
 import com.bhm.ble.utils.BleLogger
 import kotlinx.coroutines.TimeoutCancellationException
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -43,29 +46,51 @@ internal class BleWriteRequest(
 
     private val bluetoothGatt = getBluetoothGatt(bleDevice)
 
-    private val bleWriteCallbackHashMap: HashMap<String, BleWriteCallback> = HashMap()
-
-//    private var currentPackage = AtomicInteger(0)
-//
-//    private var totalPackage: Int = 0
-//
-//    private var dataArray: SparseArray<ByteArray>? = null
+    private val bleWriteCallbackHashMap:
+            ConcurrentHashMap<String, CopyOnWriteArrayList<BleWriteCallback>> = ConcurrentHashMap()
+    private val bleWriteDataList:
+            CopyOnWriteArrayList<BleWriteData> = CopyOnWriteArrayList()
 
     @Synchronized
-    fun addWriteCallback(uuid: String, bleWriteCallback: BleWriteCallback) {
-        bleWriteCallbackHashMap[uuid] = bleWriteCallback
+    private fun addWriteCallback(uuid: String, bleWriteCallback: BleWriteCallback) {
+        if (bleWriteCallbackHashMap.contains(uuid) && bleWriteCallbackHashMap[uuid] != null) {
+            bleWriteCallbackHashMap[uuid]?.add(bleWriteCallback)
+        } else {
+            val list = CopyOnWriteArrayList<BleWriteCallback>()
+            list.add(bleWriteCallback)
+            bleWriteCallbackHashMap[uuid] = list
+        }
     }
 
     @Synchronized
-    fun removeWriteCallback(uuid: String?) {
+    fun removeWriteCallback(uuid: String?, bleWriteCallback: BleWriteCallback? = null) {
         if (bleWriteCallbackHashMap.containsKey(uuid)) {
-            bleWriteCallbackHashMap.remove(uuid)
+            if (bleWriteCallback != null) {
+                bleWriteCallbackHashMap[uuid]?.remove(bleWriteCallback)
+            } else {
+                bleWriteCallbackHashMap.remove(uuid)
+            }
         }
     }
 
     @Synchronized
     fun removeAllWriteCallback() {
         bleWriteCallbackHashMap.clear()
+    }
+
+    @Synchronized
+    private fun addWriteData(bleWriteData: BleWriteData) {
+        bleWriteDataList.add(bleWriteData)
+    }
+
+    @Synchronized
+    private fun removeWriteData(operateRandomID: String) {
+        val it = bleWriteDataList.iterator()
+        while (it.hasNext()) {
+            if (operateRandomID.equals(it.next())){
+                it.remove()
+            }
+        }
     }
 
     @Synchronized
@@ -103,9 +128,6 @@ internal class BleWriteRequest(
                 return
             }
         }
-//        totalPackage = dataArray.size()
-//        this.dataArray = dataArray
-//        currentPackage.set(1)
 
         val characteristic = getCharacteristic(serviceUUID, writeUUID)
 
@@ -117,6 +139,9 @@ internal class BleWriteRequest(
             bleWriteCallback.setServiceUUID(serviceUUID)
             bleWriteCallback.setSingleKey(operateRandomID)
             addWriteCallback(writeUUID, bleWriteCallback)
+            for (i in 0..dataArray.size()) {
+
+            }
             startWriteJob(dataArray.get(0), bleWriteCallback)
         } else {
             val exception = UnSupportException("$writeUUID -> 写数据失败，此特性不支持写数据")
@@ -200,21 +225,21 @@ internal class BleWriteRequest(
         characteristic: BluetoothGattCharacteristic?,
         status: Int
     ) {
-        bleWriteCallbackHashMap.values.forEach {
-            if (characteristic?.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
-                if (status == BluetoothGatt.GATT_SUCCESS) {
+        bleWriteCallbackHashMap.keys.forEach { writeUUID ->
+//            if (characteristic?.uuid?.toString().equals(writeUUID, ignoreCase = true)) {
+//                if (status == BluetoothGatt.GATT_SUCCESS) {
 //                    if (BleLogger.isLogger) {
 //                        BleLogger.d("${it.getKey()} -> " +
 //                                "写数据成功：${BleUtil.bytesToHex(value)}")
 //                    }
 //                    it.callWriteSuccess()
-                } else {
-                    val exception = UnDefinedException("${it.getKey()} -> " +
-                            "写数据失败，status = $status")
-                    BleLogger.e(exception.message)
-                    it.callWriteFail(exception)
-                }
-            }
+//                } else {
+//                    val exception = UnDefinedException("$writeUUID -> " +
+//                            "写数据失败，status = $status")
+//                    BleLogger.e(exception.message)
+//                    it.callWriteFail(exception)
+//                }
+//            }
         }
     }
 

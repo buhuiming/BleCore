@@ -267,8 +267,8 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     }
 
     @Synchronized
-    fun removeWriteCallback(uuid: String?) {
-        bleWriteRequest.removeWriteCallback(uuid)
+    fun removeWriteCallback(uuid: String?, bleWriteCallback: BleWriteCallback? = null) {
+        bleWriteRequest.removeWriteCallback(uuid, bleWriteCallback)
     }
 
     @Synchronized

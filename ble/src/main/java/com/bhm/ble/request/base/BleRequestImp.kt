@@ -351,10 +351,10 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
      * 注意：因为分包后每一个包，可能是包含完整的协议，所以分包由业务层处理，组件只会根据包的长度和mtu值对比后是否拦截
      */
     override fun writeData(bleDevice: BleDevice,
-                  serviceUUID: String,
-                  writeUUID: String,
-                  dataArray: SparseArray<ByteArray>,
-                  bleWriteCallback: BleWriteCallback.() -> Unit) {
+                           serviceUUID: String,
+                           writeUUID: String,
+                           dataArray: SparseArray<ByteArray>,
+                           bleWriteCallback: BleWriteCallback.() -> Unit) {
         val callback = BleWriteCallback()
         callback.apply(bleWriteCallback)
         val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
@@ -410,9 +410,13 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     /**
      * 移除该设备的Write回调
      */
-    override fun removeBleWriteCallback(bleDevice: BleDevice, writeUUID: String) {
+    override fun removeBleWriteCallback(
+        bleDevice: BleDevice,
+        writeUUID: String,
+        bleWriteCallback: BleWriteCallback?
+    ) {
         val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
-        request?.removeWriteCallback(writeUUID)
+        request?.removeWriteCallback(writeUUID, bleWriteCallback)
     }
 
     /**

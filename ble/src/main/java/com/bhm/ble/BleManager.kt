@@ -396,10 +396,14 @@ class BleManager private constructor() {
 
     /**
      * 移除该设备的Write回调
+     * bleWriteCallback为空，则会移除writeUUID下的所有callback
      */
-    fun removeBleWriteCallback(bleDevice: BleDevice, writeUUID: String) {
+    fun removeBleWriteCallback(bleDevice: BleDevice,
+                               writeUUID: String,
+                               bleWriteCallback: BleWriteCallback? = null
+    ) {
         checkInitialize()
-        bleBaseRequest?.removeBleWriteCallback(bleDevice, writeUUID)
+        bleBaseRequest?.removeBleWriteCallback(bleDevice, writeUUID, bleWriteCallback)
     }
 
     /**

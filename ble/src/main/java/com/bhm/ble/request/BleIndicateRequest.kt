@@ -28,6 +28,7 @@ import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -44,10 +45,11 @@ internal class BleIndicateRequest(
     private val bleTaskQueue: BleTaskQueue
 ) : Request() {
 
-    private val bleIndicateCallbackHashMap: HashMap<String, BleIndicateCallback> = HashMap()
+    private val bleIndicateCallbackHashMap:
+            ConcurrentHashMap<String, BleIndicateCallback> = ConcurrentHashMap()
 
     @Synchronized
-    fun addIndicateCallback(uuid: String, bleIndicateCallback: BleIndicateCallback) {
+    private fun addIndicateCallback(uuid: String, bleIndicateCallback: BleIndicateCallback) {
         bleIndicateCallbackHashMap[uuid] = bleIndicateCallback
     }
 

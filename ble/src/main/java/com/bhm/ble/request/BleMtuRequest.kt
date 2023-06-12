@@ -36,7 +36,7 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
     private var bleMtuChangedCallback: BleMtuChangedCallback? = null
 
     @Synchronized
-    fun addMtuChangedCallback(callback: BleMtuChangedCallback) {
+    private fun addMtuChangedCallback(callback: BleMtuChangedCallback) {
         bleMtuChangedCallback = callback
     }
 

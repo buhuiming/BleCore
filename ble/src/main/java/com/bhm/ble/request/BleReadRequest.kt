@@ -22,6 +22,7 @@ import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -38,10 +39,11 @@ internal class BleReadRequest(
     private val bleTaskQueue: BleTaskQueue
 ) : Request() {
 
-    private val bleReadCallbackHashMap: HashMap<String, BleReadCallback> = HashMap()
+    private val bleReadCallbackHashMap:
+            ConcurrentHashMap<String, BleReadCallback> = ConcurrentHashMap()
 
     @Synchronized
-    fun addReadCallback(uuid: String, bleReadCallback: BleReadCallback) {
+    private fun addReadCallback(uuid: String, bleReadCallback: BleReadCallback) {
         bleReadCallbackHashMap[uuid] = bleReadCallback
     }
 

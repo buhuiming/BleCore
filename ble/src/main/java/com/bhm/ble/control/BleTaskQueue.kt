@@ -141,20 +141,16 @@ class BleTaskQueue {
      * 移除任务
      */
     @Synchronized
-    fun removeTask(task: BleTask?): Boolean {
+    private fun removeTask(task: BleTask?) {
         if (taskList.contains(task)) {
             task?.setCompleted(CANCEL_UN_COMPLETE)
             if (task == taskList.firstOrNull()) {
                 //正在执行
-                BleLogger.e("移除正在执行的任务：$task")
                 task?.remove()
             } else {
-                BleLogger.e("移除队列中的任务：${task}")
                 taskList.remove(task)
             }
-            return true
         }
-        return false
     }
 
     /**
@@ -165,17 +161,24 @@ class BleTaskQueue {
         if (!taskList.containsTaskId(taskId)) {
             return false
         }
-        taskList.forEach {
-            if (it.taskId == taskId) {
-                return removeTask(it)
+        var success = false
+        val iterator = taskList.iterator()
+        while (iterator.hasNext()) {
+            val task = iterator.next()
+            if (task.taskId == taskId) {
+                task.setCompleted(CANCEL_UN_COMPLETE)
+                success = true
+                if (task == taskList.firstOrNull()) {
+                    //正在执行
+                    BleLogger.e("移除正在执行的任务：$task")
+                    task.remove()
+                } else {
+                    BleLogger.e("移除队列中的任务：${task}")
+                    iterator.remove()
+                }
             }
         }
-        return false
-    }
-
-    @Synchronized
-    fun removeRunningTask(): Boolean {
-        return removeTask(taskList.firstOrNull())
+        return success
     }
 
     /**
@@ -198,9 +201,16 @@ class BleTaskQueue {
      * 关闭并释放资源
      */
     fun clear() {
-        taskList.forEach {
-            removeTask(it)
-            it.setTimingJob(null)
+        val iterator = taskList.iterator()
+        while (iterator.hasNext()) {
+            val task = iterator.next()
+            task.setTimingJob(null)
+            task.setCompleted(CANCEL_UN_COMPLETE)
+            if (task == taskList.firstOrNull()) {
+                task.remove()
+            } else {
+                iterator.remove()
+            }
         }
         taskList.clear()
         mChannel?.close()

@@ -26,6 +26,7 @@ import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -42,10 +43,11 @@ internal class BleNotifyRequest(
     private val bleTaskQueue: BleTaskQueue
 ) : Request() {
 
-    private val bleNotifyCallbackHashMap: HashMap<String, BleNotifyCallback> = HashMap()
+    private val bleNotifyCallbackHashMap:
+            ConcurrentHashMap<String, BleNotifyCallback> = ConcurrentHashMap()
 
     @Synchronized
-    fun addNotifyCallback(uuid: String, bleNotifyCallback: BleNotifyCallback) {
+    private fun addNotifyCallback(uuid: String, bleNotifyCallback: BleNotifyCallback) {
         bleNotifyCallbackHashMap[uuid] = bleNotifyCallback
     }
 

@@ -38,7 +38,7 @@ internal class BleRssiRequest(
     private var bleRssiCallback: BleRssiCallback? = null
 
     @Synchronized
-    fun addRssiCallback(callback: BleRssiCallback) {
+    private fun addRssiCallback(callback: BleRssiCallback) {
         bleRssiCallback = callback
     }
 
@@ -67,9 +67,6 @@ internal class BleRssiRequest(
                 }
             },
             interrupt = { _, throwable ->
-                if (throwable is CancelException) {
-                    bleRssiCallback.callRssiFail(throwable)
-                }
                 mContinuation?.resume(throwable)
             },
             callback = { _, throwable ->

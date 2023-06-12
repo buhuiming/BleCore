@@ -218,7 +218,7 @@ internal class BleConnectRequest(
     }
 
     @Synchronized
-    fun addBleConnectCallback(bleConnectCallback: BleConnectCallback) {
+    private fun addBleConnectCallback(bleConnectCallback: BleConnectCallback) {
         this.bleConnectCallback = bleConnectCallback
     }
 
