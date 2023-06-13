@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.withContext
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 
@@ -32,6 +33,7 @@ class BleTask(val taskId: String,
               val operateInterval: Long = 100,
               val callInMainThread: Boolean = false,
               val autoDoNextTask: Boolean = true,
+              var canceled: AtomicBoolean = AtomicBoolean(false),
               private val block: suspend BleTask.() -> Unit,
               private val interrupt: ((task: BleTask, throwable: Throwable?) -> Unit)? = null,
               val callback: ((task: BleTask, throwable: Throwable?) -> Unit)? = null

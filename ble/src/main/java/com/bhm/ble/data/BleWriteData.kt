@@ -23,6 +23,7 @@ internal data class BleWriteData(
     var totalPackage: Int,
     var data: ByteArray,
     var isWriting: AtomicBoolean = AtomicBoolean(false),
+    var isWriteFail: AtomicBoolean = AtomicBoolean(false),
     var bleWriteCallback: BleWriteCallback,
 ) {
     override fun equals(other: Any?): Boolean {

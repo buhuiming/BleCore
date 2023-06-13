@@ -236,8 +236,8 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                   text: String) {
         index ++
         val listData = SparseArray<ByteArray>()
-        for (i in 0 until 22) {
-            listData.put(i, "${i}{i}{i}{i}{i}{i}--${index}".toByteArray())
+        for (i in 0 until 5) {
+            listData.put(i, "${i}${i}${i}${i}${i}${i}--${index}".toByteArray())
         }
         BleManager.get().writeData(bleDevice, serviceUUID, writeUUID, listData) {
             onWriteFail { currentPackage, _, t ->

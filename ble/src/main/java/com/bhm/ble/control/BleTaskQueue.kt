@@ -56,7 +56,7 @@ internal class BleTaskQueue {
         mCoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         mCoroutineScope?.launch {
             mChannel?.consumeEach {
-                if (taskList.contains(it)) {
+                if (taskList.contains(it) && !it.canceled.get()) {
                     tryHandleTask(it)
                 }
             }
@@ -77,6 +77,7 @@ internal class BleTaskQueue {
             } else if (task.completed() == CANCEL_UN_COMPLETE) {
                 task.callback?.invoke(task, CancelException())
             }
+            task.canceled.set(true)
             taskList.remove(task)
             BleLogger.i("任务：${task}结束完毕，剩下${taskList.size()}个任务")
             if (task.autoDoNextTask) {
@@ -86,6 +87,7 @@ internal class BleTaskQueue {
             BleLogger.i("任务执行中断：$task，\r\n ${e.message}")
             task.setCompleted(CANCEL_UN_COMPLETE)
             task.callback?.invoke(task, CancellationException(e.message))
+            task.canceled.set(true)
             taskList.remove(task)
             sendTask(taskList.firstOrNull())
         }
@@ -129,11 +131,12 @@ internal class BleTaskQueue {
         timingJob.invokeOnCompletion {
             if (it is TimeoutCancellationException &&
                 task.completed() == UN_COMPLETE) {
-                BleLogger.e("任务超时，即刻移除：$task")
+                task.canceled.set(true)
                 removeTask(task)
                 task.callback?.invoke(task, TimeoutCancelException())
             } else if (it is CancellationException) {
-                BleLogger.i("任务未超时：$task")
+                task.canceled.set(true)
+                BleLogger.i("任务完成，未超时：$task")
             }
         }
         task.setTimingJob(timingJob)
@@ -148,11 +151,11 @@ internal class BleTaskQueue {
             task?.setCompleted(CANCEL_UN_COMPLETE)
             if (task == taskList.firstOrNull()) {
                 //正在执行
-                BleLogger.e("移除正在执行的任务：$task")
+                BleLogger.e("任务正在执行，但超时，移除任务：$task")
                 task?.remove()
                 taskList.remove(task)
             } else {
-                BleLogger.e("移除队列中的任务：${task}")
+                BleLogger.e("任务在队列未执行，但超时，移除任务：${task}")
                 taskList.remove(task)
             }
         }
@@ -172,6 +175,7 @@ internal class BleTaskQueue {
             while (iterator.hasNext()) {
                 val task = iterator.next()
                 if (task.taskId == taskId) {
+                    task.canceled.set(true)
                     task.setCompleted(CANCEL_UN_COMPLETE)
                     success = true
                     if (task == taskList.firstOrNull()) {

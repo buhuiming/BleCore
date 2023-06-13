@@ -116,7 +116,7 @@ internal class BleWriteRequest(
                     , i + 1)} -> " + "写数据失败，第${i + 1}个数据包" +
                         "长度(${data.size}) + 3大于设定Mtu($mtu)")
                 BleLogger.e(exception.message)
-                bleWriteCallback.callWriteFail(i + 1, dataArray.size(),exception)
+                bleWriteCallback.callWriteFail(i + 1, dataArray.size(), exception)
                 return
             }
         }
@@ -174,6 +174,7 @@ internal class BleWriteRequest(
                 throwable?.let {
                     BleLogger.e(it.message)
                     if (it is TimeoutCancellationException || it is TimeoutCancelException) {
+                        bleWriteData.isWriteFail.set(true)
                         val exception = TimeoutCancelException(
                             getTaskId(bleWriteData.writeUUID, bleWriteData.operateRandomID,
                                 bleWriteData.currentPackage) + " -> " +
@@ -186,6 +187,20 @@ internal class BleWriteRequest(
                         )
                         if (bleWriteData.currentPackage == bleWriteData.totalPackage) {
                             bleWriteData.bleWriteCallback.callWriteComplete(false)
+                        }
+                        for ((key, value) in bleWriteDataHashMap) {
+                            if (!bleWriteData.writeUUID.equals(key, ignoreCase = true)) {
+                                continue
+                            }
+                            synchronized(value) {
+                                val iterator = value.iterator()
+                                while (iterator.hasNext()) {
+                                    val writeData = iterator.next()
+                                    if (writeData == bleWriteData) {
+                                        iterator.remove()
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -228,6 +243,7 @@ internal class BleWriteRequest(
             // BluetoothStatusCodes.ERROR_GATT_WRITE_NOT_ALLOWED,
             // BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY,
             // BluetoothStatusCodes.ERROR_UNKNOWN
+            bleWriteData.isWriteFail.set(true)
             val taskId = getTaskId(bleWriteData.writeUUID, bleWriteData.operateRandomID
             , bleWriteData.currentPackage)
             cancelWriteJob(taskId)
@@ -253,7 +269,7 @@ internal class BleWriteRequest(
                 val iterator = value.iterator()
                 while (iterator.hasNext()) {
                     val bleWriteData = iterator.next()
-                    if (bleWriteData.isWriting.get()) {
+                    if (bleWriteData.isWriting.get() && !bleWriteData.isWriteFail.get()) {
                         val taskId = getTaskId(
                             bleWriteData.writeUUID,
                             bleWriteData.operateRandomID,
