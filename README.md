@@ -228,8 +228,9 @@
 
 #### 存在问题
 
-*   1、关闭系统蓝牙，没有触发onConnectionStateChange
+* 1、关闭系统蓝牙，没有触发onConnectionStateChange
        解决方案：1、操作前判断蓝牙状态，2、蓝牙广播
+
 
 ## License
 
