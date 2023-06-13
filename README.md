@@ -3,7 +3,15 @@
 ![20230613110126](https://github.com/buhuiming/BleCore/blob/main/screenshots/20230613110126.png)
 ![20230613110146](https://github.com/buhuiming/BleCore/blob/main/screenshots/20230613110146.png)
 
-### 详细用法参考demo 详细用法参考demo 详细用法参考demo
+### 详细用法参考demo 
+### 详细用法参考demo 
+### 详细用法参考demo 
+
+#### 基于Kotlin、协程
+#### 支持读写等操作任务队列，一个设备一次执行一个任务
+#### 基于sdk 33，权限API
+#### 详细的完整的容错机制
+#### 基于多个蓝牙库的设计思想
 
 ### 用法
 
