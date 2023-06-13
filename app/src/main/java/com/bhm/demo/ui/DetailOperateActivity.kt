@@ -189,7 +189,7 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
                     getBleDevice(),
                     node.serviceUUID,
                     node.characteristicUUID,
-                    ""
+                    content
                 )
             }
         }

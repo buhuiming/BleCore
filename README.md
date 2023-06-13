@@ -1,5 +1,8 @@
 # BleCore Android蓝牙低功耗(BLE)快速开发框架
 
+![55f2ed59eaf3137d536a84151d78e63](https://user-images.githubusercontent.com/30099293/197972403-47566ee6-6d92-4e5d-a5b6-f099b1197131.jpg)
+![55f2ed59eaf3137d536a84151d78e63](https://user-images.githubusercontent.com/30099293/197972403-47566ee6-6d92-4e5d-a5b6-f099b1197131.jpg)
+
 ### 用法
 
         allprojects {
@@ -182,13 +185,35 @@
                               readUUID: String,
                               bleIndicateCallback: BleReadCallback)
 
-#### 18、断开某个设备的连接 释放资源
+#### 18、写数据
+     BleManager.get().writeData(bleDevice: BleDevice,
+                                serviceUUID: String,
+                                writeUUID: String,
+                                data: ByteArray,
+                                bleWriteCallback: BleWriteCallback)
+     BleManager.get().writeData(bleDevice: BleDevice,
+                                serviceUUID: String,
+                                writeUUID: String,
+                                data: SparseArray,
+                                bleWriteCallback: BleWriteCallback)
+
+*    因为分包后每一个包，可能是包含完整的协议，所以分包由业务层处理，组件只会根据包的长度和mtu值对比后是否拦截
+*    特殊情况下：indicate\mtu\notify\read\rssi\write 这些操作，同一个特征值在不同地方调用(不同callback)，最后面的操作
+     对应的回调才会触发，其他地方先前的操作对应的回调不会触发
+     解决方案：业务层每个特征值对应的操作维护一个单例的callback对象（假如为SingleCallback），在不同地方调用再传递callback
+             (放入到SingleCallback中的集合CallbackList)，SingleCallback 回调时循环CallbackList中的callback，这样就达到了
+              同一个特征值在不同地方调用，都能收到回调
+     
+*    indicate\mtu\notify\read\rssi这些操作 ，同一个特征值在不同地方调用，后面的操作会取消前面未完成的操作；write操作比较
+     特殊，每个写操作都会有回调，且write操作之间不会被取消。具体详情看taskId
+
+#### 19、断开某个设备的连接 释放资源
     BleManager.get().release(bleDevice: BleDevice)
 
-#### 19、断开所有连接 释放资源
+#### 20、断开所有连接 释放资源
     BleManager.get().releaseAll()
 
-#### 20、一些移除监听的函数
+#### 21、一些移除监听的函数
     BleManager.get().removeBleScanCallback()
     BleManager.get().removeBleConnectCallback(bleDevice: BleDevice)
     BleManager.get().removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String)

@@ -40,7 +40,7 @@ object Constants {
 
     const val DEFAULT_MTU: Int = 23
 
-    const val DEFAULT_AUTO_SET_MTU = true
+    const val DEFAULT_AUTO_SET_MTU = false
 
     //系统提供接受通知自带的UUID
     const val UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR =

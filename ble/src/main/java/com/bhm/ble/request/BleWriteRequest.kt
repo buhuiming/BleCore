@@ -10,6 +10,8 @@ package com.bhm.ble.request
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothStatusCodes
+import android.os.Build
 import android.util.SparseArray
 import com.bhm.ble.callback.BleWriteCallback
 import com.bhm.ble.control.BleTaskQueue
@@ -24,7 +26,6 @@ import com.bhm.ble.request.base.Request
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.delay
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
@@ -127,25 +128,22 @@ internal class BleWriteRequest(
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0 ||
                     characteristic.properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0)
         ) {
-            bleWriteCallback.launchInDefaultThread {
-                for (i in 0 until dataArray.size()) {
-                    val bleWriteData = BleWriteData(
-                        operateRandomID = operateRandomID,
-                        serviceUUID = serviceUUID,
-                        writeUUID = writeUUID,
-                        currentPackage = i + 1,
-                        totalPackage = dataArray.size(),
-                        data = dataArray.valueAt(i),
-                        isWriting = AtomicBoolean(false),
-                        bleWriteCallback = bleWriteCallback
-                    )
-                    addBleWriteData(writeUUID, bleWriteData)
-                    delay(getOperateInterval())
-                    startWriteJob(
-                        characteristic,
-                        bleWriteData
-                    )
-                }
+            for (i in 0 until dataArray.size()) {
+                val bleWriteData = BleWriteData(
+                    operateRandomID = operateRandomID,
+                    serviceUUID = serviceUUID,
+                    writeUUID = writeUUID,
+                    currentPackage = i + 1,
+                    totalPackage = dataArray.size(),
+                    data = dataArray.valueAt(i),
+                    isWriting = AtomicBoolean(false),
+                    bleWriteCallback = bleWriteCallback
+                )
+                addBleWriteData(writeUUID, bleWriteData)
+                startWriteJob(
+                    characteristic,
+                    bleWriteData
+                )
             }
         } else {
             val exception = UnSupportException("$writeUUID -> 写数据失败，此特性不支持写数据")
@@ -218,40 +216,52 @@ internal class BleWriteRequest(
         BleLogger.i(
             getTaskId(bleWriteData.writeUUID, bleWriteData.operateRandomID
                 , bleWriteData.currentPackage) + " - > 开始写第${bleWriteData.currentPackage}包数据")
-        bleWriteData.bleWriteCallback.launchInIOThread {
-            delay(500)
-            onCharacteristicWrite(characteristic, BluetoothGatt.GATT_SUCCESS)
-        }
-        /*val success: Boolean? =
+//        bleWriteData.bleWriteCallback.launchInIOThread {
+//            delay(500)
+//            onCharacteristicWrite(characteristic, BluetoothGatt.GATT_SUCCESS)
+//        }
+        val writeType =
+            if (characteristic.properties and
+                BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0) {
+                BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+            } else {
+                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+            }
+        val success: Boolean? =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 getBluetoothGatt(bleDevice)?.writeCharacteristic(
                     characteristic,
                     bleWriteData.data,
-                    BluetoothGattCharacteristic.WRITE_TYPE_SIGNED
+                    writeType
                 ) == BluetoothStatusCodes.SUCCESS
             } else {
-                characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_SIGNED
+                characteristic.writeType = writeType
                 characteristic.value = bleWriteData.data
                 getBluetoothGatt(bleDevice)?.writeCharacteristic(characteristic)
             }
         if (success != true) {
             //whether the characteristic was successfully written to Value is
-            // BluetoothStatusCodes.SUCCESS,
-            // BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION,
-            // android.bluetooth.BluetoothStatusCodes.ERROR_DEVICE_NOT_CONNECTED,
-            // BluetoothStatusCodes.ERROR_PROFILE_SERVICE_NOT_BOUND,
-            // BluetoothStatusCodes.ERROR_GATT_WRITE_NOT_ALLOWED,
-            // BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY,
-            // BluetoothStatusCodes.ERROR_UNKNOWN
+            // BluetoothStatusCodes.SUCCESS = 0,
+            // BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION = 6,
+            // BluetoothStatusCodes.ERROR_DEVICE_NOT_CONNECTED = 4,
+            // BluetoothStatusCodes.ERROR_PROFILE_SERVICE_NOT_BOUND = 8,
+            // BluetoothStatusCodes.ERROR_GATT_WRITE_NOT_ALLOWED = 200,
+            // BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY = 201,
+            // BluetoothStatusCodes.ERROR_UNKNOWN = 2147483647,
+            // BluetoothStatusCodes.ERROR_NO_ACTIVE_DEVICES = 13,
             bleWriteData.isWriteFail.set(true)
             val taskId = getTaskId(bleWriteData.writeUUID, bleWriteData.operateRandomID
-            , bleWriteData.currentPackage)
+                , bleWriteData.currentPackage)
             cancelWriteJob(taskId)
             val exception = UnDefinedException("$taskId -> 第${bleWriteData.currentPackage}包数据写" +
                     "失败，错误可能是没有权限、未连接、服务未绑定、不可写、请求忙碌等")
             BleLogger.e(exception.message)
-            bleWriteData.bleWriteCallback.callWriteFail(exception)
-        }*/
+            bleWriteData.bleWriteCallback.callWriteFail(
+                bleWriteData.currentPackage,
+                bleWriteData.totalPackage,
+                exception
+            )
+        }
     }
 
     /**

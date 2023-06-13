@@ -90,6 +90,7 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     BleLogger.d("${bleDevice.deviceAddress} -> 设置Mtu成功：$mtu")
                     it.callMtuChanged(mtu)
+                    getBleOptions()?.mtu = mtu
                 } else {
                     val exception = UnDefinedException(
                         "${bleDevice.deviceAddress} -> " +

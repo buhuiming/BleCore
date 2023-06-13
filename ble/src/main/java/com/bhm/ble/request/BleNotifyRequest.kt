@@ -239,13 +239,14 @@ internal class BleNotifyRequest(
         }
         if (!success) {
             //true, if the write operation was initiated successfully Value is
-            // BluetoothStatusCodes.SUCCESS,
-            // BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION,
-            // android.bluetooth.BluetoothStatusCodes.ERROR_DEVICE_NOT_CONNECTED,
-            // BluetoothStatusCodes.ERROR_PROFILE_SERVICE_NOT_BOUND,
-            // BluetoothStatusCodes.ERROR_GATT_WRITE_NOT_ALLOWED,
-            // BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY,
-            // BluetoothStatusCodes.ERROR_UNKNOWN
+            // BluetoothStatusCodes.SUCCESS = 0,
+            // BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION = 6,
+            // BluetoothStatusCodes.ERROR_DEVICE_NOT_CONNECTED = 4,
+            // BluetoothStatusCodes.ERROR_PROFILE_SERVICE_NOT_BOUND = 8,
+            // BluetoothStatusCodes.ERROR_GATT_WRITE_NOT_ALLOWED = 200,
+            // BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY = 201,
+            // BluetoothStatusCodes.ERROR_UNKNOWN = 2147483647,
+            // BluetoothStatusCodes.ERROR_NO_ACTIVE_DEVICES = 13,
             val exception = UnDefinedException(
                 "$notifyUUID -> 设置Notify失败，错误可能是没有权限、未连接、服务未绑定、不可写、请求忙碌等",
                 EXCEPTION_CODE_DESCRIPTOR_FAIL
