@@ -193,7 +193,7 @@ internal class BleIndicateRequest(
                                           useCharacteristicDescriptor: Boolean,
                                           enable: Boolean,
                                           bleIndicateCallback: BleIndicateCallback?): Boolean {
-        val bluetoothGatt = getBleConnectedDevice(bleDevice)?.getBluetoothGatt()
+        val bluetoothGatt = getBluetoothGatt(bleDevice)
         val setSuccess = bluetoothGatt?.setCharacteristicNotification(characteristic, enable)
         if (setSuccess != true) {
             val exception = UnDefinedException(

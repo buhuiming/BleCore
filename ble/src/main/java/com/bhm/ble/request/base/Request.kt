@@ -37,7 +37,7 @@ internal open class Request {
     /**
      * 获取操作时间
      */
-    fun getOperateTime(): Long {
+    private fun getOperateTime(): Long {
         var operateTime = getBleOptions()?.operateMillisTimeOut ?: DEFAULT_OPERATE_MILLIS_TIMEOUT
         if (operateTime <= 0) {
             operateTime = DEFAULT_OPERATE_MILLIS_TIMEOUT
@@ -48,7 +48,7 @@ internal open class Request {
     /**
      * 获取操作间隔
      */
-    fun getOperateInterval(): Long {
+    private fun getOperateInterval(): Long {
         var operateInterval = getBleOptions()?.operateInterval ?: DEFAULT_OPERATE_INTERVAL
         if (operateInterval <= 0) {
             operateInterval = DEFAULT_OPERATE_INTERVAL

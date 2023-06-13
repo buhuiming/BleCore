@@ -28,19 +28,6 @@ import java.util.*
  */
 internal class BleTaskQueue {
 
-    companion object {
-
-        private var instance: BleTaskQueue = BleTaskQueue()
-
-        @Synchronized
-        fun get(): BleTaskQueue {
-            if (instance == null) {
-                instance = BleTaskQueue()
-            }
-            return instance
-        }
-    }
-
     private var mChannel: Channel<BleTask>? = null
 
     private var mCoroutineScope: CoroutineScope? = null

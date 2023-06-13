@@ -29,15 +29,15 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
 
     private val bleConnectRequest = BleConnectRequest(bleDevice, this)
 
-    private val bleNotifyRequest = BleNotifyRequest(bleDevice, bleTaskQueue)
-
-    private val bleIndicateRequest = BleIndicateRequest(bleDevice, bleTaskQueue)
+    private val bleSetPriorityRequest = BleSetPriorityRequest(bleDevice)
 
     private val bleRssiRequest = BleRssiRequest(bleDevice, bleTaskQueue)
 
     private val bleMtuRequest = BleMtuRequest(bleDevice, bleTaskQueue)
 
-    private val bleSetPriorityRequest = BleSetPriorityRequest(bleDevice)
+    private val bleNotifyRequest = BleNotifyRequest(bleDevice, bleTaskQueue)
+
+    private val bleIndicateRequest = BleIndicateRequest(bleDevice, bleTaskQueue)
 
     private val bleReadRequest = BleReadRequest(bleDevice, bleTaskQueue)
 

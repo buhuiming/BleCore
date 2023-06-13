@@ -443,7 +443,6 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         ioScope.cancel()
         defaultScope.cancel()
         bleConnectedDeviceManager.releaseAll()
-        BleTaskQueue.get().clear()
     }
 
     /**
