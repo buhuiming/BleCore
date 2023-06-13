@@ -9,6 +9,7 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.Request
+import com.bhm.ble.utils.BleLogger
 
 
 /**
@@ -28,6 +29,12 @@ internal class BleSetPriorityRequest(private val bleDevice: BleDevice) : Request
      */
     @SuppressLint("MissingPermission")
     fun setConnectionPriority(connectionPriority: Int): Boolean {
-        return getBluetoothGatt(bleDevice)?.requestConnectionPriority(connectionPriority)?: false
+        val result = getBluetoothGatt(bleDevice)?.requestConnectionPriority(connectionPriority)?: false
+        if (result) {
+            BleLogger.i("${bleDevice.deviceAddress} -> 设置设备的传输优先级成功")
+        } else {
+            BleLogger.e("${bleDevice.deviceAddress} -> 设置设备的传输优先级失败")
+        }
+        return result
     }
 }

@@ -5,8 +5,6 @@
  */
 package com.bhm.demo.ui
 
-import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import com.bhm.ble.BleManager
 import com.bhm.ble.attribute.BleOptions

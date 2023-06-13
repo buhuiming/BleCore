@@ -35,13 +35,13 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
 
     private val bleMtuRequest = BleMtuRequest(bleDevice, bleTaskQueue)
 
-    private val bleNotifyRequest = BleNotifyRequest(bleDevice, bleTaskQueue)
+    private val bleNotifyRequest = BleNotifyRequest(bleDevice)
 
-    private val bleIndicateRequest = BleIndicateRequest(bleDevice, bleTaskQueue)
+    private val bleIndicateRequest = BleIndicateRequest(bleDevice)
 
-    private val bleReadRequest = BleReadRequest(bleDevice, bleTaskQueue)
+    private val bleReadRequest = BleReadRequest(bleDevice)
 
-    private val bleWriteRequest = BleWriteRequest(bleDevice, bleTaskQueue)
+    private val bleWriteRequest = BleWriteRequest(bleDevice)
 
     /**
      * 当连接上设备或者失去连接时会触发
@@ -257,6 +257,8 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         )
     }
 
+    fun getShareBleTaskQueue() = bleTaskQueue
+
     fun removeNotifyCallback(uuid: String?) {
         bleNotifyRequest.removeNotifyCallback(uuid)
     }
@@ -307,6 +309,10 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     }
 
     fun close() {
+        bleNotifyRequest.close()
+        bleIndicateRequest.close()
+        bleReadRequest.close()
+        bleWriteRequest.close()
         bleConnectRequest.close()
         bleTaskQueue.clear()
     }

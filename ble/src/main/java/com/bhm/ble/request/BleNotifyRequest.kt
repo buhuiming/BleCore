@@ -14,14 +14,13 @@ import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothStatusCodes
 import android.os.Build
 import com.bhm.ble.callback.BleNotifyCallback
-import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.data.*
 import com.bhm.ble.data.Constants.EXCEPTION_CODE_DESCRIPTOR_FAIL
 import com.bhm.ble.data.Constants.EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
 import com.bhm.ble.data.Constants.NOTIFY_TASK_ID
 import com.bhm.ble.data.Constants.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR
 import com.bhm.ble.device.BleDevice
-import com.bhm.ble.request.base.Request
+import com.bhm.ble.request.base.BleTaskQueueRequest
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
@@ -40,8 +39,7 @@ import kotlin.coroutines.suspendCoroutine
  */
 internal class BleNotifyRequest(
     private val bleDevice: BleDevice,
-    private val bleTaskQueue: BleTaskQueue
-) : Request() {
+) : BleTaskQueueRequest(bleDevice, "Notify队列") {
 
     private val bleNotifyCallbackHashMap:
             ConcurrentHashMap<String, BleNotifyCallback> = ConcurrentHashMap()
@@ -106,7 +104,7 @@ internal class BleNotifyRequest(
                     }
                 }
             )
-            bleTaskQueue.addTask(task)
+            getTaskQueue(notifyUUID)?.addTask(task)
         } else {
             val exception = UnSupportException("$notifyUUID -> 设置Notify失败，此特性不支持通知")
             BleLogger.e(exception.message)
@@ -125,7 +123,7 @@ internal class BleNotifyRequest(
         if (characteristic != null &&
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0
         ) {
-            cancelNotifyJob(getTaskId(notifyUUID))
+            cancelNotifyJob(notifyUUID, getTaskId(notifyUUID))
             val success = setCharacteristicNotify(
                 notifyUUID,
                 characteristic,
@@ -166,7 +164,7 @@ internal class BleNotifyRequest(
     ) {
         bleNotifyCallbackHashMap.values.forEach {
             if (descriptor?.characteristic?.uuid?.toString().equals(it.getKey(), ignoreCase = true)
-                && cancelNotifyJob(getTaskId(it.getKey()))) {
+                && cancelNotifyJob(it.getKey(), getTaskId(it.getKey()))) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     BleLogger.d("${it.getKey()} -> 设置Notify成功")
                     it.callNotifySuccess()
@@ -198,7 +196,7 @@ internal class BleNotifyRequest(
                 "$notifyUUID -> 设置Notify失败，SetCharacteristicNotificationFail",
                 EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
             )
-            cancelNotifyJob(getTaskId(notifyUUID))
+            cancelNotifyJob(notifyUUID, getTaskId(notifyUUID))
             BleLogger.e(exception.message)
             bleNotifyCallback?.callNotifyFail(exception)
             return false
@@ -213,7 +211,7 @@ internal class BleNotifyRequest(
                 "$notifyUUID -> 设置Notify失败，SetCharacteristicNotificationFail",
                 EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
             )
-            cancelNotifyJob(getTaskId(notifyUUID))
+            cancelNotifyJob(notifyUUID, getTaskId(notifyUUID))
             BleLogger.e(exception.message)
             bleNotifyCallback?.callNotifyFail(exception)
             return false
@@ -251,7 +249,7 @@ internal class BleNotifyRequest(
                 "$notifyUUID -> 设置Notify失败，错误可能是没有权限、未连接、服务未绑定、不可写、请求忙碌等",
                 EXCEPTION_CODE_DESCRIPTOR_FAIL
             )
-            cancelNotifyJob(getTaskId(notifyUUID))
+            cancelNotifyJob(notifyUUID, getTaskId(notifyUUID))
             BleLogger.e(exception.message)
             bleNotifyCallback?.callNotifyFail(exception)
             return false
@@ -264,11 +262,7 @@ internal class BleNotifyRequest(
     /**
      * 取消设置notify任务
      */
-    private fun cancelNotifyJob(taskId: String): Boolean {
-        return bleTaskQueue.removeTask(taskId)
-    }
-
-    fun close() {
-
+    private fun cancelNotifyJob(notifyUUID: String?, taskId: String): Boolean {
+        return getTaskQueue(notifyUUID?: "")?.removeTask(taskId)?: false
     }
 }

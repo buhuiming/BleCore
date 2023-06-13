@@ -5,6 +5,7 @@
 #### * 基于sdk 33，最新API
 #### * 详细的完整的容错机制
 #### * 基于多个蓝牙库的设计思想
+#### * 强大的Notify\Indicate\Read\Write任务队列
 
 ![20230613110126](https://github.com/buhuiming/BleCore/blob/main/screenshots/20230613110126.png)
 ![20230613110146](https://github.com/buhuiming/BleCore/blob/main/screenshots/20230613110146.png)
@@ -71,11 +72,28 @@
                 .setOperateInterval(80)
                 .setMaxConnectNum(5)
                 .setMtu(500)
+                .setTaskQueueType(BleTaskQueueType.Operate)
                 .build()
     BleManager.get().init(application, options)
 
     //或者使用默认配置
     BleManager.get().init(application)
+
+    setTaskQueueType方法，有3个选项分别是：
+*   BleTaskQueueType.Single
+    默认值，一个设备所有操作共享一个任务队列(不区分特征值)，Notify\Indicate\Read\Write(包括rssi\mtu)
+    所对应的任务，都将放入到同一个任务队列中，先进先出按序执行。
+*   BleTaskQueueType.Operate
+    一个设备每个操作独立一个任务队列(不区分特征值)，
+    Notify\Indicate\Read\Write(不包括rssi\mtu，rssi\mtu仍在共享队列)所对应的任务，
+    分别放入到独立的任务队列中，不同操作任务之间不相互影响，相同操作任务之间先进先出按序执行。
+*   BleTaskQueueType.Independent
+    一个设备每个特征值下的每个操作独立一个任务队列(区分特征值)，
+    Notify\Indicate\Read\Write(不包括rssi\mtu，rssi\mtu仍在共享队列)所对应的任务，
+    分别放入到独立的任务队列中，且按特征值区分，不同操作任务之间不相互影响，相同操作任务之间不相互影响，
+    例如特征值1和特征值2，两者的写操作，在两个不同的任务队列当中，
+    例如特征值1和特征值2，前者的读操作和后者的写操作，在两个不同的任务队列当中。
+
 
 #### 2、扫描
     注意：扫描之前先检查权限、检查GPS开关、检查蓝牙开关

@@ -14,7 +14,6 @@ import android.bluetooth.BluetoothStatusCodes
 import android.os.Build
 import android.util.SparseArray
 import com.bhm.ble.callback.BleWriteCallback
-import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.data.BleWriteData
 import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.data.Constants.WRITE_TASK_ID
@@ -22,7 +21,7 @@ import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.data.UnSupportException
 import com.bhm.ble.device.BleDevice
-import com.bhm.ble.request.base.Request
+import com.bhm.ble.request.base.BleTaskQueueRequest
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
@@ -42,8 +41,7 @@ import kotlin.coroutines.suspendCoroutine
  */
 internal class BleWriteRequest(
     private val bleDevice: BleDevice,
-    private val bleTaskQueue: BleTaskQueue
-) : Request() {
+) : BleTaskQueueRequest(bleDevice, "Write队列") {
 
     private val bleWriteDataHashMap:
             ConcurrentHashMap<String, MutableList<BleWriteData>> = ConcurrentHashMap()
@@ -210,7 +208,7 @@ internal class BleWriteRequest(
                 }
             }
         )
-        bleTaskQueue.addTask(task)
+        getTaskQueue(bleWriteData.writeUUID)?.addTask(task)
     }
 
     @SuppressLint("MissingPermission")
@@ -258,7 +256,7 @@ internal class BleWriteRequest(
             bleWriteData.isWriteFail.set(true)
             val taskId = getTaskId(bleWriteData.writeUUID, bleWriteData.operateRandomID
                 , bleWriteData.currentPackage)
-            cancelWriteJob(taskId)
+            cancelWriteJob(bleWriteData.writeUUID, taskId)
             val exception = UnDefinedException("$taskId -> 第${bleWriteData.currentPackage}包数据写" +
                     "失败，错误可能是没有权限、未连接、服务未绑定、不可写、请求忙碌等")
             BleLogger.e(exception.message)
@@ -298,7 +296,7 @@ internal class BleWriteRequest(
                                 "$taskId -> 第${bleWriteData.currentPackage}包" +
                                         "数据写成功：" + BleUtil.bytesToHex(bleWriteData.data)
                             )
-                            cancelWriteJob(taskId)
+                            cancelWriteJob(bleWriteData.writeUUID, taskId)
 
                             bleWriteData.bleWriteCallback.callWriteSuccess(
                                 bleWriteData.currentPackage,
@@ -310,7 +308,7 @@ internal class BleWriteRequest(
                                 iterator.remove()
                             }
                         } else {
-                            cancelWriteJob(taskId)
+                            cancelWriteJob(bleWriteData.writeUUID, taskId)
 
                             val exception = UnDefinedException(
                                 "$taskId -> 第${bleWriteData.currentPackage}包数据写" +
@@ -345,11 +343,7 @@ internal class BleWriteRequest(
      * 取消写数据任务
      */
     @Synchronized
-    private fun cancelWriteJob(taskId: String) {
-        bleTaskQueue.removeTask(taskId)
-    }
-
-    fun close() {
-
+    private fun cancelWriteJob(writeUUID: String?, taskId: String) {
+        getTaskQueue(writeUUID?: "")?.removeTask(taskId)
     }
 }

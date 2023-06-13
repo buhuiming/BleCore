@@ -112,8 +112,4 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
     private fun cancelSetMtuJob(): Boolean {
         return bleTaskQueue.removeTask(getTaskId())
     }
-
-    fun close() {
-
-    }
 }

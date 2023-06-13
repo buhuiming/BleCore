@@ -11,13 +11,12 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import com.bhm.ble.callback.BleReadCallback
-import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.data.Constants.READ_TASK_ID
 import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.data.UnSupportException
 import com.bhm.ble.device.BleDevice
-import com.bhm.ble.request.base.Request
+import com.bhm.ble.request.base.BleTaskQueueRequest
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
@@ -36,8 +35,7 @@ import kotlin.coroutines.suspendCoroutine
  */
 internal class BleReadRequest(
     private val bleDevice: BleDevice,
-    private val bleTaskQueue: BleTaskQueue
-) : Request() {
+) : BleTaskQueueRequest(bleDevice, "Read队列") {
 
     private val bleReadCallbackHashMap:
             ConcurrentHashMap<String, BleReadCallback> = ConcurrentHashMap()
@@ -72,7 +70,7 @@ internal class BleReadRequest(
         if (characteristic != null &&
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_READ) != 0
         ) {
-            cancelReadJob(getTaskId(readUUID))
+            cancelReadJob(readUUID, getTaskId(readUUID))
             bleReadCallback.setKey(readUUID)
             addReadCallback(readUUID, bleReadCallback)
             var mContinuation: Continuation<Throwable?>? = null
@@ -100,7 +98,7 @@ internal class BleReadRequest(
                     }
                 }
             )
-            bleTaskQueue.addTask(task)
+            getTaskQueue(readUUID)?.addTask(task)
         } else {
             val exception = UnSupportException("$readUUID -> 读特征值数据失败，此特性不支持读特征值数据")
             BleLogger.e(exception.message)
@@ -118,7 +116,7 @@ internal class BleReadRequest(
     ) {
         bleReadCallbackHashMap.values.forEach {
             if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true) &&
-                cancelReadJob(getTaskId(it.getKey()))) {
+                cancelReadJob(it.getKey(), getTaskId(it.getKey()))) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     BleLogger.d(
                         "${it.getKey()} -> " +
@@ -143,11 +141,7 @@ internal class BleReadRequest(
      * 取消读特征值数据任务
      */
     @Synchronized
-    private fun cancelReadJob(taskId: String): Boolean {
-        return bleTaskQueue.removeTask(taskId)
-    }
-
-    fun close() {
-
+    private fun cancelReadJob(readUUID: String?, taskId: String): Boolean {
+        return getTaskQueue(readUUID?: "")?.removeTask(taskId)?: false
     }
 }

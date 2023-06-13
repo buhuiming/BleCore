@@ -14,7 +14,6 @@ import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothStatusCodes
 import android.os.Build
 import com.bhm.ble.callback.BleIndicateCallback
-import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.data.Constants.EXCEPTION_CODE_DESCRIPTOR_FAIL
 import com.bhm.ble.data.Constants.EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
 import com.bhm.ble.data.Constants.INDICATE_TASK_ID
@@ -23,7 +22,7 @@ import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.data.UnSupportException
 import com.bhm.ble.device.BleDevice
-import com.bhm.ble.request.base.Request
+import com.bhm.ble.request.base.BleTaskQueueRequest
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
@@ -42,8 +41,7 @@ import kotlin.coroutines.suspendCoroutine
  */
 internal class BleIndicateRequest(
     private val bleDevice: BleDevice,
-    private val bleTaskQueue: BleTaskQueue
-) : Request() {
+) : BleTaskQueueRequest(bleDevice, "Indicate队列") {
 
     private val bleIndicateCallbackHashMap:
             ConcurrentHashMap<String, BleIndicateCallback> = ConcurrentHashMap()
@@ -108,7 +106,7 @@ internal class BleIndicateRequest(
                     }
                 }
             )
-            bleTaskQueue.addTask(task)
+            getTaskQueue(indicateUUID)?.addTask(task)
         } else {
             val exception = UnSupportException("$indicateUUID -> 设置Indicate失败，此特性不支持通知")
             BleLogger.e(exception.message)
@@ -127,7 +125,7 @@ internal class BleIndicateRequest(
         if (characteristic != null &&
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0
         ) {
-            cancelIndicateJob(getTaskId(indicateUUID))
+            cancelIndicateJob(indicateUUID, getTaskId(indicateUUID))
             val success = setCharacteristicIndicate(
                 indicateUUID,
                 characteristic,
@@ -168,7 +166,7 @@ internal class BleIndicateRequest(
     ) {
         bleIndicateCallbackHashMap.values.forEach {
             if (descriptor?.characteristic?.uuid.toString().equals(it.getKey(), ignoreCase = true)
-                && cancelIndicateJob(getTaskId(it.getKey()))) {
+                && cancelIndicateJob(it.getKey(), getTaskId(it.getKey()))) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     BleLogger.d("${it.getKey()} -> 设置Indicate成功")
                     it.callIndicateSuccess()
@@ -200,7 +198,7 @@ internal class BleIndicateRequest(
                 "$indicateUUID -> 设置Indicate失败，SetCharacteristicNotificationFail",
                 EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
             )
-            cancelIndicateJob(getTaskId(indicateUUID))
+            cancelIndicateJob(indicateUUID, getTaskId(indicateUUID))
             BleLogger.e(exception.message)
             bleIndicateCallback?.callIndicateFail(exception)
             return false
@@ -215,7 +213,7 @@ internal class BleIndicateRequest(
                 "$indicateUUID -> 设置Indicate失败，SetCharacteristicNotificationFail",
                 EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
             )
-            cancelIndicateJob(getTaskId(indicateUUID))
+            cancelIndicateJob(indicateUUID, getTaskId(indicateUUID))
             BleLogger.e(exception.message)
             bleIndicateCallback?.callIndicateFail(exception)
             return false
@@ -253,7 +251,7 @@ internal class BleIndicateRequest(
                 "$indicateUUID -> 设置Indicate失败，错误可能是没有权限、未连接、服务未绑定、不可写、请求忙碌等",
                 EXCEPTION_CODE_DESCRIPTOR_FAIL
             )
-            cancelIndicateJob(getTaskId(indicateUUID))
+            cancelIndicateJob(indicateUUID, getTaskId(indicateUUID))
             BleLogger.e(exception.message)
             bleIndicateCallback?.callIndicateFail(exception)
             return false
@@ -266,11 +264,7 @@ internal class BleIndicateRequest(
     /**
      * 取消设置indicate任务
      */
-    private fun cancelIndicateJob(taskId: String): Boolean {
-        return bleTaskQueue.removeTask(taskId)
-    }
-
-    fun close() {
-
+    private fun cancelIndicateJob(indicateUUID: String?, taskId: String): Boolean {
+        return getTaskQueue(indicateUUID?: "")?.removeTask(taskId)?: false
     }
 }
