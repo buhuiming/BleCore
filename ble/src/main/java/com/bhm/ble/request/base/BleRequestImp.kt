@@ -316,7 +316,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
-     * 设置设备的优先级
+     * 设置设备的传输优先级
      * connectionPriority 必须是 [BluetoothGatt.CONNECTION_PRIORITY_BALANCED]、
      * [BluetoothGatt.CONNECTION_PRIORITY_HIGH]、
      * [BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER]的其中一个
@@ -365,6 +365,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         val exception = UnConnectedException("$writeUUID -> 写数据失败，设备未连接")
         BleLogger.e(exception.message)
         callback.callWriteFail(0, dataArray.size(), exception)
+        callback.callWriteComplete(false)
     }
 
     /**

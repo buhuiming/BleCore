@@ -107,7 +107,7 @@ internal interface BleBaseRequest {
                bleMtuChangedCallback: BleMtuChangedCallback.() -> Unit)
 
     /**
-     * 设置设备的优先级
+     * 设置设备的传输优先级
      * connectionPriority 必须是 [BluetoothGatt.CONNECTION_PRIORITY_BALANCED]、
      * [BluetoothGatt.CONNECTION_PRIORITY_HIGH]、
      * [BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER]的其中一个

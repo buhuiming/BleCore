@@ -5,6 +5,7 @@
  */
 package com.bhm.demo.ui
 
+import android.bluetooth.BluetoothGatt
 import android.content.Intent
 import android.os.Build
 import android.view.KeyEvent
@@ -48,6 +49,8 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
     private var disConnectWhileClose = false // 关闭页面后是否断开连接
 
     private var currentSendNode: CharacteristicNode? = null
+
+    private var connectionPriority = BluetoothGatt.CONNECTION_PRIORITY_BALANCED
 
     override fun initData() {
         super.initData()
@@ -150,6 +153,21 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
             }
         }
 
+        viewBinding.btnConnectionPriority.setOnClickListener {
+            if (ViewUtil.isInvalidClick(it)) {
+                return@setOnClickListener
+            }
+            when (connectionPriority) {
+                BluetoothGatt.CONNECTION_PRIORITY_BALANCED -> connectionPriority =
+                    BluetoothGatt.CONNECTION_PRIORITY_HIGH
+                BluetoothGatt.CONNECTION_PRIORITY_HIGH -> connectionPriority =
+                    BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER
+                BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER -> connectionPriority =
+                    BluetoothGatt.CONNECTION_PRIORITY_BALANCED
+            }
+            viewModel.setConnectionPriority(getBleDevice(), connectionPriority)
+        }
+
         viewBinding.btnClear.setOnClickListener {
             if (ViewUtil.isInvalidClick(it)) {
                 return@setOnClickListener
@@ -171,6 +189,7 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
             }
             viewModel.readRssi(getBleDevice())
         }
+
         viewBinding.btnSend.setOnClickListener {
             if (ViewUtil.isInvalidClick(it)) {
                 return@setOnClickListener

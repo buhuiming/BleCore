@@ -282,10 +282,12 @@ class BleManager private constructor() {
     }
 
     /**
-     * 设置设备的优先级
-     * connectionPriority 必须是 [BluetoothGatt.CONNECTION_PRIORITY_BALANCED]、
-     * [BluetoothGatt.CONNECTION_PRIORITY_HIGH]、
-     * [BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER]的其中一个
+     * 设置设备的传输优先级
+     * connectionPriority 必须是以下的其中一个
+     * [BluetoothGatt.CONNECTION_PRIORITY_BALANCED] (默认)、
+     * [BluetoothGatt.CONNECTION_PRIORITY_HIGH] (高优先级，低延迟，传输完请求设置
+     * CONNECTION_PRIORITY_BALANCED，以减少能源使用)、
+     * [BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER] (低功耗)
      *
      */
     @Synchronized

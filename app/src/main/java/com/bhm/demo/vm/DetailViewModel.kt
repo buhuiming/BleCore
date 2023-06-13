@@ -188,6 +188,18 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
     }
 
     /**
+     * 设置设备的传输优先级
+     */
+    fun setConnectionPriority(bleDevice: BleDevice, connectionPriority: Int) {
+        val success = BleManager.get().setConnectionPriority(bleDevice, connectionPriority)
+        if (success) {
+            addLogMsg(LogEntity(Level.FINE, "设置设备的传输优先级成功：$connectionPriority"))
+        } else {
+            addLogMsg(LogEntity(Level.OFF, "设置设备的传输优先级失败：$connectionPriority"))
+        }
+    }
+
+    /**
      * 读取信号值
      */
     fun readRssi(bleDevice: BleDevice) {

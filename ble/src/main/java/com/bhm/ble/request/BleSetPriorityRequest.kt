@@ -12,7 +12,7 @@ import com.bhm.ble.request.base.Request
 
 
 /**
- * 设置设备的优先级请求
+ * 设置设备的传输优先级请求
  *
  * @author Buhuiming
  * @date 2023年06月07日 15时45分
@@ -20,7 +20,7 @@ import com.bhm.ble.request.base.Request
 internal class BleSetPriorityRequest(private val bleDevice: BleDevice) : Request() {
 
     /**
-     * 设置设备的优先级
+     * 设置设备的传输优先级
      * connectionPriority 必须是 [BluetoothGatt.CONNECTION_PRIORITY_BALANCED]、
      * [BluetoothGatt.CONNECTION_PRIORITY_HIGH]、
      * [BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER]的其中一个

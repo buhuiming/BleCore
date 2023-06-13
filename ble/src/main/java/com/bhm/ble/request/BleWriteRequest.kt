@@ -96,6 +96,7 @@ internal class BleWriteRequest(
             )
             BleLogger.e(exception.message)
             bleWriteCallback.callWriteFail(0, 0, exception)
+            bleWriteCallback.callWriteComplete(false)
             return
         }
         for (i in 0 until dataArray.size()) {
@@ -107,6 +108,7 @@ internal class BleWriteRequest(
                 )
                 BleLogger.e(exception.message)
                 bleWriteCallback.callWriteFail(i + 1, dataArray.size(), exception)
+                bleWriteCallback.callWriteComplete(false)
                 return
             }
             val mtu = getBleOptions()?.mtu?: DEFAULT_MTU
@@ -118,6 +120,7 @@ internal class BleWriteRequest(
                         "长度(${data.size}) + 3大于设定Mtu($mtu)")
                 BleLogger.e(exception.message)
                 bleWriteCallback.callWriteFail(i + 1, dataArray.size(), exception)
+                bleWriteCallback.callWriteComplete(false)
                 return
             }
         }
@@ -128,6 +131,7 @@ internal class BleWriteRequest(
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0 ||
                     characteristic.properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0)
         ) {
+            //循环数据包，生成对应的任务
             for (i in 0 until dataArray.size()) {
                 val bleWriteData = BleWriteData(
                     operateRandomID = operateRandomID,
@@ -149,6 +153,7 @@ internal class BleWriteRequest(
             val exception = UnSupportException("$writeUUID -> 写数据失败，此特性不支持写数据")
             BleLogger.e(exception.message)
             bleWriteCallback.callWriteFail(0, dataArray.size(), exception)
+            bleWriteCallback.callWriteComplete(false)
         }
     }
 
@@ -186,6 +191,7 @@ internal class BleWriteRequest(
                         if (bleWriteData.currentPackage == bleWriteData.totalPackage) {
                             bleWriteData.bleWriteCallback.callWriteComplete(false)
                         }
+                        //移除监听
                         for ((key, value) in bleWriteDataHashMap) {
                             if (!bleWriteData.writeUUID.equals(key, ignoreCase = true)) {
                                 continue
@@ -279,6 +285,7 @@ internal class BleWriteRequest(
                 val iterator = value.iterator()
                 while (iterator.hasNext()) {
                     val bleWriteData = iterator.next()
+                    //只处理正在写并且没有失败的监听
                     if (bleWriteData.isWriting.get() && !bleWriteData.isWriteFail.get()) {
                         val taskId = getTaskId(
                             bleWriteData.writeUUID,
@@ -292,6 +299,7 @@ internal class BleWriteRequest(
                                         "数据写成功：" + BleUtil.bytesToHex(bleWriteData.data)
                             )
                             cancelWriteJob(taskId)
+
                             bleWriteData.bleWriteCallback.callWriteSuccess(
                                 bleWriteData.currentPackage,
                                 bleWriteData.totalPackage,
