@@ -42,6 +42,8 @@ object Constants {
 
     const val DEFAULT_AUTO_SET_MTU = false
 
+    val DEFAULT_TASK_QUEUE_TYPE = BleTaskQueueType.Single
+
     //系统提供接受通知自带的UUID
     const val UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR =
         "00002902-0000-1000-8000-00805f9b34fb"

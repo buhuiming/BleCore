@@ -26,7 +26,7 @@ import java.util.*
  * @author Buhuiming
  * @date 2023年06月02日 08时32分
  */
-internal class BleTaskQueue {
+internal class BleTaskQueue(private val tag: String = "") {
 
     private var mChannel: Channel<BleTask>? = null
 
@@ -56,7 +56,7 @@ internal class BleTaskQueue {
     private suspend fun tryHandleTask(task: BleTask) {
         //防止有task抛出异常，用CoroutineExceptionHandler捕获异常之后父coroutine关闭了，之后的send的Task不执行了
         try {
-            BleLogger.i("开始执行任务：$task")
+            BleLogger.i("($tag) 开始执行任务：$task")
             task.doTask()
             if (task.completed() == UN_COMPLETE) {
                 task.setCompleted(COMPLETED)
@@ -66,12 +66,12 @@ internal class BleTaskQueue {
             }
             task.canceled.set(true)
             taskList.remove(task)
-            BleLogger.i("任务：${task}结束完毕，剩下${taskList.size()}个任务")
+            BleLogger.i("($tag) 任务：${task}结束完毕，剩下${taskList.size()}个任务")
             if (task.autoDoNextTask) {
                 sendTask(taskList.firstOrNull())
             }
         } catch (e: Exception) {
-            BleLogger.i("任务执行中断：$task，\r\n ${e.message}")
+            BleLogger.i("($tag) 任务执行中断：$task，\r\n ${e.message}")
             task.setCompleted(CANCEL_UN_COMPLETE)
             task.callback?.invoke(task, CancellationException(e.message))
             task.canceled.set(true)
@@ -89,7 +89,7 @@ internal class BleTaskQueue {
         if (mCoroutineScope == null && mChannel == null) {
             initLoop()
         }
-        BleLogger.i("当前任务数量：${taskList.size()}, 添加任务：$task")
+        BleLogger.i("($tag) 当前任务数量：${taskList.size()}, 添加任务：$task")
         task.setCompleted(UN_COMPLETE)
         taskList.add(task)
         taskForTiming(task)
@@ -123,7 +123,7 @@ internal class BleTaskQueue {
                 task.callback?.invoke(task, TimeoutCancelException())
             } else if (it is CancellationException) {
                 task.canceled.set(true)
-                BleLogger.i("任务完成，未超时：$task")
+                BleLogger.i("($tag) 任务完成，未超时：$task")
             }
         }
         task.setTimingJob(timingJob)
@@ -138,11 +138,11 @@ internal class BleTaskQueue {
             task?.setCompleted(CANCEL_UN_COMPLETE)
             if (task == taskList.firstOrNull()) {
                 //正在执行
-                BleLogger.e("任务正在执行，但超时，移除任务：$task")
+                BleLogger.e("($tag) 任务正在执行，但超时，移除任务：$task")
                 task?.remove()
                 taskList.remove(task)
             } else {
-                BleLogger.e("任务在队列未执行，但超时，移除任务：${task}")
+                BleLogger.e("($tag) 任务在队列未执行，但超时，移除任务：${task}")
                 taskList.remove(task)
             }
         }
@@ -167,10 +167,10 @@ internal class BleTaskQueue {
                     success = true
                     if (task == taskList.firstOrNull()) {
                         //正在执行
-                        BleLogger.e("移除正在执行的任务：$task")
+                        BleLogger.e("($tag) 移除正在执行的任务：$task")
                         task.remove()
                     } else {
-                        BleLogger.e("移除队列中的任务：${task}")
+                        BleLogger.e("($tag) 移除队列中的任务：${task}")
                         iterator.remove()
                     }
                 }
@@ -185,7 +185,7 @@ internal class BleTaskQueue {
     @Synchronized
     private fun sendTask(task: BleTask?) {
         if (task == null) {
-            BleLogger.i("所有任务执行完毕")
+            BleLogger.i("($tag) 所有任务执行完毕")
             return
         }
         mCoroutineScope?.launch {

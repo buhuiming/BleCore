@@ -239,7 +239,7 @@ internal class BleConnectRequest(
      * 断开所有连接 释放资源
      */
     @Synchronized
-    fun release() {
+    fun close() {
         bleConnectCallback?.callDisConnected(
             isActiveDisconnect.get(),
             bleDevice, bluetoothGatt, BluetoothGatt.GATT_SUCCESS

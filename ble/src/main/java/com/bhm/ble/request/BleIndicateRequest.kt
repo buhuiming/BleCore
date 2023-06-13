@@ -269,4 +269,8 @@ internal class BleIndicateRequest(
     private fun cancelIndicateJob(taskId: String): Boolean {
         return bleTaskQueue.removeTask(taskId)
     }
+
+    fun close() {
+
+    }
 }

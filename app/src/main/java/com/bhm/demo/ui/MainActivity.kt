@@ -75,6 +75,9 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
                         listAdapter?.notifyItemChanged(position)
                     }
                     val isConnected= viewModel.isConnected(bleDevice)
+                    if (it.bleDevice.deviceAddress == "7C:DF:A1:A3:5A:BE") {
+                        viewBinding.btnConnect.isEnabled = !isConnected
+                    }
                     if (isConnected && autoOpenDetailsActivity) {
                         openDetails(it.bleDevice)
                     }
@@ -178,6 +181,6 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.stopScan()
-        viewModel.release()
+        viewModel.close()
     }
 }

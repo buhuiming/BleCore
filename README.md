@@ -218,10 +218,10 @@
      特殊，每个写操作都会有回调，且write操作之间不会被取消。具体详情看taskId
 
 #### 19、断开某个设备的连接 释放资源
-    BleManager.get().release(bleDevice: BleDevice)
+    BleManager.get().close(bleDevice: BleDevice)
 
 #### 20、断开所有连接 释放资源
-    BleManager.get().releaseAll()
+    BleManager.get().closeAll()
 
 #### 21、一些移除监听的函数
     BleManager.get().removeBleScanCallback()

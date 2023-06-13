@@ -436,19 +436,26 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
+     * 断开所有设备的连接
+     */
+    override fun disConnectAll() {
+        bleConnectedDeviceManager.disConnectAll()
+    }
+
+    /**
      * 断开所有连接 释放资源
      */
-    override fun releaseAll() {
+    override fun closeAll() {
         mainScope.cancel()
         ioScope.cancel()
         defaultScope.cancel()
-        bleConnectedDeviceManager.releaseAll()
+        bleConnectedDeviceManager.closeAll()
     }
 
     /**
      * 断开某个设备的连接 释放资源
      */
-    override fun release(bleDevice: BleDevice) {
-        bleConnectedDeviceManager.release(bleDevice)
+    override fun close(bleDevice: BleDevice) {
+        bleConnectedDeviceManager.close(bleDevice)
     }
 }

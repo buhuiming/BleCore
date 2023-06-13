@@ -81,18 +81,30 @@ internal class BleConnectedDeviceManager private constructor() {
      * 断开某个设备的连接 释放资源
      */
     @Synchronized
-    fun release(bleDevice: BleDevice) {
-        getBleConnectedDevice(bleDevice)?.release()
+    fun close(bleDevice: BleDevice) {
+        getBleConnectedDevice(bleDevice)?.close()
         bleLruHashMap.remove(bleDevice.getKey())
+    }
+
+    /**
+     * 断开所有设备的连接
+     */
+    @Synchronized
+    fun disConnectAll() {
+        bleLruHashMap.values.forEach {
+            it?.disConnect()
+
+        }
+        closeAll()
     }
 
     /**
      * 断开所有连接 释放资源
      */
     @Synchronized
-    fun releaseAll() {
+    fun closeAll() {
         bleLruHashMap.values.forEach {
-            it?.release()
+            it?.close()
         }
         bleLruHashMap.clear()
     }

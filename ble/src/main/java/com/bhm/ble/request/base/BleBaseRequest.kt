@@ -177,6 +177,11 @@ internal interface BleBaseRequest {
     fun removeAllCharacterCallback(bleDevice: BleDevice)
 
     /**
+     * 断开所有设备的连接
+     */
+    fun disConnectAll()
+
+    /**
      * 移除该设备的Scan回调
      */
     fun removeBleScanCallback()
@@ -184,10 +189,10 @@ internal interface BleBaseRequest {
     /**
      * 断开某个设备的连接 释放资源
      */
-    fun release(bleDevice: BleDevice)
+    fun close(bleDevice: BleDevice)
 
     /**
      * 断开所有连接 释放资源
      */
-    fun releaseAll()
+    fun closeAll()
 }

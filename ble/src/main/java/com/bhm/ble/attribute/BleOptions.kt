@@ -5,6 +5,7 @@
  */
 package com.bhm.ble.attribute
 
+import com.bhm.ble.data.BleTaskQueueType
 import com.bhm.ble.data.Constants.AUTO_CONNECT
 import com.bhm.ble.data.Constants.CONTAIN_SCAN_DEVICE_NAME
 import com.bhm.ble.data.Constants.DEFAULT_AUTO_SET_MTU
@@ -18,6 +19,7 @@ import com.bhm.ble.data.Constants.DEFAULT_SCAN_MILLIS_TIMEOUT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_COUNT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_INTERVAL
 import com.bhm.ble.data.Constants.DEFAULT_OPERATE_INTERVAL
+import com.bhm.ble.data.Constants.DEFAULT_TASK_QUEUE_TYPE
 import com.bhm.ble.data.Constants.ENABLE_LOG
 
 
@@ -63,6 +65,8 @@ class BleOptions private constructor(builder: Builder) {
 
     var autoSetMtu = builder.autoSetMtu
 
+    var taskQueueType = builder.taskQueueType
+
     companion object {
 
         @JvmStatic
@@ -107,6 +111,8 @@ class BleOptions private constructor(builder: Builder) {
         internal var mtu: Int = DEFAULT_MTU
 
         internal var autoSetMtu: Boolean = DEFAULT_AUTO_SET_MTU
+
+        internal var taskQueueType: BleTaskQueueType = DEFAULT_TASK_QUEUE_TYPE
 
         /**
          * 设置扫描过滤规则：只查询对应ServiceUuid的设备
@@ -225,6 +231,25 @@ class BleOptions private constructor(builder: Builder) {
         fun setMtu(mtu: Int, autoSetMtu: Boolean = DEFAULT_AUTO_SET_MTU) = apply {
             this.mtu = mtu
             this.autoSetMtu = autoSetMtu
+        }
+
+        /**
+         * 设置任务队列类型，默认为[BleTaskQueueType.Single]，设置完需断开所有设备才可生效
+         * [BleTaskQueueType.Single] 一个设备所有操作共享一个任务队列(不区分特征值)，
+         * Notify\Indicate\Read\Write(包括rssi\mtu)所对应的任务，都将放入到同一个任务队列中，先进先出按序执行
+         *
+         * [BleTaskQueueType.Operate] 一个设备每个操作独立一个任务队列(不区分特征值)，
+         * Notify\Indicate\Read\Write(不包括rssi\mtu，rssi\mtu仍在共享队列)所对应的任务，
+         * 分别放入到独立的任务队列中，不同操作任务之间不相互影响，相同操作任务之间先进先出按序执行
+         *
+         * [BleTaskQueueType.Independent] 一个设备每个特征值下的每个操作独立一个任务队列(区分特征值)
+         * Notify\Indicate\Read\Write(不包括rssi\mtu，rssi\mtu仍在共享队列)所对应的任务
+         * 分别放入到独立的任务队列中，且按特征值区分，不同操作任务之间不相互影响，相同操作任务之间不相互影响
+         * 例如特征值1和特征值2，两者的写操作，在两个不同的任务队列当中，
+         * 例如特征值1和特征值2，前者的读操作和后者的写操作，在两个不同的任务队列当中
+         */
+        fun setTaskQueueType(taskQueueType: BleTaskQueueType) = apply {
+            this.taskQueueType = taskQueueType
         }
 
         fun build(): BleOptions {

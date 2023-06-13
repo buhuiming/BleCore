@@ -22,7 +22,7 @@ import java.util.*
  * @author Buhuiming
  * @date 2023年05月26日 13时59分
  */
-internal open class Request {
+internal abstract class Request {
 
     /**
      * 获取BleManager

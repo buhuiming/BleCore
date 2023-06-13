@@ -25,7 +25,7 @@ import com.bhm.ble.request.*
  */
 internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallback() {
 
-    private var bleTaskQueue = BleTaskQueue()
+    private var bleTaskQueue = BleTaskQueue("共享队列")
 
     private val bleConnectRequest = BleConnectRequest(bleDevice, this)
 
@@ -306,8 +306,8 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         bleReadRequest.removeAllReadCallback()
     }
 
-    fun release() {
-        bleConnectRequest.release()
+    fun close() {
+        bleConnectRequest.close()
         bleTaskQueue.clear()
     }
 }

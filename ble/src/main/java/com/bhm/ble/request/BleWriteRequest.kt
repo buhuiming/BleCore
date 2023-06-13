@@ -348,4 +348,8 @@ internal class BleWriteRequest(
     private fun cancelWriteJob(taskId: String) {
         bleTaskQueue.removeTask(taskId)
     }
+
+    fun close() {
+
+    }
 }

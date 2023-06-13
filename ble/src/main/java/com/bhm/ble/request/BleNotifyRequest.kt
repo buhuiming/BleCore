@@ -267,4 +267,8 @@ internal class BleNotifyRequest(
     private fun cancelNotifyJob(taskId: String): Boolean {
         return bleTaskQueue.removeTask(taskId)
     }
+
+    fun close() {
+
+    }
 }

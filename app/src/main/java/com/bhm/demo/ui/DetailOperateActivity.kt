@@ -230,7 +230,7 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (disConnectWhileClose) {
-                BleManager.get().release(getBleDevice())
+                BleManager.get().close(getBleDevice())
                 setResult(0, Intent())
             } else {
                 BleManager.get().removeAllCharacterCallback(getBleDevice())

@@ -5,8 +5,12 @@
  */
 package com.bhm.demo.ui
 
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import com.bhm.ble.BleManager
 import com.bhm.ble.attribute.BleOptions
+import com.bhm.ble.data.BleTaskQueueType
 import com.bhm.ble.data.Constants.AUTO_CONNECT
 import com.bhm.ble.data.Constants.CONTAIN_SCAN_DEVICE_NAME
 import com.bhm.ble.data.Constants.DEFAULT_AUTO_SET_MTU
@@ -15,11 +19,11 @@ import com.bhm.ble.data.Constants.DEFAULT_CONNECT_RETRY_COUNT
 import com.bhm.ble.data.Constants.DEFAULT_CONNECT_RETRY_INTERVAL
 import com.bhm.ble.data.Constants.DEFAULT_MAX_CONNECT_NUM
 import com.bhm.ble.data.Constants.DEFAULT_MTU
+import com.bhm.ble.data.Constants.DEFAULT_OPERATE_INTERVAL
 import com.bhm.ble.data.Constants.DEFAULT_OPERATE_MILLIS_TIMEOUT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_MILLIS_TIMEOUT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_COUNT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_INTERVAL
-import com.bhm.ble.data.Constants.DEFAULT_OPERATE_INTERVAL
 import com.bhm.ble.data.Constants.ENABLE_LOG
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.R
@@ -42,6 +46,10 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
     override fun initData() {
         super.initData()
         AppTheme.setStatusBarColor(this, R.color.purple_500)
+        val taskQueueTypes = arrayOf("Single", "Operate", "Independent")
+        viewBinding.spTaskQueueType.adapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, taskQueueTypes)
+        viewBinding.spTaskQueueType.setSelection(0)
         val options = BleManager.get().getOptions()
         options?.let {
             val etScanServiceUuidText = StringBuilder()
@@ -51,6 +59,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
                     etScanServiceUuidText.append(",")
                 }
             }
+
             if (etScanServiceUuidText.isNotEmpty()) {
                 etScanServiceUuidText.delete(etScanServiceUuidText.length - 1,
                     etScanServiceUuidText.length)
@@ -94,6 +103,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
             viewBinding.cbLogger.isChecked = it.enableLog
             viewBinding.cbMtu.isChecked = it.autoSetMtu
             viewBinding.cbAutoConnect.isChecked = it.autoConnect
+            viewBinding.spTaskQueueType.setSelection(getTaskQueueType(it.taskQueueType))
         }
     }
 
@@ -120,6 +130,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
             viewBinding.cbLogger.isChecked = ENABLE_LOG
             viewBinding.cbMtu.isChecked = DEFAULT_AUTO_SET_MTU
             viewBinding.cbAutoConnect.isChecked = AUTO_CONNECT
+            viewBinding.spTaskQueueType.setSelection(0)
             BleManager.get().init(application)
         }
         viewBinding.btnSave.setOnClickListener { view ->
@@ -160,9 +171,26 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
                 .setOperateInterval(viewBinding.etOperateInterval.text.toString().toLong())
                 .setMaxConnectNum(viewBinding.etMaxConnectNum.text.toString().toInt())
                 .setMtu(viewBinding.etMTU.text.toString().toInt(), viewBinding.cbMtu.isChecked)
+                .setTaskQueueType(getTaskQueueType(viewBinding.spTaskQueueType.selectedItemPosition))
             BleManager.get().init(application, builder.build())
+            BleManager.get().disConnectAll()
             finish()
         }
     }
 
+    private fun getTaskQueueType(taskQueueType: BleTaskQueueType): Int {
+        return when (taskQueueType) {
+            BleTaskQueueType.Single -> 0
+            BleTaskQueueType.Operate -> 1
+            BleTaskQueueType.Independent -> 2
+        }
+    }
+
+    private fun getTaskQueueType(taskQueueType: Int): BleTaskQueueType {
+        return when (taskQueueType) {
+            1 -> BleTaskQueueType.Operate
+            2 -> BleTaskQueueType.Independent
+            else -> BleTaskQueueType.Single
+        }
+    }
 }

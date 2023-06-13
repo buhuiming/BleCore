@@ -424,14 +424,20 @@ class BleManager private constructor() {
         bleBaseRequest?.removeAllCharacterCallback(bleDevice)
     }
 
+    /**
+     * 断开所有设备的连接，先回调状态，再close
+     */
+    fun disConnectAll() {
+        bleBaseRequest?.disConnectAll()
+    }
 
     /**
      * 断开所有连接 释放资源
      */
     @Synchronized
-    fun releaseAll() {
+    fun closeAll() {
         checkInitialize()
-        bleBaseRequest?.releaseAll()
+        bleBaseRequest?.closeAll()
         application = null
         bleOptions = null
         bluetoothManager = null
@@ -443,9 +449,9 @@ class BleManager private constructor() {
      * 断开某个设备的连接 释放资源
      */
     @Synchronized
-    fun release(bleDevice: BleDevice) {
+    fun close(bleDevice: BleDevice) {
         checkInitialize()
-        bleBaseRequest?.release(bleDevice)
+        bleBaseRequest?.close(bleDevice)
         BleLogger.i("${bleDevice}资源释放完毕")
     }
 

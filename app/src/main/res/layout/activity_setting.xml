@@ -443,6 +443,12 @@
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
+            <Spinner
+                    android:id="@+id/spTaskQueueType"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="10dp"/>
+
         </androidx.appcompat.widget.LinearLayoutCompat>
 
     </androidx.core.widget.NestedScrollView>

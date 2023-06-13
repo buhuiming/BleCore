@@ -114,4 +114,8 @@ internal class BleRssiRequest(
     private fun cancelReadRssiJob(): Boolean {
         return bleTaskQueue.removeTask(getTaskId())
     }
+
+    fun close() {
+
+    }
 }
