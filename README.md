@@ -3,6 +3,8 @@
 ![20230613110126](https://github.com/buhuiming/BleCore/blob/main/screenshots/20230613110126.png)
 ![20230613110146](https://github.com/buhuiming/BleCore/blob/main/screenshots/20230613110146.png)
 
+### 详细用法参考demo 详细用法参考demo 详细用法参考demo
+
 ### 用法
 
         allprojects {
@@ -222,7 +224,13 @@
     BleManager.get().removeBleMtuChangedCallback(bleDevice: BleDevice)
     BleManager.get().removeBleReadCallback(bleDevice: BleDevice, readUUID: String)
     BleManager.get().removeBleWriteCallback(bleDevice: BleDevice, writeUUID: String)
-    
+
+
+#### 存在问题
+
+*   1、关闭系统蓝牙，没有触发onConnectionStateChange
+       解决方案：1、操作前判断蓝牙状态，2、蓝牙广播
+
 ## License
 
 ```
