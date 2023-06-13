@@ -1,7 +1,7 @@
 # BleCore Android蓝牙低功耗(BLE)快速开发框架
 
-![55f2ed59eaf3137d536a84151d78e63](https://user-images.githubusercontent.com/30099293/197972403-47566ee6-6d92-4e5d-a5b6-f099b1197131.jpg)
-![55f2ed59eaf3137d536a84151d78e63](https://user-images.githubusercontent.com/30099293/197972403-47566ee6-6d92-4e5d-a5b6-f099b1197131.jpg)
+![20230613110126](https://github.com/buhuiming/BleCore/blob/main/screenshots/20230613110126.png)
+![20230613110146](https://github.com/buhuiming/BleCore/blob/main/screenshots/20230613110146.png)
 
 ### 用法
 
