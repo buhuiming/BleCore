@@ -14,13 +14,11 @@ import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothStatusCodes
 import android.os.Build
 import com.bhm.ble.callback.BleIndicateCallback
+import com.bhm.ble.data.*
 import com.bhm.ble.data.Constants.EXCEPTION_CODE_DESCRIPTOR_FAIL
 import com.bhm.ble.data.Constants.EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
 import com.bhm.ble.data.Constants.INDICATE_TASK_ID
 import com.bhm.ble.data.Constants.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR
-import com.bhm.ble.data.TimeoutCancelException
-import com.bhm.ble.data.UnDefinedException
-import com.bhm.ble.data.UnSupportException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.BleTaskQueueRequest
 import com.bhm.ble.utils.BleLogger
@@ -71,6 +69,10 @@ internal class BleIndicateRequest(
                                      indicateUUID: String,
                                      useCharacteristicDescriptor: Boolean,
                                      bleIndicateCallback: BleIndicateCallback) {
+        if (!BleUtil.isPermission(getBleManager().getContext())) {
+            bleIndicateCallback.callIndicateFail(NoBlePermissionException())
+            return
+        }
         val characteristic = getCharacteristic(bleDevice, serviceUUID, indicateUUID)
         if (characteristic != null &&
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0
@@ -121,6 +123,9 @@ internal class BleIndicateRequest(
     fun disableCharacteristicIndicate(serviceUUID: String,
                                       indicateUUID: String,
                                       useCharacteristicDescriptor: Boolean): Boolean {
+        if (!BleUtil.isPermission(getBleManager().getContext())) {
+            return false
+        }
         val characteristic = getCharacteristic(bleDevice, serviceUUID, indicateUUID)
         if (characteristic != null &&
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0
@@ -219,13 +224,14 @@ internal class BleIndicateRequest(
             return false
         }
         val success: Boolean
+        var writeDescriptorCode: Int? = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val writeDescriptor: Int = if (enable) {
+            writeDescriptorCode = if (enable) {
                 bluetoothGatt.writeDescriptor(descriptor, BluetoothGattDescriptor.ENABLE_INDICATION_VALUE)
             } else {
                 bluetoothGatt.writeDescriptor(descriptor, BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE)
             }
-            success = writeDescriptor == BluetoothStatusCodes.SUCCESS
+            success = writeDescriptorCode == BluetoothStatusCodes.SUCCESS
         } else {
             @Suppress("DEPRECATION")
             descriptor.value = if (enable) {
@@ -248,7 +254,8 @@ internal class BleIndicateRequest(
             // BluetoothStatusCodes.ERROR_UNKNOWN = 2147483647,
             // BluetoothStatusCodes.ERROR_NO_ACTIVE_DEVICES = 13,
             val exception = UnDefinedException(
-                "$indicateUUID -> 设置Indicate失败，错误可能是没有权限、未连接、服务未绑定、不可写、请求忙碌等",
+                "$indicateUUID -> 设置Indicate失败，错误可能是没有权限、" +
+                        "未连接、服务未绑定、不可写、请求忙碌等，code = $writeDescriptorCode",
                 EXCEPTION_CODE_DESCRIPTOR_FAIL
             )
             cancelIndicateJob(indicateUUID, getTaskId(indicateUUID))

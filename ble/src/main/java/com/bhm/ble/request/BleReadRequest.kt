@@ -11,10 +11,8 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import com.bhm.ble.callback.BleReadCallback
+import com.bhm.ble.data.*
 import com.bhm.ble.data.Constants.READ_TASK_ID
-import com.bhm.ble.data.TimeoutCancelException
-import com.bhm.ble.data.UnDefinedException
-import com.bhm.ble.data.UnSupportException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.BleTaskQueueRequest
 import com.bhm.ble.utils.BleLogger
@@ -66,6 +64,10 @@ internal class BleReadRequest(
                            readUUID: String,
                            bleReadCallback: BleReadCallback
     ) {
+        if (!BleUtil.isPermission(getBleManager().getContext())) {
+            bleReadCallback.callReadFail(NoBlePermissionException())
+            return
+        }
         val characteristic = getCharacteristic(bleDevice, serviceUUID, readUUID)
         if (characteristic != null &&
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_READ) != 0

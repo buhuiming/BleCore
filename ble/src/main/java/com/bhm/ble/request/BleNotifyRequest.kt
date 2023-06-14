@@ -69,6 +69,10 @@ internal class BleNotifyRequest(
                                    notifyUUID: String,
                                    useCharacteristicDescriptor: Boolean,
                                    bleNotifyCallback: BleNotifyCallback) {
+        if (!BleUtil.isPermission(getBleManager().getContext())) {
+            bleNotifyCallback.callNotifyFail(NoBlePermissionException())
+            return
+        }
         val characteristic = getCharacteristic(bleDevice, serviceUUID, notifyUUID)
         if (characteristic != null &&
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0
@@ -119,6 +123,9 @@ internal class BleNotifyRequest(
     fun disableCharacteristicNotify(serviceUUID: String,
                                     notifyUUID: String,
                                     useCharacteristicDescriptor: Boolean): Boolean {
+        if (!BleUtil.isPermission(getBleManager().getContext())) {
+            return false
+        }
         val characteristic = getCharacteristic(bleDevice, serviceUUID, notifyUUID)
         if (characteristic != null &&
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0
@@ -217,13 +224,14 @@ internal class BleNotifyRequest(
             return false
         }
         val success: Boolean
+        var writeDescriptorCode: Int? = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val writeDescriptor: Int = if (enable) {
+            writeDescriptorCode = if (enable) {
                 bluetoothGatt.writeDescriptor(descriptor, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
             } else {
                 bluetoothGatt.writeDescriptor(descriptor, BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE)
             }
-            success = writeDescriptor == BluetoothStatusCodes.SUCCESS
+            success = writeDescriptorCode == BluetoothStatusCodes.SUCCESS
         } else {
             @Suppress("DEPRECATION")
             descriptor.value = if (enable) {
@@ -246,7 +254,8 @@ internal class BleNotifyRequest(
             // BluetoothStatusCodes.ERROR_UNKNOWN = 2147483647,
             // BluetoothStatusCodes.ERROR_NO_ACTIVE_DEVICES = 13,
             val exception = UnDefinedException(
-                "$notifyUUID -> 设置Notify失败，错误可能是没有权限、未连接、服务未绑定、不可写、请求忙碌等",
+                "$notifyUUID -> -> 设置Indicate失败，错误可能是没有权限、" +
+                        "未连接、服务未绑定、不可写、请求忙碌等，code = $writeDescriptorCode",
                 EXCEPTION_CODE_DESCRIPTOR_FAIL
             )
             cancelNotifyJob(notifyUUID, getTaskId(notifyUUID))

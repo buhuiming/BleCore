@@ -12,11 +12,13 @@ import android.bluetooth.BluetoothGatt
 import com.bhm.ble.callback.BleMtuChangedCallback
 import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.data.Constants.SET_MTU_TASK_ID
+import com.bhm.ble.data.NoBlePermissionException
 import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.Request
 import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -51,6 +53,10 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
     @SuppressLint("MissingPermission")
     @Synchronized
     fun setMtu(mtu: Int, bleMtuChangedCallback: BleMtuChangedCallback) {
+        if (!BleUtil.isPermission(getBleManager().getContext())) {
+            bleMtuChangedCallback.callSetMtuFail(NoBlePermissionException())
+            return
+        }
         cancelSetMtuJob()
         addMtuChangedCallback(bleMtuChangedCallback)
         var mContinuation: Continuation<Throwable?>? = null

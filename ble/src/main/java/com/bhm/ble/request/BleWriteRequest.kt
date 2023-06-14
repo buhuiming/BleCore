@@ -14,12 +14,10 @@ import android.bluetooth.BluetoothStatusCodes
 import android.os.Build
 import android.util.SparseArray
 import com.bhm.ble.callback.BleWriteCallback
+import com.bhm.ble.data.*
 import com.bhm.ble.data.BleWriteData
 import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.data.Constants.WRITE_TASK_ID
-import com.bhm.ble.data.TimeoutCancelException
-import com.bhm.ble.data.UnDefinedException
-import com.bhm.ble.data.UnSupportException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.BleTaskQueueRequest
 import com.bhm.ble.utils.BleLogger
@@ -88,6 +86,11 @@ internal class BleWriteRequest(
                   operateRandomID: String,
                   dataArray: SparseArray<ByteArray>,
                   bleWriteCallback: BleWriteCallback) {
+        if (!BleUtil.isPermission(getBleManager().getContext())) {
+            bleWriteCallback.callWriteFail(0, dataArray.size(), NoBlePermissionException())
+            bleWriteCallback.callWriteComplete(false)
+            return
+        }
         if (dataArray.size() == 0) {
             val exception = UnDefinedException(
                 getTaskId(writeUUID, operateRandomID, 0) + " -> 写数据失败，数据为空"

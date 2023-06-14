@@ -68,6 +68,10 @@ internal class BleScanRequest private constructor() : Request() {
      */
     @Synchronized
     fun startScan(bleScanCallback: BleScanCallback) {
+        if (!BleUtil.isPermission(getBleManager().getContext())) {
+            bleScanCallback.callScanFail(BleScanFailType.NoBlePermissionType)
+            return
+        }
         initScannerAndStart(bleScanCallback)
     }
 

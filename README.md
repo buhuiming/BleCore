@@ -34,7 +34,7 @@
         }
 
         dependencies {
-            implementation 'com.github.buhuiming:BleCore:1.0.0-beta01'
+            implementation 'com.github.buhuiming:BleCore:latest version'
         }
 
 #### 1、添加权限

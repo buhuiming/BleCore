@@ -114,6 +114,9 @@ class BleManager private constructor() {
     @SuppressLint("MissingPermission")
     fun isConnected(bleDevice: BleDevice?): Boolean {
         checkInitialize()
+        if (!BleUtil.isPermission(application)) {
+            return false
+        }
         bleDevice?.let {
             return bluetoothManager?.getConnectionState(it.deviceInfo, BluetoothProfile.GATT) ==
                     BluetoothProfile.STATE_CONNECTED && bleBaseRequest?.isConnected(it) == true

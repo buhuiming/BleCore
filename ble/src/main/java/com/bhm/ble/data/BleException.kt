@@ -39,6 +39,13 @@ open class TimeoutCancelException(msg: String? = null) : CancellationException(m
 open class UnConnectedException(msg: String? = "设备未连接") : CancellationException(msg)
 
 /**
+ * 设备缺乏权限抛出的Exception
+ * @author Buhuiming
+ * @date :2023/6/5 10:24
+ */
+open class NoBlePermissionException(msg: String? = "缺乏权限") : CancellationException(msg)
+
+/**
  * 设备不支持某个功能抛出的Exception
  * @author Buhuiming
  * @date :2023/6/5 10:24
