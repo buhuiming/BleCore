@@ -7,7 +7,6 @@ package com.bhm.ble.request
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
-import com.bhm.ble.data.NoBlePermissionException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.Request
 import com.bhm.ble.utils.BleLogger
