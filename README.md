@@ -13,6 +13,13 @@
 ![20230613110146](https://github.com/buhuiming/BleCore/blob/main/screenshots/20230613110146.png)
 ![20230614090104](https://github.com/buhuiming/BleCore/blob/main/screenshots/20230614090104.png)
 
+### demo体验
+
+![apk_address](https://github.com/buhuiming/BleCore/blob/main/screenshots/apk_address.png)
+
+###
+###
+
 ### 详细用法参考demo 
 ### 详细用法参考demo 
 ### 详细用法参考demo 
