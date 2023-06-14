@@ -16,7 +16,7 @@ object Constants {
 
     const val CONTAIN_SCAN_DEVICE_NAME = false
 
-    const val AUTO_CONNECT = true
+    const val AUTO_CONNECT = false
 
     const val ENABLE_LOG = true
 
