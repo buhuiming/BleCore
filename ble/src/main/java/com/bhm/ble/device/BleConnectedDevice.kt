@@ -263,44 +263,36 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         bleNotifyRequest.removeNotifyCallback(uuid)
     }
 
-    @Synchronized
     fun removeIndicateCallback(uuid: String?) {
         bleIndicateRequest.removeIndicateCallback(uuid)
     }
 
-    @Synchronized
     fun removeWriteCallback(uuid: String?, bleWriteCallback: BleWriteCallback? = null) {
         bleWriteRequest.removeWriteCallback(uuid, bleWriteCallback)
     }
 
-    @Synchronized
     fun removeReadCallback(uuid: String?) {
         bleReadRequest.removeReadCallback(uuid)
     }
 
-    @Synchronized
     fun removeRssiCallback() {
         bleRssiRequest.removeRssiCallback()
     }
 
-    @Synchronized
     fun removeMtuChangedCallback() {
         bleMtuRequest.removeMtuChangedCallback()
     }
 
-    @Synchronized
     fun removeBleConnectCallback() {
         bleConnectRequest.removeBleConnectCallback()
     }
 
-    @Synchronized
     fun removeAllCharacterCallback() {
         removeRssiCallback()
         removeMtuChangedCallback()
         clearCharacterCallback()
     }
 
-    @Synchronized
     fun clearCharacterCallback() {
         bleNotifyRequest.removeAllNotifyCallback()
         bleIndicateRequest.removeAllIndicateCallback()

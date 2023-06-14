@@ -14,7 +14,7 @@ import java.util.*
  * @author Buhuiming
  * @date 2023年06月06日 10时41分
  */
-class BleTaskList {
+internal class BleTaskList {
 
     private val taskIdList = Collections.synchronizedList(LinkedList<String>())
 

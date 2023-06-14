@@ -19,16 +19,20 @@ import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Ble任务，主要是用来处理rssi、mtu、write、read、notify、indicate操作
- * durationTimeMillis： Long 任务执行的时间，0：表示任务执行时间不固定
- * callInMainThread：指定在主线程执行，默认为false
- * autoDoNextTask = true自动执行下一个任务，= false，则需要调用doNextTask()执行下一个任务
- * interrupt：中断任务执行
- * callback：任务执行回调，成功throwable = CompleteException，超时throwable = TimeoutCancelException，
+ * @param taskId 任务Id
+ * @param durationTimeMillis： Long 任务执行的时间，0：表示任务执行时间不固定
+ * @param operateInterval：间隔上个任务的时间
+ * @param callInMainThread：指定在主线程执行，默认为false
+ * @param autoDoNextTask = true自动执行下一个任务，= false，则需要调用doNextTask()执行下一个任务
+ * @param canceled 是否已经取消
+ * @param block：任务执行函数
+ * @param interrupt：中断任务执行
+ * @param callback：任务执行回调，成功throwable = CompleteException，超时throwable = TimeoutCancelException，
  * 任务中断抛异常 throwable = CancellationException
  * @author Buhuiming
  * @date 2023年06月02日 11时01分
  */
-class BleTask(val taskId: String,
+internal class BleTask(val taskId: String,
               val durationTimeMillis: Long = 0,
               val operateInterval: Long = 100,
               val callInMainThread: Boolean = false,
@@ -52,6 +56,9 @@ class BleTask(val taskId: String,
 
     fun completed() = completed.get()
 
+    /**
+     * 任务计时器，用于超时
+     */
     fun setTimingJob(job: Job?) {
         timingJob = job
     }

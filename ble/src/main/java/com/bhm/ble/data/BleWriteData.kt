@@ -11,6 +11,15 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * 写数据
+ * @param operateRandomID 数据id，以时间戳生成
+ * @param serviceUUID 服务UUID
+ * @param writeUUID 特征值UUID
+ * @param currentPackage 当前第几数据包
+ * @param totalPackage 总数据包数量
+ * @param data 数据包
+ * @param isWriting 是否正在写
+ * @param isWriteFail 是否写失败
+ * @param bleWriteCallback 写回调
  *
  * @author Buhuiming
  * @date 2023年06月12日 09时45分

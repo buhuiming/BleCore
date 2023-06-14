@@ -1,5 +1,8 @@
 # BleCore Android蓝牙低功耗(BLE)快速开发框架
 
+*   minSdk 24
+*   targetSdk 33
+
 #### * 基于Kotlin、协程
 #### * 基于sdk 33，最新API
 #### * 详细的完整的容错机制
@@ -8,6 +11,7 @@
 
 ![20230613110126](https://github.com/buhuiming/BleCore/blob/main/screenshots/20230613110126.png)
 ![20230613110146](https://github.com/buhuiming/BleCore/blob/main/screenshots/20230613110146.png)
+![20230614090104](https://github.com/buhuiming/BleCore/blob/main/screenshots/20230614090104.png)
 
 ### 详细用法参考demo 
 ### 详细用法参考demo 
@@ -203,7 +207,7 @@ setTaskQueueType方法，有3个选项分别是：
      调用该方法后，可以通过onMtuChanged(int mtu)查看最终设置完后，设备的最大传输单元被拓展到多少。如果设备不支持，
      可能无论设置多少，最终的mtu还是23。 
 
-#### 16、断开某个设备的连接 释放资源
+#### 16、设置连接的优先级
     BleManager.get().setConnectionPriority(connectionPriority: Int)
 
 *    设置连接的优先级，一般用于高速传输大量数据的时候可以进行设置。
@@ -227,7 +231,7 @@ setTaskQueueType方法，有3个选项分别是：
                                 bleWriteCallback: BleWriteCallback)
 
 *    因为分包后每一个包，可能是包含完整的协议，所以分包由业务层处理，组件只会根据包的长度和mtu值对比后是否拦截
-*    特殊情况下：indicate\mtu\notify\read\rssi\write 这些操作，同一个特征值在不同地方调用(不同callback)，最后面的操作
+*    特殊情况下：indicate\mtu\notify\read\rssi 这些操作，同一个特征值在不同地方调用(不同callback)，最后面的操作
      对应的回调才会触发，其他地方先前的操作对应的回调不会触发
      解决方案：业务层每个特征值对应的操作维护一个单例的callback对象（假如为SingleCallback），在不同地方调用再传递callback
              (放入到SingleCallback中的集合CallbackList)，SingleCallback 回调时循环CallbackList中的callback，这样就达到了

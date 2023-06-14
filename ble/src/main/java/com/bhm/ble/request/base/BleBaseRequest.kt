@@ -43,7 +43,8 @@ internal interface BleBaseRequest {
     /**
      * 开始连接
      */
-    fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit)
+    fun connect(bleDevice: BleDevice,
+                bleConnectCallback: BleConnectCallback.() -> Unit)
 
     /**
      * 断开连接
@@ -97,7 +98,8 @@ internal interface BleBaseRequest {
     /**
      * 读取信号值
      */
-    fun readRssi(bleDevice: BleDevice, bleRssiCallback: BleRssiCallback.() -> Unit)
+    fun readRssi(bleDevice: BleDevice,
+                 bleRssiCallback: BleRssiCallback.() -> Unit)
 
     /**
      * 设置mtu

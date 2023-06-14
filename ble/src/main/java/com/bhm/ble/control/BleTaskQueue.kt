@@ -43,6 +43,7 @@ internal class BleTaskQueue(private val tag: String = "") {
         mCoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         mCoroutineScope?.launch {
             mChannel?.consumeEach {
+                //任务还在队列中并且未取消才执行
                 if (taskList.contains(it) && !it.canceled.get()) {
                     tryHandleTask(it)
                 }

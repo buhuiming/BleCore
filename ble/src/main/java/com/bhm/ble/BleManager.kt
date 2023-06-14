@@ -351,6 +351,7 @@ class BleManager private constructor() {
     /**
      * 移除该设备的连接回调
      */
+    @Synchronized
     fun removeBleConnectCallback(bleDevice: BleDevice) {
         checkInitialize()
         bleBaseRequest?.removeBleConnectCallback(bleDevice)
@@ -359,6 +360,7 @@ class BleManager private constructor() {
     /**
      * 移除该设备的Indicate回调
      */
+    @Synchronized
     fun removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String) {
         checkInitialize()
         bleBaseRequest?.removeBleIndicateCallback(bleDevice, indicateUUID)
@@ -367,6 +369,7 @@ class BleManager private constructor() {
     /**
      * 移除该设备的Notify回调
      */
+    @Synchronized
     fun removeBleNotifyCallback(bleDevice: BleDevice, notifyUUID: String) {
         checkInitialize()
         bleBaseRequest?.removeBleNotifyCallback(bleDevice, notifyUUID)
@@ -375,6 +378,7 @@ class BleManager private constructor() {
     /**
      * 移除该设备的Read回调
      */
+    @Synchronized
     fun removeBleReadCallback(bleDevice: BleDevice, readUUID: String) {
         checkInitialize()
         bleBaseRequest?.removeBleReadCallback(bleDevice, readUUID)
@@ -383,6 +387,7 @@ class BleManager private constructor() {
     /**
      * 移除该设备的MtuChanged回调
      */
+    @Synchronized
     fun removeBleMtuChangedCallback(bleDevice: BleDevice) {
         checkInitialize()
         bleBaseRequest?.removeBleMtuChangedCallback(bleDevice)
@@ -391,6 +396,7 @@ class BleManager private constructor() {
     /**
      * 移除该设备的Rssi回调
      */
+    @Synchronized
     fun removeBleRssiCallback(bleDevice: BleDevice) {
         checkInitialize()
         bleBaseRequest?.removeBleRssiCallback(bleDevice)
@@ -400,6 +406,7 @@ class BleManager private constructor() {
      * 移除该设备的Write回调
      * bleWriteCallback为空，则会移除writeUUID下的所有callback
      */
+    @Synchronized
     fun removeBleWriteCallback(bleDevice: BleDevice,
                                writeUUID: String,
                                bleWriteCallback: BleWriteCallback? = null
@@ -411,6 +418,7 @@ class BleManager private constructor() {
     /**
      * 移除该设备的Scan回调
      */
+    @Synchronized
     fun removeBleScanCallback() {
         checkInitialize()
         bleBaseRequest?.removeBleScanCallback()
@@ -419,6 +427,7 @@ class BleManager private constructor() {
     /**
      * 移除该设备回调，BleConnectCallback除外
      */
+    @Synchronized
     fun removeAllCharacterCallback(bleDevice: BleDevice) {
         checkInitialize()
         bleBaseRequest?.removeAllCharacterCallback(bleDevice)
@@ -427,6 +436,7 @@ class BleManager private constructor() {
     /**
      * 断开所有设备的连接，先回调状态，再close
      */
+    @Synchronized
     fun disConnectAll() {
         bleBaseRequest?.disConnectAll()
     }

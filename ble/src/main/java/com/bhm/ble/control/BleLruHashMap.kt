@@ -16,7 +16,7 @@ import kotlin.math.ceil
  * @author Buhuiming
  * @date 2023年05月26日 08时59分
  */
-class BleLruHashMap<K, V>(saveSize: Int) : LinkedHashMap<K, V>(
+internal class BleLruHashMap<K, V>(saveSize: Int) : LinkedHashMap<K, V>(
     ceil(saveSize / 0.75).toInt() + 1, 0.75f, true) {
 
     private var maxSize = saveSize
