@@ -231,13 +231,15 @@ internal class BleWriteRequest(
             } else {
                 BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
             }
+        var errorCode: Int? = null
         val success: Boolean? =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                getBluetoothGatt(bleDevice)?.writeCharacteristic(
+                errorCode = getBluetoothGatt(bleDevice)?.writeCharacteristic(
                     characteristic,
                     bleWriteData.data,
                     writeType
-                ) == BluetoothStatusCodes.SUCCESS
+                )
+                errorCode == BluetoothStatusCodes.SUCCESS
             } else {
                 characteristic.writeType = writeType
                 characteristic.value = bleWriteData.data
@@ -258,7 +260,7 @@ internal class BleWriteRequest(
                 , bleWriteData.currentPackage)
             cancelWriteJob(bleWriteData.writeUUID, taskId)
             val exception = UnDefinedException("$taskId -> 第${bleWriteData.currentPackage}包数据写" +
-                    "失败，错误可能是没有权限、未连接、服务未绑定、不可写、请求忙碌等")
+                    "失败，错误可能是没有权限、未连接、服务未绑定、不可写、请求忙碌等，code = $errorCode")
             BleLogger.e(exception.message)
             bleWriteData.bleWriteCallback.callWriteFail(
                 bleWriteData.currentPackage,
