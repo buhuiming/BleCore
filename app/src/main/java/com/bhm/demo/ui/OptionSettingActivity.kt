@@ -44,7 +44,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
     override fun initData() {
         super.initData()
         AppTheme.setStatusBarColor(this, R.color.purple_500)
-        val taskQueueTypes = arrayOf("Single", "Operate", "Independent")
+        val taskQueueTypes = arrayOf("Default", "Operate", "Independent")
         viewBinding.spTaskQueueType.adapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, taskQueueTypes)
         viewBinding.spTaskQueueType.setSelection(0)
@@ -178,7 +178,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
 
     private fun getTaskQueueType(taskQueueType: BleTaskQueueType): Int {
         return when (taskQueueType) {
-            BleTaskQueueType.Single -> 0
+            BleTaskQueueType.Default -> 0
             BleTaskQueueType.Operate -> 1
             BleTaskQueueType.Independent -> 2
         }
@@ -188,7 +188,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
         return when (taskQueueType) {
             1 -> BleTaskQueueType.Operate
             2 -> BleTaskQueueType.Independent
-            else -> BleTaskQueueType.Single
+            else -> BleTaskQueueType.Default
         }
     }
 }

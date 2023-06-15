@@ -16,17 +16,17 @@ package com.bhm.ble.data
 sealed class BleTaskQueueType {
 
     /**
-     * 默认
-     * 一个设备所有操作共享一个任务队列(不区分特征值)
-     * Notify\Indicate\Read\Write(包括rssi\mtu)所对应的任务
-     * 都将放入到同一个任务队列中，先进先出按序执行
+     * 默认值
+     * 一个设备的Notify\Indicate\Read\Write\mtu操作所对应的任务共享同一个任务
+     * 队列(共享队列)(不区分特征值)，rssi在rssi队列
      */
-    object Single : BleTaskQueueType()
+    object Default : BleTaskQueueType()
 
     /**
      * 一个设备每个操作独立一个任务队列(不区分特征值)
-     * Notify\Indicate\Read\Write(不包括rssi\mtu，rssi\mtu仍在共享队列)所对应的任务
-     * 分别放入到独立的任务队列中，不同操作任务之间相互不影响，相同操作任务之间先进先出按序执行
+     * Notify在Notify队列中，Indicate在Indicate队列中，Read在Read队列中，
+     * Write在Write队列中，mtu在共享队列，rssi在rssi队列中，
+     * 不同操作任务之间相互不影响，相同操作任务之间先进先出按序执行
      * 例如特征值1的写操作和特征值2的写操作，在同一个任务队列当中；特征值1的写操作和特征值1的读操作，
      * 在两个不同的任务队列当中，特征值1的读操作和特征值2的写操作，在两个不同的任务队列当中。
      */
@@ -34,8 +34,9 @@ sealed class BleTaskQueueType {
 
     /**
      * 一个设备每个特征值下的每个操作独立一个任务队列(区分特征值)
-     * Notify\Indicate\Read\Write(不包括rssi\mtu，rssi\mtu仍在共享队列)所对应的任务
-     * 分别放入到独立的任务队列中，且按特征值区分，不同操作任务之间相互不影响，相同操作任务之间相互不影响
+     * Notify\Indicate\Read\Write所对应的任务分别放入到独立的任务队列中，
+     * mtu在共享队列，rssi在rssi队列中，
+     * 且按特征值区分，不同操作任务之间相互不影响，相同操作任务之间相互不影响
      * 例如特征值1的写操作和特征值2的写操作，在两个不同的任务队列当中；特征值1的写操作和特征值1的读操作，
      * 在两个不同的任务队列当中，特征值1的读操作和特征值2的写操作，在两个不同的任务队列当中。
      */

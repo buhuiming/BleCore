@@ -90,21 +90,23 @@
     BleManager.get().init(application)
 
 setTaskQueueType方法，有3个选项分别是：
-*   BleTaskQueueType.Single
-    默认值，一个设备所有操作共享一个任务队列(不区分特征值)，Notify\Indicate\Read\Write(包括rssi\mtu)
-    所对应的任务，都将放入到同一个任务队列中，先进先出按序执行。
+*   BleTaskQueueType.Default
+    一个设备的Notify\Indicate\Read\Write\mtu操作所对应的任务共享同一个任务
+    队列(共享队列)(不区分特征值)，rssi在rssi队列
 *   BleTaskQueueType.Operate
-    一个设备每个操作独立一个任务队列(不区分特征值)，
-    Notify\Indicate\Read\Write(不包括rssi\mtu，rssi\mtu仍在共享队列)所对应的任务，
-    分别放入到独立的任务队列中，不同操作任务之间相互不影响，相同操作任务之间先进先出按序执行。
-    例如特征值1的写操作和特征值2的写操作，在同一个任务队列当中；特征值1的写操作和特征值1的读操作，在两个不同的任务
-    队列当中，特征值1的读操作和特征值2的写操作，在两个不同的任务队列当中。
+    一个设备每个操作独立一个任务队列(不区分特征值)
+    Notify在Notify队列中，Indicate在Indicate队列中，Read在Read队列中，
+    Write在Write队列中，mtu在共享队列，rssi在rssi队列中，
+    不同操作任务之间相互不影响，相同操作任务之间先进先出按序执行
+    例如特征值1的写操作和特征值2的写操作，在同一个任务队列当中；特征值1的写操作和特征值1的读操作，
+    在两个不同的任务队列当中，特征值1的读操作和特征值2的写操作，在两个不同的任务队列当中。
 *   BleTaskQueueType.Independent
-    一个设备每个特征值下的每个操作独立一个任务队列(区分特征值)，
-    Notify\Indicate\Read\Write(不包括rssi\mtu，rssi\mtu仍在共享队列)所对应的任务，
-    分别放入到独立的任务队列中，且按特征值区分，不同操作任务之间相互不影响，相同操作任务之间相互不影响，
-    例如特征值1的写操作和特征值2的写操作，在两个不同的任务队列当中；特征值1的写操作和特征值1的读操作，在两个不同的任务
-    队列当中，特征值1的读操作和特征值2的写操作，在两个不同的任务队列当中。
+    一个设备每个特征值下的每个操作独立一个任务队列(区分特征值)
+    Notify\Indicate\Read\Write所对应的任务分别放入到独立的任务队列中，
+    mtu在共享队列，rssi在rssi队列中，
+    且按特征值区分，不同操作任务之间相互不影响，相同操作任务之间相互不影响
+    例如特征值1的写操作和特征值2的写操作，在两个不同的任务队列当中；特征值1的写操作和特征值1的读操作，
+    在两个不同的任务队列当中，特征值1的读操作和特征值2的写操作，在两个不同的任务队列当中。
 
 
 #### 2、扫描
@@ -213,6 +215,8 @@ setTaskQueueType方法，有3个选项分别是：
 *    并不是每台设备都支持拓展MTU，需要通讯双方都支持才行，也就是说，需要设备硬件也支持拓展MTU该方法才会起效果。
      调用该方法后，可以通过onMtuChanged(int mtu)查看最终设置完后，设备的最大传输单元被拓展到多少。如果设备不支持，
      可能无论设置多少，最终的mtu还是23。 
+*    建议在indicate、notify、read、write为完成的情况下，不要执行设置Mtu，否则会导致前者操作失败
+
 
 #### 16、设置连接的优先级
     BleManager.get().setConnectionPriority(connectionPriority: Int)
@@ -246,6 +250,8 @@ setTaskQueueType方法，有3个选项分别是：
      
 *    indicate\mtu\notify\read\rssi这些操作 ，同一个特征值在不同地方调用，后面的操作会取消前面未完成的操作；write操作比较
      特殊，每个写操作都会有回调，且write操作之间不会被取消。具体详情看taskId
+
+*    一次写操作，分包后，假如某个数据包写失败，后面的数据包不会继续写，例如一次写操作分包后有10个数据包，第7个写失败，后面第8、9、10不会再写     
 
 #### 19、断开某个设备的连接 释放资源
     BleManager.get().close(bleDevice: BleDevice)

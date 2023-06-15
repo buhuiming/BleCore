@@ -33,10 +33,11 @@ import kotlin.coroutines.suspendCoroutine
  */
 internal class BleRssiRequest(
     private val bleDevice: BleDevice,
-    private val bleTaskQueue: BleTaskQueue
 ) : Request() {
 
     private var bleRssiCallback: BleRssiCallback? = null
+
+    private val bleTaskQueue: BleTaskQueue = BleTaskQueue("Rssi队列")
 
     @Synchronized
     private fun addRssiCallback(callback: BleRssiCallback) {
@@ -119,5 +120,9 @@ internal class BleRssiRequest(
     @Synchronized
     private fun cancelReadRssiJob(): Boolean {
         return bleTaskQueue.removeTask(getTaskId())
+    }
+
+    fun close() {
+        bleTaskQueue.clear()
     }
 }

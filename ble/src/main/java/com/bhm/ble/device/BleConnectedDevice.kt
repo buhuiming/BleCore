@@ -51,7 +51,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
 
     private fun initBleRssiRequest() {
         if (bleRssiRequest == null) {
-            bleRssiRequest = BleRssiRequest(bleDevice, bleTaskQueue)
+            bleRssiRequest = BleRssiRequest(bleDevice)
         }
     }
 
@@ -356,6 +356,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         bleIndicateRequest?.close()
         bleReadRequest?.close()
         bleWriteRequest?.close()
+        bleRssiRequest?.close()
         bleConnectRequest.close()
         bleTaskQueue.clear()
         bleNotifyRequest = null

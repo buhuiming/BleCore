@@ -261,7 +261,6 @@ internal class BleWriteRequest(
             bleWriteData.isWriteFail.set(true)
             val taskId = getTaskId(bleWriteData.writeUUID, bleWriteData.operateRandomID
                 , bleWriteData.currentPackage)
-            cancelWriteJob(bleWriteData.writeUUID, taskId)
             val exception = UnDefinedException("$taskId -> 第${bleWriteData.currentPackage}包数据写" +
                     "失败，错误可能是没有权限、未连接、服务未绑定、不可写、请求忙碌等，code = $errorCode")
             BleLogger.e(exception.message)
@@ -270,6 +269,7 @@ internal class BleWriteRequest(
                 bleWriteData.totalPackage,
                 exception
             )
+            cancelSameWriteJob(bleWriteData)
         }
     }
 
@@ -313,8 +313,6 @@ internal class BleWriteRequest(
                                 iterator.remove()
                             }
                         } else {
-                            cancelWriteJob(bleWriteData.writeUUID, taskId)
-
                             val exception = UnDefinedException(
                                 "$taskId -> 第${bleWriteData.currentPackage}包数据写" +
                                         "失败，status = $status"
@@ -325,8 +323,8 @@ internal class BleWriteRequest(
                                 bleWriteData.totalPackage,
                                 exception
                             )
+                            cancelSameWriteJob(bleWriteData)
                             if (bleWriteData.currentPackage == bleWriteData.totalPackage) {
-                                bleWriteData.bleWriteCallback.callWriteComplete(false)
                                 iterator.remove()
                             }
                         }
@@ -343,6 +341,28 @@ internal class BleWriteRequest(
 
     private fun getTaskId(uuid: String?, operateRandomID: String, currentPackage: Int) =
         "$WRITE_TASK_ID：$uuid($operateRandomID)($currentPackage)"
+
+    /**
+     * 某个数据包写失败，后面的包不需再写
+     */
+    private fun cancelSameWriteJob(bleWriteData: BleWriteData) {
+        val currentPackage = bleWriteData.currentPackage
+        val totalPackage = bleWriteData.totalPackage
+        if (currentPackage == totalPackage) {
+            val taskId = getTaskId(bleWriteData.writeUUID, bleWriteData.operateRandomID
+                , bleWriteData.currentPackage)
+            cancelWriteJob(bleWriteData.writeUUID, taskId)
+            bleWriteData.bleWriteCallback.callWriteComplete(false)
+        } else {
+            for (i in currentPackage..totalPackage) {
+                val id = getTaskId(bleWriteData.writeUUID, bleWriteData.operateRandomID, i)
+                cancelWriteJob(bleWriteData.writeUUID, id)
+                if (i == totalPackage) {
+                    bleWriteData.bleWriteCallback.callWriteComplete(false)
+                }
+            }
+        }
+    }
 
     /**
      * 取消写数据任务

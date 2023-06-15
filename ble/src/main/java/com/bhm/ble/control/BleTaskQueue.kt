@@ -15,8 +15,6 @@ import com.bhm.ble.data.Constants.UN_COMPLETE
 import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.utils.BleLogger
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consumeEach
 import java.util.*
 
 
@@ -28,8 +26,6 @@ import java.util.*
  */
 internal class BleTaskQueue(private val tag: String = "") {
 
-    private var mChannel: Channel<BleTask>? = null
-
     private var mCoroutineScope: CoroutineScope? = null
 
     private val taskList = BleTaskList()
@@ -39,16 +35,7 @@ internal class BleTaskQueue(private val tag: String = "") {
     }
 
     private fun initLoop() {
-        mChannel = Channel()
         mCoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-        mCoroutineScope?.launch {
-            mChannel?.consumeEach {
-                //任务还在队列中并且未取消才执行
-                if (taskList.contains(it) && !it.canceled.get()) {
-                    tryHandleTask(it)
-                }
-            }
-        }
     }
 
     /**
@@ -87,7 +74,7 @@ internal class BleTaskQueue(private val tag: String = "") {
      */
     @Synchronized
     fun addTask(task: BleTask) {
-        if (mCoroutineScope == null && mChannel == null) {
+        if (mCoroutineScope == null) {
             initLoop()
         }
         BleLogger.i("($tag) 当前任务数量：${taskList.size()}, 添加任务：$task")
@@ -192,7 +179,10 @@ internal class BleTaskQueue(private val tag: String = "") {
         mCoroutineScope?.launch {
             //两次操作之间最好间隔一小段时间，如100ms（具体时间可以根据自己实际蓝牙外设自行尝试延长或缩短）
             delay(task.operateInterval)
-            mChannel?.send(task)
+            //任务还在队列中并且未取消才执行
+            if (taskList.contains(task) && !task.canceled.get()) {
+                tryHandleTask(task)
+            }
         }
     }
 
@@ -214,8 +204,6 @@ internal class BleTaskQueue(private val tag: String = "") {
             }
         }
         taskList.clear()
-        mChannel?.close()
-        mChannel = null
         mCoroutineScope?.cancel()
         mCoroutineScope = null
     }

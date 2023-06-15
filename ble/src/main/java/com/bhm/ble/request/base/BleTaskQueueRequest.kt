@@ -7,7 +7,7 @@ package com.bhm.ble.request.base
 
 import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.data.BleTaskQueueType
-import com.bhm.ble.data.Constants
+import com.bhm.ble.data.Constants.DEFAULT_TASK_QUEUE_TYPE
 import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
 import java.util.concurrent.ConcurrentHashMap
@@ -27,7 +27,8 @@ internal open class BleTaskQueueRequest(
     private val bleTaskQueueHashMap:
             ConcurrentHashMap<String, BleTaskQueue> = ConcurrentHashMap()
 
-    private val bleTaskQueueType = getBleOptions()?.taskQueueType?: Constants.DEFAULT_TASK_QUEUE_TYPE
+    private val bleTaskQueueType = getBleOptions()?.taskQueueType?: DEFAULT_TASK_QUEUE_TYPE
+
 
     private var operateBleTaskQueue: BleTaskQueue? = null
 
@@ -39,7 +40,7 @@ internal open class BleTaskQueueRequest(
 
     fun getTaskQueue(uuid: String): BleTaskQueue? {
         return when (bleTaskQueueType) {
-            BleTaskQueueType.Single ->
+            BleTaskQueueType.Default ->
                 BleConnectedDeviceManager.get()
                     .getBleConnectedDevice(bleDevice)
                     ?.getShareBleTaskQueue()

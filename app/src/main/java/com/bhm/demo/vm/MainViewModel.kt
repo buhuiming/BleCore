@@ -62,7 +62,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                 .setScanMillisTimeOut(5000)
                 .setConnectMillisTimeOut(5000)
                 //一般不推荐autoSetMtu，因为如果设置的等待时间会影响其他操作
-                .setMtu(100, true)
+//                .setMtu(100, true)
                 .setMaxConnectNum(7)
                 .setConnectRetryCountAndInterval(2, 1000)
                 .build()
