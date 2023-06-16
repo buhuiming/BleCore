@@ -64,7 +64,9 @@ internal class BleTaskQueue(private val tag: String = "") {
             task.callback?.invoke(task, CancellationException(e.message))
             task.canceled.set(true)
             taskList.remove(task)
-            sendTask(taskList.firstOrNull())
+            if (task.autoDoNextTask) {
+                sendTask(taskList.firstOrNull())
+            }
         }
     }
 
@@ -134,6 +136,15 @@ internal class BleTaskQueue(private val tag: String = "") {
                 taskList.remove(task)
             }
         }
+    }
+
+    fun doNextTask() {
+        val task = taskList.firstOrNull()
+        if (task?.completed() == UN_COMPLETE || task?.completed() == CANCEL_UN_COMPLETE) {
+            doNextTask()
+            return
+        }
+        sendTask(task)
     }
 
     /**

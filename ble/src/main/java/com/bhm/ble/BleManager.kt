@@ -352,6 +352,15 @@ class BleManager private constructor() {
     }
 
     /**
+     * 获取所有已连接设备集合(不包含其他应用连接的设备、系统连接的设备)
+     */
+    @Synchronized
+    fun getAllConnectedDevice(): MutableList<BleDevice>? {
+        checkInitialize()
+        return bleBaseRequest?.getAllConnectedDevice()
+    }
+
+    /**
      * 移除该设备的连接回调
      */
     @Synchronized

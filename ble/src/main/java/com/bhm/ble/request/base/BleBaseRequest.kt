@@ -135,6 +135,11 @@ internal interface BleBaseRequest {
                   bleWriteCallback: BleWriteCallback.() -> Unit)
 
     /**
+     * 获取所有已连接设备集合
+     */
+    fun getAllConnectedDevice(): MutableList<BleDevice>
+
+    /**
      * 移除该设备的连接回调
      */
     fun removeBleConnectCallback(bleDevice: BleDevice)

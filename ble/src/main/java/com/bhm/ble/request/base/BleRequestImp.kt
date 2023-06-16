@@ -369,6 +369,14 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
+     * 获取所有已连接设备集合
+     */
+    @Synchronized
+    override fun getAllConnectedDevice(): MutableList<BleDevice> {
+        return bleConnectedDeviceManager.getAllConnectedDevice()
+    }
+
+    /**
      * 移除该设备的Indicate回调
      */
     override fun removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String) {

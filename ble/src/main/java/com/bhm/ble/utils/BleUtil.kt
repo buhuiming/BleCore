@@ -54,20 +54,22 @@ object BleUtil {
      * @return true = 拥有该权限
      */
     fun isPermission(context: Context?): Boolean {
-        if (isPermission(context?.applicationContext,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            isPermission(context?.applicationContext,
                 Manifest.permission.ACCESS_FINE_LOCATION) &&
             isPermission(context?.applicationContext,
-                Manifest.permission.ACCESS_COARSE_LOCATION)) {
-            return true
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                Manifest.permission.ACCESS_COARSE_LOCATION) &&
             isPermission(context?.applicationContext,
                 Manifest.permission.BLUETOOTH_SCAN) &&
             isPermission(context?.applicationContext,
                 Manifest.permission.BLUETOOTH_ADVERTISE) &&
             isPermission(context?.applicationContext,
-                Manifest.permission.BLUETOOTH_CONNECT)
-        ) {
+                Manifest.permission.BLUETOOTH_CONNECT)) {
+            return true
+        } else if (isPermission(context?.applicationContext,
+                Manifest.permission.ACCESS_FINE_LOCATION) &&
+            isPermission(context?.applicationContext,
+                Manifest.permission.ACCESS_COARSE_LOCATION)) {
             return true
         }
         return false

@@ -78,6 +78,22 @@ internal class BleConnectedDeviceManager private constructor() {
     }
 
     /**
+     * 获取所有已连接设备集合
+     */
+    @Synchronized
+    fun getAllConnectedDevice(): MutableList<BleDevice> {
+        val list = mutableListOf<BleDevice>()
+        bleLruHashMap.forEach {
+            it.value?.let { device ->
+                if (BleManager.get().isConnected(device.bleDevice)) {
+                    list.add(device.bleDevice)
+                }
+            }
+        }
+        return list
+    }
+
+    /**
      * 断开某个设备的连接 释放资源
      */
     @Synchronized
