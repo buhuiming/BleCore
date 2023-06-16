@@ -20,7 +20,7 @@ import com.bhm.ble.data.Constants.DEFAULT_MAX_CONNECT_NUM
  */
 internal class BleConnectedDeviceManager private constructor() {
 
-    private val bleLruHashMap: BleLruHashMap<String, BleConnectedDevice?> =
+    private val bleLruHashMap: BleLruHashMap =
         BleLruHashMap(BleManager.get().getOptions()?.maxConnectNum
             ?: DEFAULT_MAX_CONNECT_NUM)
 

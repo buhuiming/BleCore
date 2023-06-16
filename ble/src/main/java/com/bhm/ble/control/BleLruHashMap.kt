@@ -5,9 +5,10 @@
  */
 package com.bhm.ble.control
 
-import com.bhm.ble.request.BleConnectRequest
+import com.bhm.ble.device.BleConnectedDevice
 import com.bhm.ble.utils.BleLogger
-import kotlin.math.ceil
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 
 /**
@@ -16,19 +17,31 @@ import kotlin.math.ceil
  * @author Buhuiming
  * @date 2023年05月26日 08时59分
  */
-internal class BleLruHashMap<K, V>(saveSize: Int) : LinkedHashMap<K, V>(
-    ceil(saveSize / 0.75).toInt() + 1, 0.75f, true) {
+internal class BleLruHashMap(
+    private val maxSize: Int
+) : ConcurrentHashMap<String, BleConnectedDevice?>(maxSize) {
 
-    private var maxSize = saveSize
+    private val keyLists = Collections.synchronizedList(LinkedList<String>())
 
-    override fun removeEldestEntry(eldest: MutableMap.MutableEntry<K, V>?): Boolean {
-        eldest?.let {
-            if (size > maxSize && it.value is BleConnectRequest) {
-                BleLogger.e("超出最大连接设备数：${maxSize}，断开第一个设备的连接")
-                (it.value as BleConnectRequest).disConnect()
-            }
+    override fun put(key: String, value: BleConnectedDevice): BleConnectedDevice? {
+        if (size == maxSize) {
+            BleLogger.e("超出最大连接设备数：${maxSize}，断开第一个设备的连接")
+            get(keyLists.firstOrNull())?.disConnect()
+            remove(keyLists.firstOrNull())
+            keyLists.removeFirstOrNull()
         }
-        return size > maxSize
+        keyLists.add(key)
+        return super.put(key, value)
+    }
+
+    override fun remove(key: String): BleConnectedDevice? {
+        keyLists.remove(key)
+        return super.remove(key)
+    }
+
+    override fun clear() {
+        super.clear()
+        keyLists.clear()
     }
 
     override fun toString(): String {
