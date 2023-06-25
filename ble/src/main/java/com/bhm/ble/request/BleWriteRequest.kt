@@ -289,44 +289,45 @@ internal class BleWriteRequest(
                 while (iterator.hasNext()) {
                     val bleWriteData = iterator.next()
                     //只处理正在写并且没有失败的监听
-                    if (bleWriteData.isWriting.get() && !bleWriteData.isWriteFail.get()) {
-                        val taskId = getTaskId(
-                            bleWriteData.writeUUID,
-                            bleWriteData.operateRandomID,
-                            bleWriteData.currentPackage
+                    if (!bleWriteData.isWriting.get() || bleWriteData.isWriteFail.get()) {
+                        continue
+                    }
+                    val taskId = getTaskId(
+                        bleWriteData.writeUUID,
+                        bleWriteData.operateRandomID,
+                        bleWriteData.currentPackage
+                    )
+                    bleWriteData.isWriting = AtomicBoolean(false)
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        BleLogger.d(
+                            "$taskId -> 第${bleWriteData.currentPackage}包" +
+                                    "数据写成功：" + BleUtil.bytesToHex(bleWriteData.data)
                         )
-                        bleWriteData.isWriting = AtomicBoolean(false)
-                        if (status == BluetoothGatt.GATT_SUCCESS) {
-                            BleLogger.d(
-                                "$taskId -> 第${bleWriteData.currentPackage}包" +
-                                        "数据写成功：" + BleUtil.bytesToHex(bleWriteData.data)
-                            )
-                            cancelWriteJob(bleWriteData.writeUUID, taskId)
+                        cancelWriteJob(bleWriteData.writeUUID, taskId)
 
-                            bleWriteData.bleWriteCallback.callWriteSuccess(
-                                bleWriteData.currentPackage,
-                                bleWriteData.totalPackage,
-                                bleWriteData.data
-                            )
-                            if (bleWriteData.currentPackage == bleWriteData.totalPackage) {
-                                bleWriteData.bleWriteCallback.callWriteComplete(true)
-                                iterator.remove()
-                            }
-                        } else {
-                            val exception = UnDefinedException(
-                                "$taskId -> 第${bleWriteData.currentPackage}包数据写" +
-                                        "失败，status = $status"
-                            )
-                            BleLogger.e(exception.message)
-                            bleWriteData.bleWriteCallback.callWriteFail(
-                                bleWriteData.currentPackage,
-                                bleWriteData.totalPackage,
-                                exception
-                            )
-                            cancelSameWriteJob(bleWriteData)
-                            if (bleWriteData.currentPackage == bleWriteData.totalPackage) {
-                                iterator.remove()
-                            }
+                        bleWriteData.bleWriteCallback.callWriteSuccess(
+                            bleWriteData.currentPackage,
+                            bleWriteData.totalPackage,
+                            bleWriteData.data
+                        )
+                        if (bleWriteData.currentPackage == bleWriteData.totalPackage) {
+                            bleWriteData.bleWriteCallback.callWriteComplete(true)
+                            iterator.remove()
+                        }
+                    } else {
+                        val exception = UnDefinedException(
+                            "$taskId -> 第${bleWriteData.currentPackage}包数据写" +
+                                    "失败，status = $status"
+                        )
+                        BleLogger.e(exception.message)
+                        bleWriteData.bleWriteCallback.callWriteFail(
+                            bleWriteData.currentPackage,
+                            bleWriteData.totalPackage,
+                            exception
+                        )
+                        cancelSameWriteJob(bleWriteData)
+                        if (bleWriteData.currentPackage == bleWriteData.totalPackage) {
+                            iterator.remove()
                         }
                     }
                 }
