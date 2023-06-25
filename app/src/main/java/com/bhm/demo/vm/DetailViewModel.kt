@@ -21,7 +21,6 @@ import com.chad.library.adapter.base.entity.node.BaseNode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.logging.Level
-import kotlin.math.roundToInt
 
 
 /**
@@ -251,52 +250,13 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                   serviceUUID: String,
                   writeUUID: String,
                   text: String) {
-        val listData: SparseArray<ByteArray>
+
         val data = text.toByteArray()
         BleLogger.i("data is: ${BleUtil.bytesToHex(data)}")
         val mtu = BleManager.get().getOptions()?.mtu?: DEFAULT_MTU
         //mtu长度包含了ATT的opcode一个字节以及ATT的handle2个字节
         val maxLength = mtu - 3
-        if (data.size > maxLength) {
-            //分包
-            val pkgCount = if (data.size % maxLength == 0) {
-                data.size / maxLength
-            } else {
-                (data.size / maxLength + 1).toFloat().roundToInt()
-            }
-            listData = SparseArray<ByteArray>(pkgCount)
-            for (i in 0 until pkgCount) {
-                var dataPkg: ByteArray
-                var length: Int
-                if (pkgCount == 1 || i == pkgCount - 1) {
-                    length = if (data.size % maxLength == 0) {
-                        maxLength
-                    } else {
-                        data.size % maxLength
-                    }
-                    System.arraycopy(
-                        data,
-                        i * maxLength,
-                        ByteArray(length).also { dataPkg = it },
-                        0,
-                        length
-                    )
-                } else {
-                    System.arraycopy(
-                        data,
-                        i * maxLength,
-                        ByteArray(maxLength).also { dataPkg = it },
-                        0,
-                        maxLength
-                    )
-                }
-                BleLogger.i("${i + 1} data is: ${BleUtil.bytesToHex(dataPkg)}")
-                listData.put(i, dataPkg)
-            }
-        } else {
-            listData = SparseArray<ByteArray>(1)
-            listData.put(0, data)
-        }
+        val listData: SparseArray<ByteArray> = BleUtil.subpackage(data, maxLength)
         BleManager.get().writeData(bleDevice, serviceUUID, writeUUID, listData) {
             onWriteFail { currentPackage, _, t ->
                 addLogMsg(LogEntity(Level.OFF, "第${currentPackage}包数据写失败：${t.message}"))

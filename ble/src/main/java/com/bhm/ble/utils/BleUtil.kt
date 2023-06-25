@@ -12,7 +12,9 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
+import android.util.SparseArray
 import com.bhm.ble.device.BleDevice
+import kotlin.math.roundToInt
 
 
 /**
@@ -113,5 +115,54 @@ object BleUtil {
             }
         }
         return sb.toString()
+    }
+
+    /**
+     * 分包
+     * @param data 需要分别的数据
+     * @param packageLength 每个数据包最大长度
+     */
+    fun subpackage(data: ByteArray, packageLength: Int): SparseArray<ByteArray> {
+        val listData: SparseArray<ByteArray>
+        if (data.size > packageLength) {
+            val pkgCount = if (data.size % packageLength == 0) {
+                data.size / packageLength
+            } else {
+                (data.size / packageLength + 1).toFloat().roundToInt()
+            }
+            listData = SparseArray<ByteArray>(pkgCount)
+            for (i in 0 until pkgCount) {
+                var dataPkg: ByteArray
+                var length: Int
+                if (pkgCount == 1 || i == pkgCount - 1) {
+                    length = if (data.size % packageLength == 0) {
+                        packageLength
+                    } else {
+                        data.size % packageLength
+                    }
+                    System.arraycopy(
+                        data,
+                        i * packageLength,
+                        ByteArray(length).also { dataPkg = it },
+                        0,
+                        length
+                    )
+                } else {
+                    System.arraycopy(
+                        data,
+                        i * packageLength,
+                        ByteArray(packageLength).also { dataPkg = it },
+                        0,
+                        packageLength
+                    )
+                }
+                BleLogger.i("${i + 1} data is: ${bytesToHex(dataPkg)}")
+                listData.put(i, dataPkg)
+            }
+        } else {
+            listData = SparseArray<ByteArray>(1)
+            listData.put(0, data)
+        }
+        return listData
     }
 }
