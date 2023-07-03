@@ -43,7 +43,7 @@ data class BleDevice(
         parcel.readValue(Int::class.java.classLoader) as? Int,
         parcel.readValue(Long::class.java.classLoader) as? Long,
         parcel.readValue(ScanRecord::class.java.classLoader) as? ScanRecord,
-        parcel.readValue(Int::class.java.classLoader) as? Int,
+        parcel.readValue(Any::class.java.classLoader)
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
