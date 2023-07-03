@@ -35,8 +35,7 @@ import kotlin.coroutines.suspendCoroutine
 class MainViewModel(private val application: Application) : BaseViewModel(application) {
 
     private val listDRMutableStateFlow = MutableStateFlow(
-        BleDevice(null,
-            null, null, null, null, null)
+        BleDevice(null, null, null, null, null, null, null)
     )
 
     val listDRStateFlow: StateFlow<BleDevice> = listDRMutableStateFlow

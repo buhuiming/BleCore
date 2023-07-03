@@ -88,7 +88,8 @@ object BleUtil {
             deviceAddress = scanResult.device?.address,
             rssi = scanResult.rssi,
             timestampNanos = scanResult.timestampNanos,
-            scanRecord = scanResult.scanRecord,
+            scanResult = scanResult,
+            tag = null
         )
     }
 
