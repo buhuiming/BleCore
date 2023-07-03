@@ -21,7 +21,6 @@ import android.os.Parcelable
  * @param rssi 被扫描到时候的信号强度
  * @param timestampNanos 当扫描记录被观察到时，返回自启动以来的时间戳。
  * @param scanRecord 被扫描到时候携带的广播数据
- * @param tag 预留字段
  *
  * @author Buhuiming
  * @date 2023年05月22日 09时11分
@@ -33,7 +32,6 @@ data class BleDevice(
     val rssi: Int?,
     val timestampNanos: Long?,
     val scanRecord: ScanRecord?,
-    var tag: Any? = null
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
@@ -43,7 +41,6 @@ data class BleDevice(
         parcel.readValue(Int::class.java.classLoader) as? Int,
         parcel.readValue(Long::class.java.classLoader) as? Long,
         parcel.readValue(ScanRecord::class.java.classLoader) as? ScanRecord,
-        parcel.readValue(Any::class.java.classLoader)
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -52,7 +49,6 @@ data class BleDevice(
         parcel.writeString(deviceAddress)
         parcel.writeValue(rssi)
         parcel.writeValue(timestampNanos)
-        parcel.writeValue(tag)
     }
 
     override fun describeContents(): Int {
