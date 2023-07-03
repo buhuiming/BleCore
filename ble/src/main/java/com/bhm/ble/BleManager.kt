@@ -494,6 +494,6 @@ class BleManager private constructor() {
      */
     fun buildBleDeviceByDeviceAddress(deviceAddress: String): BleDevice {
         val deviceInfo = bluetoothManager?.adapter?.getRemoteDevice(deviceAddress)
-        return BleDevice(deviceInfo, "", deviceAddress, 0, 0, null, 0)
+        return BleDevice(deviceInfo, "", deviceAddress, 0, 0, null)
     }
 }

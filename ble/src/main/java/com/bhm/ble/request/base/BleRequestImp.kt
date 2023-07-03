@@ -123,7 +123,6 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                         0,
                         0,
                         null,
-                        0
                     ), BleConnectFailType.ScanNullableBluetoothDevice)
                 return@launchInMainThread
             }
