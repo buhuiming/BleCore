@@ -457,6 +457,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         mainScope.cancel()
         ioScope.cancel()
         defaultScope.cancel()
+        BleScanRequest.get().close()
         bleConnectedDeviceManager.closeAll()
     }
 

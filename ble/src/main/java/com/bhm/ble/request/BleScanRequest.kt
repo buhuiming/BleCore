@@ -332,4 +332,12 @@ internal class BleScanRequest private constructor() : Request() {
         scanJob?.cancel()
         waitScanJob?.cancel(CancellationException(CANCEL_WAIT_JOB_MESSAGE))
     }
+
+    fun close() {
+        scanJob = null
+        waitScanJob = null
+        bleScanCallback = null
+        results.clear()
+        duplicateRemovalResults.clear()
+    }
 }

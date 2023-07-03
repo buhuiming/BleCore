@@ -8,7 +8,6 @@
 package com.bhm.ble.device
 
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.le.ScanResult
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
@@ -21,7 +20,7 @@ import android.os.Parcelable
  * @param deviceAddress 蓝牙Mac地址
  * @param rssi 被扫描到时候的信号强度
  * @param timestampNanos 当扫描记录被观察到时，返回自启动以来的时间戳。
- * @param scanResult 被扫描到的信息：包含设备信息、广播数据等
+ * @param scanRecord 被扫描到时候携带的广播数据
  * @param tag 预留字段
  *
  * @author Buhuiming
@@ -33,7 +32,7 @@ data class BleDevice(
     val deviceAddress: String?,
     val rssi: Int?,
     val timestampNanos: Long?,
-    val scanResult: ScanResult?,
+    val scanRecord: ByteArray?,
     val tag: Bundle?,
 ) : Parcelable {
 
@@ -43,7 +42,7 @@ data class BleDevice(
         parcel.readString(),
         parcel.readValue(Int::class.java.classLoader) as? Int,
         parcel.readValue(Long::class.java.classLoader) as? Long,
-        parcel.readParcelable(ScanResult::class.java.classLoader),
+        parcel.createByteArray(),
         parcel.readBundle(Bundle::class.java.classLoader)
     )
 
@@ -53,7 +52,7 @@ data class BleDevice(
         parcel.writeString(deviceAddress)
         parcel.writeValue(rssi)
         parcel.writeValue(timestampNanos)
-        parcel.writeParcelable(scanResult, flags)
+        parcel.writeByteArray(scanRecord)
         parcel.writeBundle(tag)
     }
 
