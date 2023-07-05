@@ -72,7 +72,7 @@ internal class BleConnectRequest(
         if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext)) {
             BleLogger.e("权限不足，请检查")
             removeBleConnectedDevice()
-            bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.NoBlePermissionType)
+            bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.NoBlePermission)
             return
         }
         if (!bleManager.isBleSupport()) {
@@ -117,7 +117,7 @@ internal class BleConnectRequest(
         val bleManager = getBleManager()
         if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext)) {
             BleLogger.e("权限不足，请检查")
-            bleConnectCallback?.callConnectFail(bleDevice, BleConnectFailType.NoBlePermissionType)
+            bleConnectCallback?.callConnectFail(bleDevice, BleConnectFailType.NoBlePermission)
             return
         }
         if (!bleManager.isBleSupport()) {

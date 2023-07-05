@@ -69,7 +69,7 @@ internal class BleScanRequest private constructor() : Request() {
     @Synchronized
     fun startScan(bleScanCallback: BleScanCallback) {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
-            bleScanCallback.callScanFail(BleScanFailType.NoBlePermissionType)
+            bleScanCallback.callScanFail(BleScanFailType.NoBlePermission)
             return
         }
         initScannerAndStart(bleScanCallback)
@@ -83,7 +83,7 @@ internal class BleScanRequest private constructor() : Request() {
         val bleManager = getBleManager()
         if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext)) {
             BleLogger.e("权限不足，请检查")
-            bleScanCallback.callScanFail(BleScanFailType.NoBlePermissionType)
+            bleScanCallback.callScanFail(BleScanFailType.NoBlePermission)
             return
         }
         if (!bleManager.isBleSupport()) {

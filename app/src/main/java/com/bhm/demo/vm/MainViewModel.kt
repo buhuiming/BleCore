@@ -175,7 +175,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
             onScanFail {
                 val msg: String = when (it) {
                     is BleScanFailType.UnSupportBle -> "设备不支持蓝牙"
-                    is BleScanFailType.NoBlePermissionType -> "权限不足，请检查"
+                    is BleScanFailType.NoBlePermission -> "权限不足，请检查"
                     is BleScanFailType.GPSDisable -> "设备未打开GPS定位"
                     is BleScanFailType.BleDisable -> "蓝牙未打开"
                     is BleScanFailType.AlReadyScanning -> "正在扫描"
@@ -240,7 +240,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
         onConnectFail { bleDevice, connectFailType ->
             val msg: String = when (connectFailType) {
                 is BleConnectFailType.UnSupportBle -> "设备不支持蓝牙"
-                is BleConnectFailType.NoBlePermissionType -> "权限不足，请检查"
+                is BleConnectFailType.NoBlePermission -> "权限不足，请检查"
                 is BleConnectFailType.NullableBluetoothDevice -> "设备为空"
                 is BleConnectFailType.BleDisable -> "蓝牙未打开"
                 is BleConnectFailType.ConnectException -> "连接异常(${connectFailType.throwable.message})"

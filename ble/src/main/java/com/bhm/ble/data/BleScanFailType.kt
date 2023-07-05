@@ -32,7 +32,7 @@ sealed class BleScanFailType {
     /**
      * 未申请权限
      */
-    object NoBlePermissionType: BleScanFailType()
+    object NoBlePermission: BleScanFailType()
 
     /**
      * 已开启扫描，不能再次开启

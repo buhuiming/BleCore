@@ -7,7 +7,6 @@ package com.bhm.ble.utils
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.bluetooth.le.ScanRecord
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.pm.PackageManager

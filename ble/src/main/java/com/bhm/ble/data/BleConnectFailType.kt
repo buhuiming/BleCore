@@ -32,7 +32,7 @@ sealed class BleConnectFailType {
     /**
      * 未申请权限
      */
-    object NoBlePermissionType: BleConnectFailType()
+    object NoBlePermission: BleConnectFailType()
 
     /**
      * 连接异常
