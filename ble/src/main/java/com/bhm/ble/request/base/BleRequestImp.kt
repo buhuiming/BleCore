@@ -39,14 +39,11 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
 
     companion object {
 
-        private var instance: BleRequestImp = BleRequestImp()
+        private var instance: BleRequestImp? = BleRequestImp()
 
         @Synchronized
         fun get(): BleRequestImp {
-            if (instance == null) {
-                instance = BleRequestImp()
-            }
-            return instance
+            return instance?: BleRequestImp()
         }
     }
 
@@ -459,6 +456,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         defaultScope.cancel()
         BleScanRequest.get().close()
         bleConnectedDeviceManager.closeAll()
+        instance = null
     }
 
     /**
