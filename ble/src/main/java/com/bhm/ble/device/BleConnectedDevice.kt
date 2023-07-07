@@ -27,7 +27,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
 
     private var bleTaskQueue = BleTaskQueue("共享队列")
 
-    private val bleConnectRequest = BleConnectRequest(bleDevice, this)
+    private var bleConnectRequest: BleConnectRequest? = null
 
     private var bleSetPriorityRequest: BleSetPriorityRequest? = null
 
@@ -42,6 +42,12 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     private var bleReadRequest: BleReadRequest? = null
 
     private var bleWriteRequest: BleWriteRequest? = null
+
+    private fun initBleConnectRequest() {
+        if (bleConnectRequest == null) {
+            bleConnectRequest = BleConnectRequest(bleDevice, this)
+        }
+    }
 
     private fun initBleSetPriorityRequest() {
         if (bleSetPriorityRequest == null) {
@@ -90,7 +96,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
      */
     override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
         super.onConnectionStateChange(gatt, status, newState)
-        bleConnectRequest.onConnectionStateChange(gatt, status, newState)
+        bleConnectRequest?.onConnectionStateChange(gatt, status, newState)
     }
 
     /**
@@ -98,7 +104,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
      */
     override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
         super.onServicesDiscovered(gatt, status)
-        bleConnectRequest.onServicesDiscovered(gatt, status)
+        bleConnectRequest?.onServicesDiscovered(gatt, status)
     }
 
     /**
@@ -172,21 +178,23 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
      * 连接设备
      */
     fun connect(bleConnectCallback: BleConnectCallback) {
-        bleConnectRequest.connect(bleConnectCallback)
+        initBleConnectRequest()
+        bleConnectRequest?.connect(bleConnectCallback)
     }
 
     /**
      * 主动断开连接，上层API调用
      */
     fun disConnect() {
-        bleConnectRequest.disConnect()
+        bleConnectRequest?.disConnect()
     }
 
     /**
      * 获取设备的BluetoothGatt对象
      */
     fun getBluetoothGatt(): BluetoothGatt? {
-        return bleConnectRequest.getBluetoothGatt()
+        initBleConnectRequest()
+        return bleConnectRequest?.getBluetoothGatt()
     }
 
     /**
@@ -335,7 +343,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     }
 
     fun removeBleConnectCallback() {
-        bleConnectRequest.removeBleConnectCallback()
+        bleConnectRequest?.removeBleConnectCallback()
     }
 
     fun removeAllCharacterCallback() {
@@ -357,11 +365,13 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         bleReadRequest?.close()
         bleWriteRequest?.close()
         bleRssiRequest?.close()
-        bleConnectRequest.close()
+        bleConnectRequest?.close()
         bleTaskQueue.clear()
         bleNotifyRequest = null
         bleIndicateRequest = null
         bleReadRequest = null
         bleWriteRequest = null
+        bleRssiRequest = null
+        bleConnectRequest = null
     }
 }
