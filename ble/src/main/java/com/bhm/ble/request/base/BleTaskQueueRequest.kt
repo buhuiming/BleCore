@@ -24,8 +24,7 @@ internal open class BleTaskQueueRequest(
     private val tag: String
 ) : Request() {
 
-    private val bleTaskQueueHashMap:
-            ConcurrentHashMap<String, BleTaskQueue> = ConcurrentHashMap()
+    private lateinit var bleTaskQueueHashMap: ConcurrentHashMap<String, BleTaskQueue>
 
     private val bleTaskQueueType = getBleOptions()?.taskQueueType?: DEFAULT_TASK_QUEUE_TYPE
 
@@ -33,8 +32,10 @@ internal open class BleTaskQueueRequest(
     private var operateBleTaskQueue: BleTaskQueue? = null
 
     init {
-        if (bleTaskQueueType == BleTaskQueueType.Operate) {
-            operateBleTaskQueue = BleTaskQueue(tag)
+        when (bleTaskQueueType) {
+            BleTaskQueueType.Operate -> operateBleTaskQueue = BleTaskQueue(tag)
+            BleTaskQueueType.Independent ->  bleTaskQueueHashMap = ConcurrentHashMap()
+            else -> {}
         }
     }
 
