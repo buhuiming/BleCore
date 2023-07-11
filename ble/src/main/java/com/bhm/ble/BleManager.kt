@@ -450,6 +450,7 @@ class BleManager private constructor() {
      */
     @Synchronized
     fun disConnectAll() {
+        checkInitialize()
         bleBaseRequest?.disConnectAll()
     }
 

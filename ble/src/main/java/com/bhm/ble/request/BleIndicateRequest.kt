@@ -153,10 +153,10 @@ internal class BleIndicateRequest(
         characteristic: BluetoothGattCharacteristic,
         value: ByteArray
     ) {
+        BleLogger.d("${characteristic.uuid} -> " +
+                "收到Indicate数据：${BleUtil.bytesToHex(value)}")
         bleIndicateCallbackHashMap.values.forEach {
             if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
-                BleLogger.d("${it.getKey()} -> " +
-                        "收到Indicate数据：${BleUtil.bytesToHex(value)}")
                 it.callCharacteristicChanged(value)
             }
         }
