@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
+import android.os.Build
 import android.util.SparseArray
 import com.bhm.ble.callback.*
 import com.bhm.ble.control.BleTaskQueue
@@ -115,9 +116,26 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         characteristic: BluetoothGattCharacteristic,
         value: ByteArray
     ) {
+        /*android 13调用的方法*/
         super.onCharacteristicChanged(gatt, characteristic, value)
         bleNotifyRequest?.onCharacteristicChanged(characteristic, value)
         bleIndicateRequest?.onCharacteristicChanged(characteristic, value)
+    }
+
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+    override fun onCharacteristicChanged(
+        gatt: BluetoothGatt?,
+        characteristic: BluetoothGattCharacteristic?
+    ) {
+        super.onCharacteristicChanged(gatt, characteristic)
+        /*android 13过时的方法*/
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return
+        }
+        characteristic?.let {
+            bleNotifyRequest?.onCharacteristicChanged(it, it.value)
+            bleIndicateRequest?.onCharacteristicChanged(it, it.value)
+        }
     }
 
     /**
