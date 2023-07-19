@@ -118,15 +118,22 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
         BleManager.get().notify(bleDevice, serviceUUID, notifyUUID, false) {
             onNotifyFail {
                 addLogMsg(LogEntity(Level.OFF, "notify失败：${it.message}"))
+
                 failCall.invoke()
             }
             onNotifySuccess {
                 addLogMsg(LogEntity(Level.FINE, "notify成功：${notifyUUID}"))
             }
             onCharacteristicChanged {
-                addLogMsg(LogEntity(Level.INFO, "Notify接收到${notifyUUID}的数据：" +
-                        BleUtil.bytesToHex(it)
-                ))
+                //数据处理在IO线程，显示UI要切换到主线程
+                launchInMainThread {
+                    addLogMsg(
+                        LogEntity(
+                            Level.INFO, "Notify接收到${notifyUUID}的数据：" +
+                                    BleUtil.bytesToHex(it)
+                        )
+                    )
+                }
             }
         }
     }
@@ -163,9 +170,15 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                 addLogMsg(LogEntity(Level.FINE, "indicate成功：${indicateUUID}"))
             }
             onCharacteristicChanged {
-                addLogMsg(LogEntity(Level.INFO, "Indicate接收到${indicateUUID}的数据：" +
-                        BleUtil.bytesToHex(it)
-                ))
+                //数据处理在IO线程，显示UI要切换到主线程
+                launchInMainThread {
+                    addLogMsg(
+                        LogEntity(
+                            Level.INFO, "Indicate接收到${indicateUUID}的数据：" +
+                                    BleUtil.bytesToHex(it)
+                        )
+                    )
+                }
             }
         }
     }

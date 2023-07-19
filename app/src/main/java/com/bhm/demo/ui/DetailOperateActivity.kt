@@ -110,7 +110,9 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
                 is OperateType.Notify -> {
                     if (isChecked) {
                         viewModel.notify(getBleDevice(), node.serviceUUID, node.characteristicUUID) {
-                            checkBox?.isChecked = false
+                            if (!isFinishing) {
+                                checkBox?.isChecked = false
+                            }
                         }
                     } else {
                         viewModel.stopNotify(getBleDevice(), node.serviceUUID, node.characteristicUUID)
@@ -119,7 +121,9 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
                 is OperateType.Indicate -> {
                     if (isChecked) {
                         viewModel.indicate(getBleDevice(), node.serviceUUID, node.characteristicUUID) {
-                            checkBox?.isChecked = false
+                            if (!isFinishing) {
+                                checkBox?.isChecked = false
+                            }
                         }
                     } else {
                         viewModel.stopIndicate(getBleDevice(), node.serviceUUID, node.characteristicUUID)

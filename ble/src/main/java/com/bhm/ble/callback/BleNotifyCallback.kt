@@ -47,6 +47,8 @@ open class BleNotifyCallback : BleBaseCallback() {
 
     open fun callCharacteristicChanged(data: ByteArray) {
         //数据处理放在非主线程
-        characteristicChanged?.invoke(data)
+        launchInIOThread {
+            characteristicChanged?.invoke(data)
+        }
     }
 }
