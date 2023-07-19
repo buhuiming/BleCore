@@ -222,6 +222,8 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
         event?.let {
             val device = it.data as BleDevice
             if (getBleDevice() == device) {
+                BleManager.get().close(getBleDevice())
+                setResult(0, null)
                 finish()
             }
         }

@@ -24,7 +24,7 @@ internal open class BleTaskQueueRequest(
     private val tag: String
 ) : Request() {
 
-    private lateinit var bleTaskQueueHashMap: ConcurrentHashMap<String, BleTaskQueue>
+    private var bleTaskQueueHashMap: ConcurrentHashMap<String, BleTaskQueue>? = null
 
     private val bleTaskQueueType = getBleOptions()?.taskQueueType?: DEFAULT_TASK_QUEUE_TYPE
 
@@ -47,25 +47,26 @@ internal open class BleTaskQueueRequest(
                     ?.getShareBleTaskQueue()
             BleTaskQueueType.Operate -> operateBleTaskQueue
             BleTaskQueueType.Independent -> {
-                if (bleTaskQueueHashMap.containsKey(uuid)) {
-                    bleTaskQueueHashMap[uuid]
+                if (bleTaskQueueHashMap?.containsKey(uuid) == true) {
+                    bleTaskQueueHashMap?.get(uuid)
                 } else {
                     val independentBleTaskQueue = BleTaskQueue(tag)
-                    bleTaskQueueHashMap[uuid] = independentBleTaskQueue
+                    bleTaskQueueHashMap?.put(uuid, independentBleTaskQueue)
                     independentBleTaskQueue
                 }
             }
         }
     }
 
-    fun close() {
+    open fun close() {
         when (bleTaskQueueType) {
             BleTaskQueueType.Operate -> operateBleTaskQueue?.clear()
             BleTaskQueueType.Independent -> {
-                bleTaskQueueHashMap.forEach {
+                bleTaskQueueHashMap?.forEach {
                     it.value.clear()
                 }
-                bleTaskQueueHashMap.clear()
+                bleTaskQueueHashMap?.clear()
+                bleTaskQueueHashMap = null
             }
             else -> {}
         }

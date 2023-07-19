@@ -146,4 +146,9 @@ internal class BleReadRequest(
     private fun cancelReadJob(readUUID: String?, taskId: String): Boolean {
         return getTaskQueue(readUUID?: "")?.removeTask(taskId)?: false
     }
+
+    override fun close() {
+        super.close()
+        removeAllReadCallback()
+    }
 }

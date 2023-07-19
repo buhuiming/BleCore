@@ -274,4 +274,9 @@ internal class BleNotifyRequest(
     private fun cancelNotifyJob(notifyUUID: String?, taskId: String): Boolean {
         return getTaskQueue(notifyUUID?: "")?.removeTask(taskId)?: false
     }
+
+    override fun close() {
+        super.close()
+        removeAllNotifyCallback()
+    }
 }

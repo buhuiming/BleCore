@@ -372,4 +372,9 @@ internal class BleWriteRequest(
     private fun cancelWriteJob(writeUUID: String?, taskId: String) {
         getTaskQueue(writeUUID?: "")?.removeTask(taskId)
     }
+
+    override fun close() {
+        super.close()
+        removeAllWriteCallback()
+    }
 }
