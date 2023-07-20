@@ -67,7 +67,7 @@ internal class BleNotifyRequest(
     @Synchronized
     fun enableCharacteristicNotify(serviceUUID: String,
                                    notifyUUID: String,
-                                   useCharacteristicDescriptor: Boolean,
+                                   bleDescriptorGetType: BleDescriptorGetType,
                                    bleNotifyCallback: BleNotifyCallback) {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
             bleNotifyCallback.callNotifyFail(NoBlePermissionException())
@@ -88,7 +88,7 @@ internal class BleNotifyRequest(
                         setCharacteristicNotify(
                             notifyUUID,
                             characteristic,
-                            useCharacteristicDescriptor,
+                            bleDescriptorGetType,
                             true,
                             bleNotifyCallback
                         )
@@ -122,7 +122,7 @@ internal class BleNotifyRequest(
     @Synchronized
     fun disableCharacteristicNotify(serviceUUID: String,
                                     notifyUUID: String,
-                                    useCharacteristicDescriptor: Boolean): Boolean {
+                                    bleDescriptorGetType: BleDescriptorGetType): Boolean {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
             return false
         }
@@ -134,7 +134,7 @@ internal class BleNotifyRequest(
             val success = setCharacteristicNotify(
                 notifyUUID,
                 characteristic,
-                useCharacteristicDescriptor,
+                bleDescriptorGetType,
                 false,
                 null
             )
@@ -193,7 +193,7 @@ internal class BleNotifyRequest(
     @SuppressLint("MissingPermission")
     private fun setCharacteristicNotify(notifyUUID: String,
                                         characteristic: BluetoothGattCharacteristic,
-                                        useCharacteristicDescriptor: Boolean,
+                                        bleDescriptorGetType: BleDescriptorGetType,
                                         enable: Boolean,
                                         bleNotifyCallback: BleNotifyCallback?): Boolean {
         val bluetoothGatt = getBluetoothGatt(bleDevice)
@@ -208,30 +208,82 @@ internal class BleNotifyRequest(
             bleNotifyCallback?.callNotifyFail(exception)
             return false
         }
-        val descriptor = if (useCharacteristicDescriptor) {
-            characteristic.getDescriptor(characteristic.uuid)
+        val descriptorList = characteristic.descriptors
+        BleLogger.d("descriptor size is ${descriptorList.size}")
+        if (bleDescriptorGetType == BleDescriptorGetType.AllDescriptor && descriptorList.isNotEmpty()) {
+            var allFail = true
+            for (descriptor in descriptorList) {
+                descriptor?.let {
+                    BleLogger.d("descriptor uuid is ${descriptor.uuid}")
+                    val writeDescriptorCode = writeDescriptor(bluetoothGatt, descriptor, enable)
+                    if (writeDescriptorCode == BluetoothStatusCodes.SUCCESS) {
+                        allFail = false
+                    }
+                }
+            }
+            if (allFail) {
+                val exception = UnDefinedException(
+                    "$notifyUUID -> 设置Notify失败，SetCharacteristicNotificationFail",
+                    EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
+                )
+                cancelNotifyJob(notifyUUID, getTaskId(notifyUUID))
+                BleLogger.e(exception.message)
+                bleNotifyCallback?.callNotifyFail(exception)
+                return false
+            }
+            return true
         } else {
-            characteristic.getDescriptor(UUID.fromString(UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR))
+            val descriptor = if (bleDescriptorGetType == BleDescriptorGetType.CharacteristicDescriptor) {
+                characteristic.getDescriptor(characteristic.uuid)
+            } else {
+                characteristic.getDescriptor(UUID.fromString(UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR))
+            }
+            if (descriptor == null) {
+                val exception = UnDefinedException(
+                    "$notifyUUID -> 设置Notify失败，SetCharacteristicNotificationFail",
+                    EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
+                )
+                cancelNotifyJob(notifyUUID, getTaskId(notifyUUID))
+                BleLogger.e(exception.message)
+                bleNotifyCallback?.callNotifyFail(exception)
+                return false
+            }
+            val writeDescriptorCode = writeDescriptor(bluetoothGatt, descriptor, enable)
+            if (writeDescriptorCode != BluetoothStatusCodes.SUCCESS) {
+                //true, if the write operation was initiated successfully Value is
+                // BluetoothStatusCodes.SUCCESS = 0,
+                // BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION = 6,
+                // BluetoothStatusCodes.ERROR_DEVICE_NOT_CONNECTED = 4,
+                // BluetoothStatusCodes.ERROR_PROFILE_SERVICE_NOT_BOUND = 8,
+                // BluetoothStatusCodes.ERROR_GATT_WRITE_NOT_ALLOWED = 200,
+                // BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY = 201,
+                // BluetoothStatusCodes.ERROR_UNKNOWN = 2147483647,
+                // BluetoothStatusCodes.ERROR_NO_ACTIVE_DEVICES = 13,
+                val exception = UnDefinedException(
+                    "$notifyUUID -> -> 设置Notify失败，错误可能是没有权限、" +
+                            "未连接、服务未绑定、不可写、请求忙碌等，code = $writeDescriptorCode",
+                    EXCEPTION_CODE_DESCRIPTOR_FAIL
+                )
+                cancelNotifyJob(notifyUUID, getTaskId(notifyUUID))
+                BleLogger.e(exception.message)
+                bleNotifyCallback?.callNotifyFail(exception)
+                return false
+            }
         }
-        if (descriptor == null) {
-            val exception = UnDefinedException(
-                "$notifyUUID -> 设置Notify失败，SetCharacteristicNotificationFail",
-                EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL
-            )
-            cancelNotifyJob(notifyUUID, getTaskId(notifyUUID))
-            BleLogger.e(exception.message)
-            bleNotifyCallback?.callNotifyFail(exception)
-            return false
-        }
-        val success: Boolean
-        var writeDescriptorCode: Int? = null
+        return true
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun writeDescriptor(bluetoothGatt: BluetoothGatt,
+                                descriptor: BluetoothGattDescriptor,
+                                enable: Boolean): Int {
+        val writeDescriptorCode: Int
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             writeDescriptorCode = if (enable) {
                 bluetoothGatt.writeDescriptor(descriptor, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
             } else {
                 bluetoothGatt.writeDescriptor(descriptor, BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE)
             }
-            success = writeDescriptorCode == BluetoothStatusCodes.SUCCESS
         } else {
             @Suppress("DEPRECATION")
             descriptor.value = if (enable) {
@@ -240,30 +292,10 @@ internal class BleNotifyRequest(
                 BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
             }
             @Suppress("DEPRECATION")
-            val writeDescriptor: Boolean = bluetoothGatt.writeDescriptor(descriptor)
-            success = writeDescriptor == true
+            bluetoothGatt.writeDescriptor(descriptor)
+            writeDescriptorCode = -1
         }
-        if (!success) {
-            //true, if the write operation was initiated successfully Value is
-            // BluetoothStatusCodes.SUCCESS = 0,
-            // BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION = 6,
-            // BluetoothStatusCodes.ERROR_DEVICE_NOT_CONNECTED = 4,
-            // BluetoothStatusCodes.ERROR_PROFILE_SERVICE_NOT_BOUND = 8,
-            // BluetoothStatusCodes.ERROR_GATT_WRITE_NOT_ALLOWED = 200,
-            // BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY = 201,
-            // BluetoothStatusCodes.ERROR_UNKNOWN = 2147483647,
-            // BluetoothStatusCodes.ERROR_NO_ACTIVE_DEVICES = 13,
-            val exception = UnDefinedException(
-                "$notifyUUID -> -> 设置Indicate失败，错误可能是没有权限、" +
-                        "未连接、服务未绑定、不可写、请求忙碌等，code = $writeDescriptorCode",
-                EXCEPTION_CODE_DESCRIPTOR_FAIL
-            )
-            cancelNotifyJob(notifyUUID, getTaskId(notifyUUID))
-            BleLogger.e(exception.message)
-            bleNotifyCallback?.callNotifyFail(exception)
-            return false
-        }
-        return true
+        return writeDescriptorCode
     }
 
     private fun getTaskId(uuid: String?) = NOTIFY_TASK_ID + uuid

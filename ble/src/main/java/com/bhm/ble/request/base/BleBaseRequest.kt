@@ -8,6 +8,7 @@ package com.bhm.ble.request.base
 import android.bluetooth.BluetoothGatt
 import android.util.SparseArray
 import com.bhm.ble.callback.*
+import com.bhm.ble.data.BleDescriptorGetType
 import com.bhm.ble.device.BleDevice
 
 
@@ -67,7 +68,7 @@ internal interface BleBaseRequest {
     fun notify(bleDevice: BleDevice,
                serviceUUID: String,
                notifyUUID: String,
-               useCharacteristicDescriptor: Boolean = false,
+               bleDescriptorGetType: BleDescriptorGetType = BleDescriptorGetType.Default,
                bleNotifyCallback: BleNotifyCallback.() -> Unit)
 
     /**
@@ -76,7 +77,7 @@ internal interface BleBaseRequest {
     fun stopNotify(bleDevice: BleDevice,
                    serviceUUID: String,
                    notifyUUID: String,
-                   useCharacteristicDescriptor: Boolean = false): Boolean
+                   bleDescriptorGetType: BleDescriptorGetType = BleDescriptorGetType.Default): Boolean
 
     /**
      * indicate
@@ -84,7 +85,7 @@ internal interface BleBaseRequest {
     fun indicate(bleDevice: BleDevice,
                  serviceUUID: String,
                  indicateUUID: String,
-                 useCharacteristicDescriptor: Boolean = false,
+                 bleDescriptorGetType: BleDescriptorGetType = BleDescriptorGetType.Default,
                  bleIndicateCallback: BleIndicateCallback.() -> Unit)
 
     /**
@@ -93,7 +94,7 @@ internal interface BleBaseRequest {
     fun stopIndicate(bleDevice: BleDevice,
                      serviceUUID: String,
                      indicateUUID: String,
-                     useCharacteristicDescriptor: Boolean = false): Boolean
+                     bleDescriptorGetType: BleDescriptorGetType = BleDescriptorGetType.Default): Boolean
 
     /**
      * 读取信号值

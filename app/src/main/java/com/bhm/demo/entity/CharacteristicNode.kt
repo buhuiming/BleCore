@@ -20,6 +20,9 @@ class CharacteristicNode(var characteristicName: String,
                          var characteristicUUID: String,
                          var characteristicProperties: String,
                          var characteristicIntProperties: Int,
+                         var enableNotify: Boolean = false,
+                         var enableIndicate: Boolean = false,
+                         var enableWrite: Boolean = false,
 )  : BaseExpandNode() {
 
     init {

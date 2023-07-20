@@ -5,10 +5,12 @@
  */
 package com.bhm.demo.ui
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import android.content.Intent
 import android.os.Build
 import android.view.KeyEvent
+import android.widget.CheckBox
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -52,6 +54,11 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
 
     private var connectionPriority = BluetoothGatt.CONNECTION_PRIORITY_BALANCED
 
+    private var operateCallback: ((checkBox: CheckBox?,
+                                   operateType: OperateType,
+                                   isChecked: Boolean,
+                                   node: CharacteristicNode) -> Unit)? = null
+
     override fun initData() {
         super.initData()
         AppTheme.setStatusBarColor(this, R.color.purple_500)
@@ -81,23 +88,22 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
     }
 
     private fun initList() {
-        val layoutManager = LinearLayoutManager(this)
+        val layoutManager = LinearLayoutManager(applicationContext)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         viewBinding.recyclerView.layoutManager = layoutManager
-        viewBinding.recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
-        expandAdapter = DetailsExpandAdapter(viewModel.getListData(getBleDevice())) {
-                checkBox, operateType, isChecked, node ->
+        viewBinding.recyclerView.addItemDecoration(DividerItemDecoration(applicationContext, DividerItemDecoration.VERTICAL))
+        operateCallback = { checkBox, operateType, isChecked, node ->
             when (operateType) {
                 is OperateType.Write -> {
                     if (isChecked) {
                         if (viewBinding.btnSend.isEnabled) {
                             checkBox?.isChecked = false
-                            Toast.makeText(this, "请取消其他特征值写操作", Toast.LENGTH_SHORT).show()
-                            return@DetailsExpandAdapter
+                            Toast.makeText(applicationContext, "请取消其他特征值写操作", Toast.LENGTH_SHORT).show()
+                        } else {
+                            viewBinding.btnSend.isEnabled = true
+                            viewBinding.etContent.isEnabled = true
+                            currentSendNode = node
                         }
-                        viewBinding.btnSend.isEnabled = true
-                        viewBinding.etContent.isEnabled = true
-                        currentSendNode = node
                     } else {
                         viewBinding.btnSend.isEnabled = false
                         viewBinding.etContent.isEnabled = false
@@ -105,38 +111,31 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
                     }
                 }
                 is OperateType.Read -> {
-                    viewModel.readData(getBleDevice(), node.serviceUUID, node.characteristicUUID)
+                    viewModel.readData(getBleDevice(), node)
                 }
                 is OperateType.Notify -> {
                     if (isChecked) {
-                        viewModel.notify(getBleDevice(), node.serviceUUID, node.characteristicUUID) {
-                            if (!isFinishing) {
-                                checkBox?.isChecked = false
-                            }
-                        }
+                        viewModel.notify(getBleDevice(), node)
                     } else {
-                        viewModel.stopNotify(getBleDevice(), node.serviceUUID, node.characteristicUUID)
+                        viewModel.stopNotify(getBleDevice(), node)
                     }
                 }
                 is OperateType.Indicate -> {
                     if (isChecked) {
-                        viewModel.indicate(getBleDevice(), node.serviceUUID, node.characteristicUUID) {
-                            if (!isFinishing) {
-                                checkBox?.isChecked = false
-                            }
-                        }
+                        viewModel.indicate(getBleDevice(), node)
                     } else {
-                        viewModel.stopIndicate(getBleDevice(), node.serviceUUID, node.characteristicUUID)
+                        viewModel.stopIndicate(getBleDevice(), node)
                     }
                 }
             }
         }
+        expandAdapter = DetailsExpandAdapter(viewModel.getListData(getBleDevice()), operateCallback)
         viewBinding.recyclerView.adapter = expandAdapter
         if ((expandAdapter?.data?.size?: 0) > 0) {
             expandAdapter?.expand(0)
         }
 
-        val logLayoutManager = LinearLayoutManager(this)
+        val logLayoutManager = LinearLayoutManager(applicationContext)
         logLayoutManager.orientation = LinearLayoutManager.VERTICAL
         viewBinding.logRecyclerView.setHasFixedSize(true)
         viewBinding.logRecyclerView.layoutManager = logLayoutManager
@@ -146,6 +145,7 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun initEvent() {
         super.initEvent()
         lifecycleScope.launch {
@@ -154,6 +154,13 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
                 val position = viewModel.listLogData.size - 1
                 loggerListAdapter?.notifyItemInserted(position)
                 viewBinding.logRecyclerView.smoothScrollToPosition(position)
+            }
+        }
+        lifecycleScope.launch {
+            viewModel.listRefreshStateFlow.collect {
+                if (it.isNotEmpty()) {
+                    expandAdapter?.notifyDataSetChanged()
+                }
             }
         }
 
@@ -200,18 +207,17 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
             }
             val content = viewBinding.etContent.text.toString()
             if (content.isEmpty()) {
-                Toast.makeText(this, "请输入数据", Toast.LENGTH_SHORT).show()
+                Toast.makeText(applicationContext, "请输入数据", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             if (currentSendNode == null) {
-                Toast.makeText(this, "请选择特征值写操作", Toast.LENGTH_SHORT).show()
+                Toast.makeText(applicationContext, "请选择特征值写操作", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             currentSendNode?.let { node ->
                 viewModel.writeData(
                     getBleDevice(),
-                    node.serviceUUID,
-                    node.characteristicUUID,
+                    node,
                     content
                 )
             }
@@ -246,5 +252,11 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
             return true
         }
         return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        expandAdapter = null
+        operateCallback = null
     }
 }

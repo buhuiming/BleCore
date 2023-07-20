@@ -11,6 +11,7 @@ import android.content.Context
 import android.util.SparseArray
 import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.callback.*
+import com.bhm.ble.data.BleDescriptorGetType
 import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.BleBaseRequest
@@ -178,19 +179,73 @@ class BleManager private constructor() {
     /**
      * notify
      */
+    @Deprecated(message = "请使用BleDescriptorGetType参数方式",
+        replaceWith = ReplaceWith(
+            "notify(BleDevice, String, String, BleDescriptorGetType, BleNotifyCallback)"
+        )
+    )
     @Synchronized
     fun notify(bleDevice: BleDevice,
                serviceUUID: String,
                notifyUUID: String,
                useCharacteristicDescriptor: Boolean = false,
                bleNotifyCallback: BleNotifyCallback.() -> Unit) {
+        notify(
+            bleDevice = bleDevice,
+            serviceUUID = serviceUUID,
+            notifyUUID = notifyUUID,
+            bleDescriptorGetType = if (useCharacteristicDescriptor) {
+                BleDescriptorGetType.CharacteristicDescriptor
+            } else {
+                BleDescriptorGetType.Default
+            },
+            bleNotifyCallback = bleNotifyCallback,
+        )
+    }
+
+    /**
+     * notify
+     */
+    @Synchronized
+    fun notify(bleDevice: BleDevice,
+               serviceUUID: String,
+               notifyUUID: String,
+               bleDescriptorGetType: BleDescriptorGetType = BleDescriptorGetType.Default,
+               bleNotifyCallback: BleNotifyCallback.() -> Unit) {
         checkInitialize()
         bleBaseRequest?.notify(
             bleDevice,
             serviceUUID,
             notifyUUID,
-            useCharacteristicDescriptor,
+            bleDescriptorGetType,
             bleNotifyCallback
+        )
+    }
+
+    /**
+     * stop notify
+     */
+    @Deprecated(message = "请使用BleDescriptorGetType参数方式",
+        replaceWith = ReplaceWith(
+            "stopNotify(BleDevice, String, String, BleDescriptorGetType)"
+        )
+    )
+    @Synchronized
+    fun stopNotify(
+        bleDevice: BleDevice,
+        serviceUUID: String,
+        notifyUUID: String,
+        useCharacteristicDescriptor: Boolean = false
+    ): Boolean? {
+        return stopNotify(
+            bleDevice = bleDevice,
+            serviceUUID = serviceUUID,
+            notifyUUID = notifyUUID,
+            bleDescriptorGetType = if (useCharacteristicDescriptor) {
+                BleDescriptorGetType.CharacteristicDescriptor
+            } else {
+                BleDescriptorGetType.Default
+            },
         )
     }
 
@@ -202,14 +257,41 @@ class BleManager private constructor() {
         bleDevice: BleDevice,
         serviceUUID: String,
         notifyUUID: String,
-        useCharacteristicDescriptor: Boolean = false
+        bleDescriptorGetType: BleDescriptorGetType = BleDescriptorGetType.Default,
     ): Boolean? {
         checkInitialize()
         return bleBaseRequest?.stopNotify(
             bleDevice,
             serviceUUID,
             notifyUUID,
-            useCharacteristicDescriptor
+            bleDescriptorGetType
+        )
+    }
+
+    /**
+     * indicate
+     */
+    @Deprecated(message = "请使用BleDescriptorGetType参数方式",
+        replaceWith = ReplaceWith(
+            "indicate(BleDevice, String, String, BleDescriptorGetType, BleIndicateCallback)"
+        )
+    )
+    @Synchronized
+    fun indicate(bleDevice: BleDevice,
+                 serviceUUID: String,
+                 indicateUUID: String,
+                 useCharacteristicDescriptor: Boolean = false,
+                 bleIndicateCallback: BleIndicateCallback.() -> Unit) {
+        indicate(
+            bleDevice = bleDevice,
+            serviceUUID = serviceUUID,
+            indicateUUID = indicateUUID,
+            bleDescriptorGetType = if (useCharacteristicDescriptor) {
+                BleDescriptorGetType.CharacteristicDescriptor
+            } else {
+                BleDescriptorGetType.Default
+            },
+            bleIndicateCallback = bleIndicateCallback
         )
     }
 
@@ -220,15 +302,42 @@ class BleManager private constructor() {
     fun indicate(bleDevice: BleDevice,
                  serviceUUID: String,
                  indicateUUID: String,
-                 useCharacteristicDescriptor: Boolean = false,
+                 bleDescriptorGetType: BleDescriptorGetType = BleDescriptorGetType.Default,
                  bleIndicateCallback: BleIndicateCallback.() -> Unit) {
         checkInitialize()
         bleBaseRequest?.indicate(
             bleDevice,
             serviceUUID,
             indicateUUID,
-            useCharacteristicDescriptor,
+            bleDescriptorGetType,
             bleIndicateCallback
+        )
+    }
+
+    /**
+     * stop indicate
+     */
+    @Deprecated(message = "请使用BleDescriptorGetType参数方式",
+        replaceWith = ReplaceWith(
+            "stopIndicate(BleDevice, String, String, BleDescriptorGetType)"
+        )
+    )
+    @Synchronized
+    fun stopIndicate(
+        bleDevice: BleDevice,
+        serviceUUID: String,
+        indicateUUID: String,
+        useCharacteristicDescriptor: Boolean = false
+    ): Boolean? {
+        return stopIndicate(
+            bleDevice = bleDevice,
+            serviceUUID = serviceUUID,
+            indicateUUID = indicateUUID,
+            bleDescriptorGetType = if (useCharacteristicDescriptor) {
+                BleDescriptorGetType.CharacteristicDescriptor
+            } else {
+                BleDescriptorGetType.Default
+            },
         )
     }
 
@@ -240,14 +349,14 @@ class BleManager private constructor() {
         bleDevice: BleDevice,
         serviceUUID: String,
         indicateUUID: String,
-        useCharacteristicDescriptor: Boolean = false
+        bleDescriptorGetType: BleDescriptorGetType = BleDescriptorGetType.Default
     ): Boolean? {
         checkInitialize()
         return bleBaseRequest?.stopIndicate(
             bleDevice,
             serviceUUID,
             indicateUUID,
-            useCharacteristicDescriptor
+            bleDescriptorGetType
         )
     }
 

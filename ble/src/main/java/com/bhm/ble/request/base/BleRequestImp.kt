@@ -193,7 +193,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     override fun notify(bleDevice: BleDevice,
                         serviceUUID: String,
                         notifyUUID: String,
-                        useCharacteristicDescriptor: Boolean,
+                        bleDescriptorGetType: BleDescriptorGetType,
                         bleNotifyCallback: BleNotifyCallback.() -> Unit) {
         val callback = BleNotifyCallback()
         callback.apply(bleNotifyCallback)
@@ -202,7 +202,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             it.enableCharacteristicNotify(
                 serviceUUID,
                 notifyUUID,
-                useCharacteristicDescriptor,
+                bleDescriptorGetType,
                 callback
             )
             return
@@ -219,14 +219,14 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         bleDevice: BleDevice,
         serviceUUID: String,
         notifyUUID: String,
-        useCharacteristicDescriptor: Boolean
+        bleDescriptorGetType: BleDescriptorGetType
     ): Boolean {
         val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.let {
             return it.disableCharacteristicNotify(
                 serviceUUID,
                 notifyUUID,
-                useCharacteristicDescriptor
+                bleDescriptorGetType
             )
         }
         BleLogger.e("$notifyUUID -> StopNotify失败，设备未连接")
@@ -239,7 +239,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     override fun indicate(bleDevice: BleDevice,
                           serviceUUID: String,
                           indicateUUID: String,
-                          useCharacteristicDescriptor: Boolean,
+                          bleDescriptorGetType: BleDescriptorGetType,
                           bleIndicateCallback: BleIndicateCallback.() -> Unit) {
         val callback = BleIndicateCallback()
         callback.apply(bleIndicateCallback)
@@ -248,7 +248,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             it.enableCharacteristicIndicate(
                 serviceUUID,
                 indicateUUID,
-                useCharacteristicDescriptor,
+                bleDescriptorGetType,
                 callback
             )
             return
@@ -265,14 +265,14 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         bleDevice: BleDevice,
         serviceUUID: String,
         indicateUUID: String,
-        useCharacteristicDescriptor: Boolean
+        bleDescriptorGetType: BleDescriptorGetType
     ): Boolean {
         val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.let {
             return it.disableCharacteristicIndicate(
                 serviceUUID,
                 indicateUUID,
-                useCharacteristicDescriptor
+                bleDescriptorGetType
             )
         }
         return false

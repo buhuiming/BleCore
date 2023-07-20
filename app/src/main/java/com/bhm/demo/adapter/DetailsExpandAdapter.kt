@@ -93,6 +93,9 @@ class DetailsExpandAdapter(nodeList: MutableList<BaseNode>,
             val btnReadData = helper.getView<Button>(R.id.btnReadData)
             val cbNotify = helper.getView<CheckBox>(R.id.cbNotify)
             val cbIndicate = helper.getView<CheckBox>(R.id.cbIndicate)
+            cbWrite.isChecked = node.enableWrite
+            cbNotify.isChecked = node.enableNotify
+            cbIndicate.isChecked = node.enableIndicate
 
             val charaProp: Int = node.characteristicIntProperties
             helper.setGone(R.id.btnReadData, charaProp and BluetoothGattCharacteristic.PROPERTY_READ <= 0)
@@ -105,6 +108,7 @@ class DetailsExpandAdapter(nodeList: MutableList<BaseNode>,
                 if (ViewUtil.isInvalidClick(buttonView)) {
                     return@setOnClickListener
                 }
+                node.enableWrite = cbWrite.isChecked
                 val isChecked = cbWrite.isChecked
                 operateCallback?.invoke(buttonView as CheckBox, OperateType.Write, isChecked, node)
             }
@@ -118,6 +122,7 @@ class DetailsExpandAdapter(nodeList: MutableList<BaseNode>,
                 if (ViewUtil.isInvalidClick(buttonView)) {
                     return@setOnClickListener
                 }
+                node.enableNotify = cbNotify.isChecked
                 val isChecked = cbNotify.isChecked
                 operateCallback?.invoke(buttonView as CheckBox, OperateType.Notify, isChecked, node)
             }
@@ -125,6 +130,7 @@ class DetailsExpandAdapter(nodeList: MutableList<BaseNode>,
                 if (ViewUtil.isInvalidClick(buttonView)) {
                     return@setOnClickListener
                 }
+                node.enableIndicate = cbIndicate.isChecked
                 val isChecked = cbIndicate.isChecked
                 operateCallback?.invoke(buttonView as CheckBox, OperateType.Indicate, isChecked, node)
             }

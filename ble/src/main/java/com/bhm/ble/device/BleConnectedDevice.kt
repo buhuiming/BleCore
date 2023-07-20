@@ -13,6 +13,7 @@ import android.os.Build
 import android.util.SparseArray
 import com.bhm.ble.callback.*
 import com.bhm.ble.control.BleTaskQueue
+import com.bhm.ble.data.BleDescriptorGetType
 import com.bhm.ble.request.*
 
 
@@ -220,14 +221,14 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
      */
     fun enableCharacteristicNotify(serviceUUID: String,
                                    notifyUUID: String,
-                                   useCharacteristicDescriptor: Boolean,
+                                   bleDescriptorGetType: BleDescriptorGetType,
                                    bleNotifyCallback: BleNotifyCallback
     ) {
         initBleNotifyRequest()
         bleNotifyRequest?.enableCharacteristicNotify(
             serviceUUID,
             notifyUUID,
-            useCharacteristicDescriptor,
+            bleDescriptorGetType,
             bleNotifyCallback
         )
     }
@@ -237,13 +238,13 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
      */
     fun disableCharacteristicNotify(serviceUUID: String,
                                     notifyUUID: String,
-                                    useCharacteristicDescriptor: Boolean
+                                    bleDescriptorGetType: BleDescriptorGetType
     ): Boolean {
         initBleNotifyRequest()
         return bleNotifyRequest?.disableCharacteristicNotify(
             serviceUUID,
             notifyUUID,
-            useCharacteristicDescriptor
+            bleDescriptorGetType
         )?: false
     }
 
@@ -252,14 +253,14 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
      */
     fun enableCharacteristicIndicate(serviceUUID: String,
                                      indicateUUID: String,
-                                     useCharacteristicDescriptor: Boolean,
+                                     bleDescriptorGetType: BleDescriptorGetType,
                                      bleIndicateCallback: BleIndicateCallback
     ) {
         initBleIndicateRequest()
         bleIndicateRequest?.enableCharacteristicIndicate(
             serviceUUID,
             indicateUUID,
-            useCharacteristicDescriptor,
+            bleDescriptorGetType,
             bleIndicateCallback
         )
     }
@@ -269,13 +270,13 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
      */
     fun disableCharacteristicIndicate(serviceUUID: String,
                                       indicateUUID: String,
-                                      useCharacteristicDescriptor: Boolean
+                                      bleDescriptorGetType: BleDescriptorGetType
     ): Boolean {
         initBleIndicateRequest()
         return bleIndicateRequest?.disableCharacteristicIndicate(
             serviceUUID,
             indicateUUID,
-            useCharacteristicDescriptor
+            bleDescriptorGetType
         )?: false
     }
 
