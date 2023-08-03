@@ -130,7 +130,7 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewBinding> : HttpActivity(
                 }
             }
 
-            if (refusePermission.size > 0) {
+            if (refusePermission.isNotEmpty()) {
                 permissionRefuse?.let {
                     it(refusePermission)
                 }
@@ -156,7 +156,7 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewBinding> : HttpActivity(
     }
 
     private fun createViewModel(owner: ViewModelStoreOwner, viewModel: VM): VM {
-        return ViewModelProvider(owner).get(viewModel.javaClass)
+        return ViewModelProvider(owner)[viewModel.javaClass]
     }
 
     fun startActivity(intent: Intent, arCallback: (resultCode: Int, resultIntent: Intent?) -> Unit) {

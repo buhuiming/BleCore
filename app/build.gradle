@@ -43,7 +43,7 @@ dependencies {
 
     implementation 'com.github.buhuiming:SupportCore:1.0.2-beta01'
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.11'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.12'
 
     implementation project(":ble")
 }

@@ -3,7 +3,6 @@
  * 不能修改和删除上面的版权声明
  * 此代码属于buhuiming编写，在未经允许的情况下不得传播复制
  */
-@file:Suppress("SENSELESS_COMPARISON")
 
 package com.bhm.ble.control
 
@@ -14,8 +13,15 @@ import com.bhm.ble.data.Constants.COMPLETED
 import com.bhm.ble.data.Constants.UN_COMPLETE
 import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.utils.BleLogger
-import kotlinx.coroutines.*
-import java.util.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 
 
 /**
@@ -138,14 +144,14 @@ internal class BleTaskQueue(private val tag: String = "") {
         }
     }
 
-    fun doNextTask() {
-        val task = taskList.firstOrNull()
-        if (task?.completed() == UN_COMPLETE || task?.completed() == CANCEL_UN_COMPLETE) {
-            doNextTask()
-            return
-        }
-        sendTask(task)
-    }
+//    fun doNextTask() {
+//        val task = taskList.firstOrNull()
+//        if (task?.completed() == UN_COMPLETE || task?.completed() == CANCEL_UN_COMPLETE) {
+//            doNextTask()
+//            return
+//        }
+//        sendTask(task)
+//    }
 
     /**
      * 移除任务
