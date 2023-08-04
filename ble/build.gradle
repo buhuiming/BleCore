@@ -3,6 +3,12 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+ext.GROUP = "com.bhm.ble"
+ext.POM_ARTIFACT_ID = "BleCore"
+ext.VERSION_NAME = "1.1.0"
+//引用gradle_upload.gradle
+apply from: "${project.rootDir}/maven_upload.gradle"
+
 android {
     namespace 'com.bhm.ble'
     compileSdk 33

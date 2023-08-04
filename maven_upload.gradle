@@ -1,0 +1,52 @@
+apply plugin: 'maven-publish'
+
+def RELEASE_REPOSITORY_URL = "http://10.70.12.12:8081/repository/maven_bsz_release/"
+def SNAPSHOT_REPOSITORY_URL = "http://10.70.12.12:8081/repository/maven_bsz_snapshot/"
+def NEXUS_USERNAME = "android"
+def NEXUS_PASSWORD = "Bsz@123"
+
+afterEvaluate {
+    publishing {
+        repositories {
+            maven {
+                allowInsecureProtocol(true)
+                name("AndroidReleaseMaven")
+                url = RELEASE_REPOSITORY_URL
+                credentials {
+                    username = NEXUS_USERNAME
+                    password = NEXUS_PASSWORD
+                }
+            }
+            maven {
+                name("AndroidSnapshotMaven")
+                url = SNAPSHOT_REPOSITORY_URL
+                credentials {
+                    username = NEXUS_USERNAME
+                    password = NEXUS_PASSWORD
+                }
+            }
+        }
+        publications {
+            Production(MavenPublication) {
+                from components.release
+                artifact androidSourcesJar //打包源码，去除这行打的包将看不到源码
+                groupId = GROUP
+                artifactId = POM_ARTIFACT_ID
+                version = VERSION_NAME
+            }
+            Develop(MavenPublication) {
+                from components.debug
+                artifact androidSourcesJar //打包源码，去除这行打的包将看不到源码
+                groupId = GROUP
+                artifactId = POM_ARTIFACT_ID
+                version = "${VERSION_NAME}-SNAPSHOT"
+            }
+        }
+    }
+}
+
+// 用于打包源代码的任务
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from android.sourceSets.main.java.srcDirs
+}
