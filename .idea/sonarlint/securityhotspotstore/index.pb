@@ -1,6 +1,4 @@
 
-g
-7ble/src/main/java/com/bhm/ble/request/BleScanRequest.kt,f\9\f9ec0c0f9c52083da2ace1694610357d4112f7e6
 ^
 .ble/src/main/java/com/bhm/ble/utils/BleUtil.kt,5\4\54c7e934d1de2c5951d7e1da694b22a7adf9a75c
 ^
@@ -35,8 +33,6 @@ d
 4ble/src/main/java/com/bhm/ble/control/BleTaskList.kt,1\b\1b99523f07d18b29693dbf6b064bf9bd82446987
 k
 ;ble/src/main/java/com/bhm/ble/request/BleIndicateRequest.kt,f\0\f098d04f62ef69cedfc781eb9212c5c5bbf1dc88
-@
-ble/build.gradle,f\f\ff8b003b156eab859952b4376b9cfbfac02fd59d
 `
 0ble/src/main/java/com/bhm/ble/control/BleTask.kt,d\3\d396928ac15e23fca51b0277da6aac0508305f1d
 _
