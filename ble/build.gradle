@@ -3,11 +3,11 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
-ext.GROUP = "com.microport.ble"
-ext.POM_ARTIFACT_ID = "BleCore"
-ext.VERSION_NAME = "1.1.1"
-//引用gradle_upload.gradle
-apply from: "${project.rootDir}/maven_upload.gradle"
+//ext.GROUP = "com.microport.ble"
+//ext.POM_ARTIFACT_ID = "BleCore"
+//ext.VERSION_NAME = "1.1.1"
+////引用gradle_upload.gradle
+//apply from: "${project.rootDir}/maven_upload.gradle"
 
 android {
     namespace 'com.bhm.ble'
