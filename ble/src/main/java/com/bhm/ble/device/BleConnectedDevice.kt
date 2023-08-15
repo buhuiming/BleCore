@@ -365,6 +365,11 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         bleConnectRequest?.removeBleConnectCallback()
     }
 
+    fun replaceBleConnectCallback(bleConnectCallback: BleConnectCallback) {
+        bleConnectRequest?.removeBleConnectCallback()
+        bleConnectRequest?.addBleConnectCallback(bleConnectCallback)
+    }
+
     fun removeAllCharacterCallback() {
         removeRssiCallback()
         removeMtuChangedCallback()

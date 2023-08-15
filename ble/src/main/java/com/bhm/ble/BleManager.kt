@@ -479,6 +479,23 @@ class BleManager private constructor() {
     }
 
     /**
+     * 替换该设备的连接回调
+     */
+    @Synchronized
+    fun replaceBleConnectCallback(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit) {
+        checkInitialize()
+        bleBaseRequest?.replaceBleConnectCallback(bleDevice, bleConnectCallback)
+    }
+
+    /**
+     * 替换该设备的连接回调
+     */
+    @Synchronized
+    fun replaceBleConnectCallback(address: String, bleConnectCallback: BleConnectCallback.() -> Unit) {
+        replaceBleConnectCallback(buildBleDeviceByDeviceAddress(address), bleConnectCallback)
+    }
+
+    /**
      * 移除该设备的Indicate回调
      */
     @Synchronized

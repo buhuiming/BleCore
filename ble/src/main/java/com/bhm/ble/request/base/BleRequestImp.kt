@@ -181,6 +181,16 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
+     * 替换该设备的连接回调
+     */
+    override fun replaceBleConnectCallback(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit) {
+        val callback = BleConnectCallback()
+        callback.apply(bleConnectCallback)
+        val request = bleConnectedDeviceManager.buildBleConnectedDevice(bleDevice)
+        request?.replaceBleConnectCallback(callback)
+    }
+
+    /**
      * 获取设备的BluetoothGatt对象
      */
     override fun getBluetoothGatt(bleDevice: BleDevice): BluetoothGatt? {

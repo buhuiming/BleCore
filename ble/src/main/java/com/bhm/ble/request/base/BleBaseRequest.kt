@@ -146,6 +146,11 @@ internal interface BleBaseRequest {
     fun removeBleConnectCallback(bleDevice: BleDevice)
 
     /**
+     * 替换该设备的连接回调
+     */
+    fun replaceBleConnectCallback(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit)
+
+    /**
      * 移除该设备的Indicate回调
      */
     fun removeBleIndicateCallback(bleDevice: BleDevice, indicateUUID: String)
