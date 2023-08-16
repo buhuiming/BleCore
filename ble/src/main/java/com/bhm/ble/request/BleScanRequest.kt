@@ -247,20 +247,20 @@ internal class BleScanRequest private constructor() : Request() {
             result?.let {
                 val bleDevice = BleUtil.scanResultToBleDevice(it)
                 BleLogger.d(bleDevice.toString())
-                if (bleDevice.deviceName == null) {
-                    filterData(bleDevice)
-                } else if (getBleOptions()?.scanDeviceNames?.isEmpty() == true) {
-                    filterData(bleDevice)
-                } else {
-                    getBleOptions()?.scanDeviceNames?.forEach { scanDeviceName ->
-                        if ((getBleOptions()?.containScanDeviceName == true &&
-                                    bleDevice.deviceName.uppercase()
-                                        .contains(scanDeviceName.uppercase())) ||
-                            bleDevice.deviceName.uppercase() == scanDeviceName.uppercase()
-                        ) {
-                            filterData(bleDevice)
+                if ((getBleOptions()?.scanDeviceNames?.size?: 0 ) > 0) {
+                    if (!bleDevice.deviceName.isNullOrEmpty()) {
+                        getBleOptions()?.scanDeviceNames?.forEach { scanDeviceName ->
+                            if ((getBleOptions()?.containScanDeviceName == true &&
+                                        bleDevice.deviceName.uppercase()
+                                            .contains(scanDeviceName.uppercase())) ||
+                                bleDevice.deviceName.uppercase() == scanDeviceName.uppercase()
+                            ) {
+                                filterData(bleDevice)
+                            }
                         }
                     }
+                } else {
+                    filterData(bleDevice)
                 }
             }
         }
