@@ -1,8 +1,4 @@
 
-^
-.ble/src/main/java/com/bhm/ble/utils/BleUtil.kt,5\4\54c7e934d1de2c5951d7e1da694b22a7adf9a75c
-^
-.app/src/main/java/com/bhm/demo/BaseActivity.kt,b\1\b14e8172266cc572270130e97f6208cb5135addc
 A
 gradle.properties,2\a\2afbb999f001938c88fa43fc2ef52abf0f8213e4
 ;
@@ -37,3 +33,31 @@ _
 /ble/src/main/java/com/bhm/ble/data/Constants.kt,4\4\443bfeba92309bf514f3e39be0961d08b0b756a7
 e
 5ble/src/main/java/com/bhm/ble/attribute/BleOptions.kt,7\f\7f1de9718fce9bf5136d83e81cb0501d55a9b34b
+i
+9ble/src/main/java/com/bhm/ble/callback/BleBaseCallback.kt,4\0\40ce750d38060383ffa2ca21095e83385593ead2
+e
+5ble/src/main/java/com/bhm/ble/request/base/Request.kt,9\8\98cca74c1c0c3e8343788bf02a1700ac660f893a
+h
+8ble/src/main/java/com/bhm/ble/request/BleWriteRequest.kt,5\7\57d9bfdb7b6ac402d17ddce46e6fef40899e1847
+e
+5ble/src/main/java/com/bhm/ble/control/BleTaskQueue.kt,4\7\47e330b37492be03483c7657e9fcec3513e5ec0f
+P
+ ble/src/main/AndroidManifest.xml,7\e\7e46852eb5ec00e23c65e3159310c13fe562f47b
+e
+5app/src/main/java/com/bhm/demo/constants/Constants.kt,2\7\27e83a3b87a581d845f69ecf9f8b72986544323d
+l
+<ble/src/main/java/com/bhm/ble/request/base/BleBaseRequest.kt,9\5\95a09dc1f0e4759f844588cc189d9efa8f7096ac
+k
+;ble/src/main/java/com/bhm/ble/request/base/BleRequestImp.kt,5\9\59b695a7f32ff772645bf24809dd7a5d616406ed
+@
+app/build.gradle,f\4\f4a01d6a4fcb971362ec00a83903fd3902f52164
+<
+build.gradle,f\0\f07866736216be0ee2aba49e392191aeae700a35
+C
+maven_upload.gradle,e\5\e55180f1d7a6cd9be128e535fbcc7a843c8a119b
+k
+;app/src/main/java/com/bhm/demo/adapter/DeviceListAdapter.kt,e\f\effe1b1ab9b158327dc30bc833b383e2026c877b
+i
+9app/src/main/java/com/bhm/demo/entity/RefreshBleDevice.kt,1\3\137fe65c8d5c99e0c766ad14d9fafef27bfdf44e
+P
+ app/src/main/AndroidManifest.xml,8\c\8c55c3ccc257e5907959013f99656e4c8ec3903e

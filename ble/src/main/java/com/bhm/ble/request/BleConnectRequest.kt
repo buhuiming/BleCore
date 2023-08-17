@@ -65,38 +65,38 @@ internal class BleConnectRequest(
         if (bleDevice.deviceInfo == null) {
             BleLogger.e("连接失败：BluetoothDevice为空")
             removeBleConnectedDevice()
-            bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.NullableBluetoothDevice)
+            bleConnectCallback.callConnectFail(createNewDeviceInfo(), BleConnectFailType.NullableBluetoothDevice)
             return
         }
         val bleManager = getBleManager()
         if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext)) {
             BleLogger.e("权限不足，请检查")
             removeBleConnectedDevice()
-            bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.NoBlePermission)
+            bleConnectCallback.callConnectFail(createNewDeviceInfo(), BleConnectFailType.NoBlePermission)
             return
         }
         if (!bleManager.isBleSupport()) {
             BleLogger.e("设备不支持蓝牙")
             removeBleConnectedDevice()
-            bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.UnSupportBle)
+            bleConnectCallback.callConnectFail(createNewDeviceInfo(), BleConnectFailType.UnSupportBle)
             return
         }
         if (!bleManager.isBleEnable()) {
             BleLogger.e("蓝牙未打开")
             removeBleConnectedDevice()
-            bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.BleDisable)
+            bleConnectCallback.callConnectFail(createNewDeviceInfo(), BleConnectFailType.BleDisable)
             return
         }
         if (lastState == BleConnectLastState.Connecting || lastState == BleConnectLastState.ConnectIdle) {
             BleLogger.e("连接中")
             removeBleConnectedDevice()
-            bleConnectCallback.callConnectFail(bleDevice, BleConnectFailType.AlreadyConnecting)
+            bleConnectCallback.callConnectFail(createNewDeviceInfo(), BleConnectFailType.AlreadyConnecting)
             return
         }
         if (bleManager.isConnected(bleDevice)) {
             lastState =  BleConnectLastState.Connected
             BleLogger.e("已连接")
-            bleConnectCallback.callConnectSuccess(bleDevice, bluetoothGatt)
+            bleConnectCallback.callConnectSuccess(createNewDeviceInfo(), bluetoothGatt)
             autoSetMtu()
             return
         }
@@ -111,23 +111,23 @@ internal class BleConnectRequest(
     fun disConnect() {
         if (bleDevice.deviceInfo == null) {
             BleLogger.e("断开失败：BluetoothDevice为空")
-            bleConnectCallback?.callConnectFail(bleDevice, BleConnectFailType.NullableBluetoothDevice)
+            bleConnectCallback?.callConnectFail(createNewDeviceInfo(), BleConnectFailType.NullableBluetoothDevice)
             return
         }
         val bleManager = getBleManager()
         if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext)) {
             BleLogger.e("权限不足，请检查")
-            bleConnectCallback?.callConnectFail(bleDevice, BleConnectFailType.NoBlePermission)
+            bleConnectCallback?.callConnectFail(createNewDeviceInfo(), BleConnectFailType.NoBlePermission)
             return
         }
         if (!bleManager.isBleSupport()) {
             BleLogger.e("设备不支持蓝牙")
-            bleConnectCallback?.callConnectFail(bleDevice, BleConnectFailType.UnSupportBle)
+            bleConnectCallback?.callConnectFail(createNewDeviceInfo(), BleConnectFailType.UnSupportBle)
             return
         }
         if (!bleManager.isBleEnable()) {
             BleLogger.e("蓝牙未打开")
-            bleConnectCallback?.callConnectFail(bleDevice, BleConnectFailType.BleDisable)
+            bleConnectCallback?.callConnectFail(createNewDeviceInfo(), BleConnectFailType.BleDisable)
             return
         }
         isActiveDisconnect.set(true)
@@ -145,7 +145,7 @@ internal class BleConnectRequest(
             BleLogger.e("${bleDevice.deviceAddress} -> 主动断开连接")
             bleConnectCallback?.callDisConnected(
                 isActiveDisconnect.get(),
-                bleDevice, bluetoothGatt, BluetoothGatt.GATT_SUCCESS
+                createNewDeviceInfo(), bluetoothGatt, BluetoothGatt.GATT_SUCCESS
             )
         }
     }
@@ -187,7 +187,7 @@ internal class BleConnectRequest(
                         BleLogger.e("${bleDevice.deviceAddress} -> 自动断开连接")
                         bleConnectCallback?.callDisConnected(
                             isActiveDisconnect.get(),
-                            bleDevice, gatt, status
+                            createNewDeviceInfo(), gatt, status
                         )
                     }
                 }
@@ -205,13 +205,13 @@ internal class BleConnectRequest(
             currentConnectRetryCount = 0
             lastState = BleConnectLastState.Connected
             isActiveDisconnect.set(false)
-            bleConnectCallback?.callConnectSuccess(bleDevice, bluetoothGatt)
+            bleConnectCallback?.callConnectSuccess(createNewDeviceInfo(), bluetoothGatt)
             autoSetMtu()
         } else {
             connectFail()
             BleLogger.e("${bleDevice.deviceAddress} -> 连接失败：未发现服务")
             bleConnectCallback?.callConnectFail(
-                bleDevice,
+                createNewDeviceInfo(),
                 BleConnectFailType.ConnectException(UnDefinedException("发现服务失败"))
             )
         }
@@ -242,7 +242,7 @@ internal class BleConnectRequest(
     fun close() {
         bleConnectCallback?.callDisConnected(
             isActiveDisconnect.get(),
-            bleDevice, bluetoothGatt, BluetoothGatt.GATT_SUCCESS
+            createNewDeviceInfo(), bluetoothGatt, BluetoothGatt.GATT_SUCCESS
         )
         lastState = BleConnectLastState.Disconnect
         disConnectGatt()
@@ -307,7 +307,7 @@ internal class BleConnectRequest(
                         connectFail()
                         BleLogger.e("${bleDevice.deviceAddress} -> 连接失败：超时")
                         bleConnectCallback?.callConnectFail(
-                            bleDevice,
+                            createNewDeviceInfo(),
                             BleConnectFailType.ConnectTimeOut
                         )
                     }
@@ -325,7 +325,7 @@ internal class BleConnectRequest(
                         connectFail()
                         BleLogger.e("${bleDevice.deviceAddress} -> 连接失败：${it.message}")
                         bleConnectCallback?.callConnectFail(
-                            bleDevice,
+                            createNewDeviceInfo(),
                             BleConnectFailType.ConnectException(it)
                         )
                         connectJob?.cancel(null)
@@ -377,7 +377,7 @@ internal class BleConnectRequest(
                 val exception = UnDefinedException("${bleDevice.deviceAddress} -> 发现服务失败")
                 BleLogger.e(exception.message)
                 bleConnectCallback?.callConnectFail(
-                    bleDevice,
+                    createNewDeviceInfo(),
                     BleConnectFailType.ConnectException(exception)
                 )
             }
@@ -418,6 +418,21 @@ internal class BleConnectRequest(
                     }
                 })
         }
+    }
+
+    private fun createNewDeviceInfo(): BleDevice {
+        if (bluetoothGatt == null || bluetoothGatt?.device == null) {
+            return bleDevice
+        }
+        return BleDevice(
+            deviceInfo = bluetoothGatt?.device?: bleDevice.deviceInfo,
+            deviceName = bluetoothGatt?.device?.name?: bleDevice.deviceName,
+            deviceAddress = bluetoothGatt?.device?.address?: bleDevice.deviceAddress,
+            rssi = bleDevice.rssi,
+            timestampNanos = bleDevice.timestampNanos,
+            scanRecord = bleDevice.scanRecord,
+            tag = bleDevice.tag,
+        )
     }
 
     /**
