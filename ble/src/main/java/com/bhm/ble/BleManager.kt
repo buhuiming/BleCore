@@ -4,6 +4,7 @@ package com.bhm.ble
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
@@ -111,16 +112,34 @@ class BleManager private constructor() {
     /**
      * 是否已连接
      * 操作断开连接后，getConnectionState马上回去到的状态还是连接状态，所以需要bleBaseRequest?.isConnected判断
+     *  @param simplySystemStatus 为true，只根据系统的状态规则；为false，会根据sdk的状态；
+     *  此字段的意义在于：有时，sdk资源被系统回收(状态未连接)，但是系统的状态是已连接。
      */
     @SuppressLint("MissingPermission")
-    fun isConnected(bleDevice: BleDevice?): Boolean {
+    fun isConnected(bleDeviceAddress: String, simplySystemStatus: Boolean = true): Boolean {
+        return isConnected(buildBleDeviceByDeviceAddress(bleDeviceAddress), simplySystemStatus)
+    }
+
+    @SuppressLint("MissingPermission")
+    fun isConnected(bleDevice: BleDevice?, simplySystemStatus: Boolean = true): Boolean {
         checkInitialize()
         if (!BleUtil.isPermission(application)) {
             return false
         }
         bleDevice?.let {
-            return bluetoothManager?.getConnectionState(it.deviceInfo, BluetoothProfile.GATT) ==
-                    BluetoothProfile.STATE_CONNECTED && bleBaseRequest?.isConnected(it) == true
+            val connectedDevices: List<BluetoothDevice>? = bluetoothManager?.getConnectedDevices(BluetoothProfile.GATT)
+            if (connectedDevices.isNullOrEmpty()) {
+                return false
+            }
+            for (connectedDevice in connectedDevices) {
+                if (it.deviceAddress == connectedDevice.address) {
+                    return if (simplySystemStatus) {
+                        true
+                    } else {
+                        bleBaseRequest?.isConnected(it) == true
+                    }
+                }
+            }
         }
         return false
     }
@@ -467,6 +486,19 @@ class BleManager private constructor() {
     fun getAllConnectedDevice(): MutableList<BleDevice>? {
         checkInitialize()
         return bleBaseRequest?.getAllConnectedDevice()
+    }
+
+    /**
+     * 获取系统已连接设备集合
+     */
+    @SuppressLint("MissingPermission")
+    @Synchronized
+    fun getSystemAllConnectedDevice(): MutableList<BluetoothDevice>? {
+        checkInitialize()
+        if (!BleUtil.isPermission(application)) {
+            return null
+        }
+        return bluetoothManager?.getConnectedDevices(BluetoothProfile.GATT)
     }
 
     /**
