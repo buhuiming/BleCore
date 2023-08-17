@@ -45,10 +45,6 @@ P
  ble/src/main/AndroidManifest.xml,7\e\7e46852eb5ec00e23c65e3159310c13fe562f47b
 e
 5app/src/main/java/com/bhm/demo/constants/Constants.kt,2\7\27e83a3b87a581d845f69ecf9f8b72986544323d
-l
-<ble/src/main/java/com/bhm/ble/request/base/BleBaseRequest.kt,9\5\95a09dc1f0e4759f844588cc189d9efa8f7096ac
-k
-;ble/src/main/java/com/bhm/ble/request/base/BleRequestImp.kt,5\9\59b695a7f32ff772645bf24809dd7a5d616406ed
 @
 app/build.gradle,f\4\f4a01d6a4fcb971362ec00a83903fd3902f52164
 <

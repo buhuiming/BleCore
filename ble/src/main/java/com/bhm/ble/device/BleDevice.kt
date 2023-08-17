@@ -88,6 +88,6 @@ data class BleDevice(
         }
     }
 
-    fun getKey() = deviceName + deviceAddress
+    fun getKey() = deviceAddress.toString()
 
 }

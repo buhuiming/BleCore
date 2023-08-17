@@ -3,20 +3,32 @@
  * 不能修改和删除上面的版权声明
  * 此代码属于buhuiming编写，在未经允许的情况下不得传播复制
  */
-@file:Suppress("SENSELESS_COMPARISON")
 
 package com.bhm.ble.request.base
 
 import android.bluetooth.BluetoothGatt
 import android.util.SparseArray
-import com.bhm.ble.callback.*
-import com.bhm.ble.control.*
-import com.bhm.ble.data.*
+import com.bhm.ble.callback.BleConnectCallback
+import com.bhm.ble.callback.BleIndicateCallback
+import com.bhm.ble.callback.BleMtuChangedCallback
+import com.bhm.ble.callback.BleNotifyCallback
+import com.bhm.ble.callback.BleReadCallback
+import com.bhm.ble.callback.BleRssiCallback
+import com.bhm.ble.callback.BleScanCallback
+import com.bhm.ble.callback.BleWriteCallback
+import com.bhm.ble.data.BleConnectFailType
+import com.bhm.ble.data.BleDescriptorGetType
+import com.bhm.ble.data.UnConnectedException
+import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.BleScanRequest
 import com.bhm.ble.utils.BleLogger
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -186,7 +198,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     override fun replaceBleConnectCallback(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit) {
         val callback = BleConnectCallback()
         callback.apply(bleConnectCallback)
-        val request = bleConnectedDeviceManager.buildBleConnectedDevice(bleDevice)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.replaceBleConnectCallback(callback)
     }
 
