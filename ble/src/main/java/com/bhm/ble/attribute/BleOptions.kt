@@ -226,9 +226,16 @@ class BleOptions private constructor(builder: Builder) {
 
         /**
          * 设置mtu，默认为[DEFAULT_MTU]
+         */
+        fun setMtu(mtu: Int) = apply {
+            setMtu(mtu, DEFAULT_AUTO_SET_MTU)
+        }
+
+        /**
+         * 设置mtu，默认为[DEFAULT_MTU]
          * @param autoSetMtu 是否自动设置mtu，true：连接成功之后会自动设置mtu，默认为[DEFAULT_AUTO_SET_MTU]
          */
-        fun setMtu(mtu: Int, autoSetMtu: Boolean = DEFAULT_AUTO_SET_MTU) = apply {
+        fun setMtu(mtu: Int, autoSetMtu: Boolean) = apply {
             this.mtu = mtu
             this.autoSetMtu = autoSetMtu
         }

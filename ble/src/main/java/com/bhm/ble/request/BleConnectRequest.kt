@@ -93,7 +93,7 @@ internal class BleConnectRequest(
             bleConnectCallback.callConnectFail(createNewDeviceInfo(), BleConnectFailType.AlreadyConnecting)
             return
         }
-        if (bleManager.isConnected(bleDevice)) {
+        if (bleManager.isConnected(bleDevice, false)) {
             lastState =  BleConnectLastState.Connected
             BleLogger.e("已连接")
             bleConnectCallback.callConnectSuccess(createNewDeviceInfo(), bluetoothGatt)

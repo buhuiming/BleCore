@@ -30,14 +30,14 @@ afterEvaluate {
         publications {
             Production(MavenPublication) {
                 from components.release
-//                artifact androidSourcesJar //打包源码，去除这行打的包将看不到源码
+                artifact androidSourcesJar //打包源码，去除这行打的包将看不到源码
                 groupId = GROUP
                 artifactId = POM_ARTIFACT_ID
                 version = VERSION_NAME
             }
             Develop(MavenPublication) {
                 from components.debug
-//                artifact androidSourcesJar //打包源码，去除这行打的包将看不到源码
+                artifact androidSourcesJar //打包源码，去除这行打的包将看不到源码
                 groupId = GROUP
                 artifactId = POM_ARTIFACT_ID
                 version = "${VERSION_NAME}-SNAPSHOT"
