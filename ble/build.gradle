@@ -5,7 +5,7 @@ plugins {
 
 //ext.GROUP = "com.microport.ble"
 //ext.POM_ARTIFACT_ID = "BleCore"
-//ext.VERSION_NAME = "1.1.8"
+//ext.VERSION_NAME = "1.1.9"
 ////引用gradle_upload.gradle
 //apply from: "${project.rootDir}/maven_upload.gradle"
 

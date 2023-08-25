@@ -17,16 +17,12 @@ h
 8ble/src/main/java/com/bhm/ble/data/BleConnectFailType.kt,8\9\89c2bf1e46dcd934c3cdc33b99f055cd30d1587d
 f
 6ble/src/main/java/com/bhm/ble/control/BleLruHashMap.kt,1\4\141f074f42b7618731e03860b83591695fc45b34
-k
-;ble/src/main/java/com/bhm/ble/request/BleIndicateRequest.kt,f\0\f098d04f62ef69cedfc781eb9212c5c5bbf1dc88
 `
 0ble/src/main/java/com/bhm/ble/control/BleTask.kt,d\3\d396928ac15e23fca51b0277da6aac0508305f1d
 _
 /ble/src/main/java/com/bhm/ble/data/Constants.kt,4\4\443bfeba92309bf514f3e39be0961d08b0b756a7
 e
 5ble/src/main/java/com/bhm/ble/request/base/Request.kt,9\8\98cca74c1c0c3e8343788bf02a1700ac660f893a
-h
-8ble/src/main/java/com/bhm/ble/request/BleWriteRequest.kt,5\7\57d9bfdb7b6ac402d17ddce46e6fef40899e1847
 P
  ble/src/main/AndroidManifest.xml,7\e\7e46852eb5ec00e23c65e3159310c13fe562f47b
 e

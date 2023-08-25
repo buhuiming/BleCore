@@ -216,7 +216,7 @@ internal class BleNotifyRequest(
                 descriptor?.let {
                     BleLogger.d("descriptor uuid is ${descriptor.uuid}")
                     val writeDescriptorCode = writeDescriptor(bluetoothGatt, descriptor, enable)
-                    if (writeDescriptorCode == BluetoothStatusCodes.SUCCESS) {
+                    if (writeDescriptorCode == 0) {
                         allFail = false
                     }
                 }
@@ -249,7 +249,7 @@ internal class BleNotifyRequest(
                 return false
             }
             val writeDescriptorCode = writeDescriptor(bluetoothGatt, descriptor, enable)
-            if (writeDescriptorCode != BluetoothStatusCodes.SUCCESS) {
+            if (writeDescriptorCode != 0) {
                 //true, if the write operation was initiated successfully Value is
                 // BluetoothStatusCodes.SUCCESS = 0,
                 // BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION = 6,
@@ -292,8 +292,12 @@ internal class BleNotifyRequest(
                 BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
             }
             @Suppress("DEPRECATION")
-            bluetoothGatt.writeDescriptor(descriptor)
-            writeDescriptorCode = -1
+            val success = bluetoothGatt.writeDescriptor(descriptor)
+            writeDescriptorCode = if (success) {
+                0
+            } else {
+                -1
+            }
         }
         return writeDescriptorCode
     }

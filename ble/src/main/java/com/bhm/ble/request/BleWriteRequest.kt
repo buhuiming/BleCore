@@ -242,7 +242,7 @@ internal class BleWriteRequest(
                     bleWriteData.data,
                     writeType
                 )
-                errorCode == BluetoothStatusCodes.SUCCESS
+                errorCode == 0
             } else {
                 characteristic.writeType = writeType
                 characteristic.value = bleWriteData.data
