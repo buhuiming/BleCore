@@ -6,8 +6,11 @@
 package com.bhm.ble.callback
 
 import android.bluetooth.BluetoothGatt
+import com.bhm.ble.BleManager
 import com.bhm.ble.data.BleConnectFailType
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.utils.BleLogger
+import kotlinx.coroutines.delay
 
 
 /**
@@ -23,6 +26,9 @@ open class BleConnectCallback : BleBaseCallback() {
     private var connectSuccess: ((bleDevice: BleDevice, gatt: BluetoothGatt?) -> Unit)? = null
 
     private var connectFail: ((bleDevice: BleDevice, connectFailType: BleConnectFailType) -> Unit)? = null
+
+    private var disConnecting: ((isActiveDisConnected: Boolean, bleDevice: BleDevice,
+                                gatt: BluetoothGatt?, status: Int) -> Unit)? = null
 
     private var disConnected: ((isActiveDisConnected: Boolean, bleDevice: BleDevice,
                                 gatt: BluetoothGatt?, status: Int) -> Unit)? = null
@@ -46,6 +52,14 @@ open class BleConnectCallback : BleBaseCallback() {
      */
     fun onConnectFail(value: (bleDevice: BleDevice, connectFailType: BleConnectFailType) -> Unit) {
         connectFail = value
+    }
+
+    /**
+     * 触发断开，此时的设备有可能还是连接状态，未完全断开
+     */
+    fun onDisConnecting(value: (isActiveDisConnected: Boolean, bleDevice: BleDevice,
+                               gatt: BluetoothGatt?, status: Int) -> Unit) {
+        disConnecting = value
     }
 
     /**
@@ -77,9 +91,24 @@ open class BleConnectCallback : BleBaseCallback() {
         }
     }
 
+    open fun callDisConnecting(isActiveDisConnected: Boolean, bleDevice: BleDevice,
+                              gatt: BluetoothGatt?, status: Int) {
+        launchInMainThread {
+            disConnecting?.invoke(isActiveDisConnected, bleDevice, gatt, status)
+        }
+        callDisConnected(isActiveDisConnected, bleDevice, gatt, status)
+    }
+
     open fun callDisConnected(isActiveDisConnected: Boolean, bleDevice: BleDevice,
                               gatt: BluetoothGatt?, status: Int) {
         launchInMainThread {
+            val start = System.currentTimeMillis()
+            while (BleManager.get().isConnected(bleDevice, true)) {
+                //主动断开，需要等待gatt释放的时间更长一些
+                delay(if (isActiveDisConnected) 80 else 4)
+            }
+            val end = System.currentTimeMillis()
+            BleLogger.i("触发onDisConnecting，${(end - start)}毫秒后触发onDisConnected")
             disConnected?.invoke(isActiveDisConnected, bleDevice, gatt, status)
         }
     }

@@ -160,15 +160,24 @@ setTaskQueueType方法，有3个选项分别是：
 
 *    在某些型号手机上，connectGatt必须在主线程才能有效，所以把连接过程放在主线程，回调也在主线程。
 *    为保证重连成功率，建议断开后间隔一段时间之后进行重连。
+*    
 
 #### 6、断开连接
     BleManager.get().disConnect(device)
     BleManager.get().disConnect(deviceAddress)
 
 *    断开后，并不会马上更新状态，所以马上连接会直接返回已连接，而且扫描不出来，要等待一定时间才可以
+*    BleConnectCallback中onDisConnecting、onDisConnected分别是，断开连接时触发onDisConnecting，
+     真正断开之后触发onDisConnected。(isActiveDisConnected = true的时候，触发onDisConnecting之后大约1秒左右
+     才会触发onDisConnected；isActiveDisConnected = false的时候，触发onDisConnecting之后大约5毫秒左右
+     才会触发onDisConnected)
 
 #### 7、是否已连接
-    BleManager.get().isConnected(device)
+    BleManager.get().isConnected(bleDeviceAddress: String, simplySystemStatus: Boolean = true)
+    BleManager.get().isConnected(bleDevice: BleDevice?, simplySystemStatus: Boolean = true)
+
+*    simplySystemStatus 为true，只根据系统的状态规则；为false，会根据sdk的状态，换句话说，只根据系统的状态返回。
+     此字段的意义在于：有时，sdk资源被系统回收(状态未连接)，但是系统的状态是已连接。
 
 #### 8、扫描并连接，如果扫描到多个设备，则会连接第一个
     BleManager.get().startScanAndConnect(bleScanCallback: BleScanCallback,
@@ -288,7 +297,7 @@ BleDescriptorGetType设计原则
     BleManager.get().removeBleWriteCallback(bleDevice: BleDevice, writeUUID: String)
 
 
-#### 存在问题
+#### [问题锦集](https://juejin.cn/post/6844903896100372494)，但愿对你有帮助
 
 * 1、关闭系统蓝牙，没有触发onConnectionStateChange
        解决方案：1、操作前判断蓝牙状态，2、蓝牙广播

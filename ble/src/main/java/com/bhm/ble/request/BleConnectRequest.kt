@@ -143,7 +143,7 @@ internal class BleConnectRequest(
             closeBluetoothGatt()
             removeAllCallback()
             BleLogger.e("${bleDevice.deviceAddress} -> 主动断开连接")
-            bleConnectCallback?.callDisConnected(
+            bleConnectCallback?.callDisConnecting(
                 isActiveDisconnect.get(),
                 createNewDeviceInfo(), bluetoothGatt, BluetoothGatt.GATT_SUCCESS
             )
@@ -185,7 +185,7 @@ internal class BleConnectRequest(
                         closeBluetoothGatt()
                         removeAllCallback()
                         BleLogger.e("${bleDevice.deviceAddress} -> 自动断开连接")
-                        bleConnectCallback?.callDisConnected(
+                        bleConnectCallback?.callDisConnecting(
                             isActiveDisconnect.get(),
                             createNewDeviceInfo(), gatt, status
                         )
@@ -240,7 +240,7 @@ internal class BleConnectRequest(
      */
     @Synchronized
     fun close() {
-        bleConnectCallback?.callDisConnected(
+        bleConnectCallback?.callDisConnecting(
             isActiveDisconnect.get(),
             createNewDeviceInfo(), bluetoothGatt, BluetoothGatt.GATT_SUCCESS
         )

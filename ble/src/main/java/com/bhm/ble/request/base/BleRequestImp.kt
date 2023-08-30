@@ -143,6 +143,9 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                 onConnectSuccess { bleDevice, gatt ->
                     connectCallback.callConnectSuccess(bleDevice, gatt)
                 }
+                onDisConnecting { isActiveDisConnected, bleDevice, gatt, status ->
+                    connectCallback.callDisConnecting(isActiveDisConnected, bleDevice, gatt, status)
+                }
                 onDisConnected { isActiveDisConnected, bleDevice, gatt, status ->
                     connectCallback.callDisConnected(isActiveDisConnected, bleDevice, gatt, status)
                 }

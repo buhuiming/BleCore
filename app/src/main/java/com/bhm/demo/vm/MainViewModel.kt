@@ -252,6 +252,9 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
             Toast.makeText(application, msg, Toast.LENGTH_SHORT).show()
             refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
         }
+        onDisConnecting { isActiveDisConnected, bleDevice, _, _ ->
+            BleLogger.e("-----${bleDevice.deviceAddress} -> onDisConnecting: $isActiveDisConnected")
+        }
         onDisConnected { isActiveDisConnected, bleDevice, _, _ ->
             Toast.makeText(application, "断开连接(${bleDevice.deviceAddress}，isActiveDisConnected: " +
                     "$isActiveDisConnected)", Toast.LENGTH_SHORT).show()
