@@ -10,12 +10,10 @@ package com.bhm.ble.request
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
-import android.bluetooth.BluetoothStatusCodes
 import android.os.Build
 import android.util.SparseArray
 import com.bhm.ble.callback.BleWriteCallback
 import com.bhm.ble.data.*
-import com.bhm.ble.data.BleWriteData
 import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.data.Constants.WRITE_TASK_ID
 import com.bhm.ble.device.BleDevice

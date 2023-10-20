@@ -39,14 +39,19 @@ class DeviceListAdapter(data: MutableList<BleDevice>?
         }
 //        holder.binding.btnRssi.text = "${item.rssi ?: 0}"
         val rssi = item.rssi ?: 0
-        if (rssi >= -65) {
-            holder.binding.ivRssi.setImageResource(R.drawable.adddevice_device_signal_four_icon)
-        } else if (rssi >= -75) {
-            holder.binding.ivRssi.setImageResource(R.drawable.adddevice_device_signal_three_icon)
-        } else if (rssi >= -85) {
-            holder.binding.ivRssi.setImageResource(R.drawable.adddevice_device_signal_two_icon)
-        } else {
-            holder.binding.ivRssi.setImageResource(R.drawable.adddevice_device_signal_one_icon)
+        when {
+            rssi >= -65 -> {
+                holder.binding.ivRssi.setImageResource(R.drawable.adddevice_device_signal_four_icon)
+            }
+            rssi >= -75 -> {
+                holder.binding.ivRssi.setImageResource(R.drawable.adddevice_device_signal_three_icon)
+            }
+            rssi >= -85 -> {
+                holder.binding.ivRssi.setImageResource(R.drawable.adddevice_device_signal_two_icon)
+            }
+            else -> {
+                holder.binding.ivRssi.setImageResource(R.drawable.adddevice_device_signal_one_icon)
+            }
         }
         if (BleManager.get().isConnected(item)) {
             holder.binding.btnConnect.text = "断开"
