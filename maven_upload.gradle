@@ -1,9 +1,9 @@
 apply plugin: 'maven-publish'
 
-def RELEASE_REPOSITORY_URL = "http://10.70.12.12:8081/repository/maven_bsz_release/"
-def SNAPSHOT_REPOSITORY_URL = "http://10.70.12.12:8081/repository/maven_bsz_snapshot/"
-def NEXUS_USERNAME = "android"
-def NEXUS_PASSWORD = "Bsz@123"
+def RELEASE_REPOSITORY_URL = "http://localhost:8081/nexus/content/repositories/releases/"
+def SNAPSHOT_REPOSITORY_URL = "http://localhost:8081/nexus/content/repositories/snapshots/"
+def NEXUS_USERNAME = "admin"
+def NEXUS_PASSWORD = "admin123"
 
 afterEvaluate {
     publishing {
