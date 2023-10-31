@@ -1,6 +1,8 @@
-apply plugin:'com.android.library'
-apply plugin:'org.jetbrains.kotlin.android'
-apply plugin:'maven-publish'
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'maven-publish'
+}
 
 //ext.GROUP = "com.lute.ble"
 //ext.POM_ARTIFACT_ID = "BleCore"
@@ -11,10 +13,11 @@ afterEvaluate {
     publishing {
         publications {
             Production(MavenPublication) {
-                from components.release
                 groupId = 'com.github.buhuiming'
                 artifactId = 'BleCore'
                 version = '1.3.0'
+
+                from components.release
             }
         }
     }
