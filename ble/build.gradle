@@ -9,15 +9,17 @@ plugins {
 //ext.VERSION_NAME = "1.3.0"
 ////引用gradle_upload.gradle
 //apply from: "${project.rootDir}/maven_upload.gradle"
-afterEvaluate {
-    publishing {
-        publications {
-            Production(MavenPublication) {
-                groupId = 'com.github.buhuiming'
-                artifactId = 'BleCore'
-                version = '1.3.0'
 
-                from components.release
+publishing {
+    publications {
+        Production(MavenPublication) {
+            groupId = 'com.github.buhuiming'
+            artifactId = 'BleCore'
+            version = '1.3.0'
+
+            afterEvaluate { // 在所有的配置都完成之后执行
+                // 从当前 module 的 release 包中发布
+                from(components["release"])
             }
         }
     }
