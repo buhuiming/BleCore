@@ -6,13 +6,13 @@ plugins {
 
 //ext.GROUP = "com.lute.ble"
 //ext.POM_ARTIFACT_ID = "BleCore"
-//ext.VERSION_NAME = "1.4.2"
+//ext.VERSION_NAME = "1.4.4"
 ////引用gradle_upload.gradle
 //apply from: "${project.rootDir}/maven_upload.gradle"
 
 //ext.GROUP = "com.github.buhuiming"
 //ext.POM_ARTIFACT_ID = "BleCore"
-//ext.VERSION_NAME = "1.4.3"
+//ext.VERSION_NAME = "1.4.4"
 ////引用gradle_upload.gradle
 //apply from: "${project.rootDir}/jitpack_maven_upload.gradle"
 
@@ -21,7 +21,7 @@ publishing {
         release(MavenPublication) {
             groupId = 'com.github.buhuiming'
             artifactId = 'BleCore'
-            version = '1.4.3'
+            version = '1.4.4'
 
             afterEvaluate {
                 from components.release
