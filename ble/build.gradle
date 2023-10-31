@@ -6,13 +6,13 @@ plugins {
 
 //ext.GROUP = "com.lute.ble"
 //ext.POM_ARTIFACT_ID = "BleCore"
-//ext.VERSION_NAME = "1.4.4"
+//ext.VERSION_NAME = "1.4.5"
 ////引用gradle_upload.gradle
 //apply from: "${project.rootDir}/maven_upload.gradle"
 
 //ext.GROUP = "com.github.buhuiming"
 //ext.POM_ARTIFACT_ID = "BleCore"
-//ext.VERSION_NAME = "1.4.4"
+//ext.VERSION_NAME = "1.4.5"
 ////引用gradle_upload.gradle
 //apply from: "${project.rootDir}/jitpack_maven_upload.gradle"
 
@@ -21,7 +21,7 @@ publishing {
         release(MavenPublication) {
             groupId = 'com.github.buhuiming'
             artifactId = 'BleCore'
-            version = '1.4.4'
+            version = '1.4.5'
 
             afterEvaluate {
                 from components.release
@@ -58,5 +58,6 @@ android {
 }
 
 dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.10"
     implementation 'androidx.lifecycle:lifecycle-common:2.6.2'
 }
