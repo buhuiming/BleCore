@@ -78,8 +78,8 @@ open class BleEventCallback : BleBaseCallback() {
     }
 
     open fun callCharacteristicChanged(uuid: String?, type: Int, data: ByteArray) {
-        //数据处理放在非主线程
-        launchInIOThread {
+        //数据处理如果需要在非主线程，则需要自行切换
+        launchInMainThread {
             characteristicChanged?.invoke(uuid, type, data)
         }
     }

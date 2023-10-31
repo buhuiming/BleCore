@@ -298,7 +298,7 @@ BleDescriptorGetType设计原则
     BleManager.get().removeBleReadCallback(bleDevice: BleDevice, readUUID: String)
     BleManager.get().removeBleWriteCallback(bleDevice: BleDevice, writeUUID: String)
 
-#### 22、v1.3.0新增addBleEventCallback方法
+#### 22、v1.5.0新增addBleEventCallback方法
     有用户反馈，设置[connect]的bleConnectCallback、[notify]的bleNotifyCallback、
      [indicate]的bleIndicateCallback、[setMtu]的bleMtuChangedCallback之后，当其他地方需要监听这些回调时比较
     不方便，所以添加addBleEventCallback来实现。addBleEventCallback与上述回调共存

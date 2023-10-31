@@ -56,7 +56,8 @@ class DeviceListAdapter(data: MutableList<BleDevice>?
         if (BleManager.get().isConnected(item)) {
             holder.binding.btnConnect.text = "断开"
             holder.binding.btnOperate.isEnabled = true
-            holder.binding.btnConnect.setBackgroundColor(ContextCompat
+            holder.binding.btnConnect.setBackgroundColor(
+                ContextCompat
                 .getColor(holder.binding.btnConnect.context, R.color.red))
         } else {
             holder.binding.btnConnect.text = "连接"

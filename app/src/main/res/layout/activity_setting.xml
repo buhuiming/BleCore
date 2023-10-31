@@ -49,7 +49,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:layout_marginVertical="@dimen/dp_10"
+                    android:layout_marginVertical="10dp"
                     android:orientation="horizontal">
 
                 <TextView
@@ -76,7 +76,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:layout_marginVertical="@dimen/dp_10"
+                    android:layout_marginVertical="10dp"
                     android:orientation="horizontal">
 
                 <TextView
@@ -103,7 +103,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:layout_marginVertical="@dimen/dp_10"
+                    android:layout_marginVertical="10dp"
                     android:orientation="horizontal">
 
                 <TextView
@@ -132,7 +132,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:layout_marginVertical="@dimen/dp_10"
+                    android:layout_marginVertical="10dp"
                     android:orientation="horizontal">
 
                 <TextView
@@ -175,7 +175,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:layout_marginVertical="@dimen/dp_10"
+                    android:layout_marginVertical="10dp"
                     android:orientation="horizontal">
 
                 <TextView
@@ -204,7 +204,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:layout_marginVertical="@dimen/dp_10"
+                    android:layout_marginVertical="10dp"
                     android:orientation="horizontal">
 
                 <TextView
@@ -247,7 +247,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:layout_marginVertical="@dimen/dp_10"
+                    android:layout_marginVertical="10dp"
                     android:orientation="horizontal">
 
                 <TextView
@@ -276,7 +276,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:layout_marginVertical="@dimen/dp_10"
+                    android:layout_marginVertical="10dp"
                     android:orientation="horizontal">
 
                 <TextView
@@ -305,7 +305,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:layout_marginVertical="@dimen/dp_10"
+                    android:layout_marginVertical="10dp"
                     android:orientation="horizontal">
 
                 <TextView
@@ -334,7 +334,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:layout_marginVertical="@dimen/dp_10"
+                    android:layout_marginVertical="10dp"
                     android:orientation="horizontal">
 
                 <TextView
@@ -378,7 +378,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:layout_marginVertical="@dimen/dp_10"
+                    android:layout_marginVertical="10dp"
                     android:orientation="horizontal">
 
                 <TextView
@@ -401,7 +401,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:layout_marginVertical="@dimen/dp_10"
+                    android:layout_marginVertical="10dp"
                     android:orientation="horizontal">
 
                 <TextView
@@ -424,7 +424,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:layout_marginTop="@dimen/dp_10"
+                    android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
                 <TextView
