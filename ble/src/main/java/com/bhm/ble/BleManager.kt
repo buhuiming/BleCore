@@ -502,6 +502,17 @@ class BleManager private constructor() {
     }
 
     /**
+     * 添加设备的连接状态发生变化、indicate/notify收到数据、mtu改变的回调
+     *  这个回调会独立存在，与[connect]的bleConnectCallback、[notify]的bleNotifyCallback、
+     *  [indicate]的bleIndicateCallback、[setMtu]的bleMtuChangedCallback不冲突
+     */
+    @Synchronized
+    fun addBleEventCallback(bleDevice: BleDevice, bleEventCallback: BleEventCallback.() -> Unit) {
+        checkInitialize()
+        bleBaseRequest?.addBleEventCallback(bleDevice, bleEventCallback)
+    }
+
+    /**
      * 移除该设备的连接回调
      */
     @Synchronized

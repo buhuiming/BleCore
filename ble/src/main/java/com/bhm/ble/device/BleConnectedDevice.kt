@@ -11,10 +11,24 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.os.Build
 import android.util.SparseArray
-import com.bhm.ble.callback.*
+import com.bhm.ble.callback.BleConnectCallback
+import com.bhm.ble.callback.BleEventCallback
+import com.bhm.ble.callback.BleIndicateCallback
+import com.bhm.ble.callback.BleMtuChangedCallback
+import com.bhm.ble.callback.BleNotifyCallback
+import com.bhm.ble.callback.BleReadCallback
+import com.bhm.ble.callback.BleRssiCallback
+import com.bhm.ble.callback.BleWriteCallback
 import com.bhm.ble.control.BleTaskQueue
 import com.bhm.ble.data.BleDescriptorGetType
-import com.bhm.ble.request.*
+import com.bhm.ble.request.BleConnectRequest
+import com.bhm.ble.request.BleIndicateRequest
+import com.bhm.ble.request.BleMtuRequest
+import com.bhm.ble.request.BleNotifyRequest
+import com.bhm.ble.request.BleReadRequest
+import com.bhm.ble.request.BleRssiRequest
+import com.bhm.ble.request.BleSetPriorityRequest
+import com.bhm.ble.request.BleWriteRequest
 
 
 /**
@@ -44,6 +58,8 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     private var bleReadRequest: BleReadRequest? = null
 
     private var bleWriteRequest: BleWriteRequest? = null
+
+    private var bleEventCallback: BleEventCallback? = null
 
     private fun initBleConnectRequest() {
         if (bleConnectRequest == null) {
@@ -119,8 +135,16 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     ) {
         /*android 13调用的方法*/
         super.onCharacteristicChanged(gatt, characteristic, value)
-        bleNotifyRequest?.onCharacteristicChanged(characteristic, value)
-        bleIndicateRequest?.onCharacteristicChanged(characteristic, value)
+        val properties = characteristic.properties
+        if (properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) {
+            // 这是 Indicate
+            bleIndicateRequest?.onCharacteristicChanged(characteristic, value)
+            bleEventCallback?.callCharacteristicChanged(characteristic.uuid?.toString(), 2, value)
+        } else if (properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0) {
+            // 这是 Notify
+            bleNotifyRequest?.onCharacteristicChanged(characteristic, value)
+            bleEventCallback?.callCharacteristicChanged(characteristic.uuid?.toString(), 1, value)
+        }
     }
 
     @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
@@ -134,8 +158,18 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
             return
         }
         characteristic?.let {
-            bleNotifyRequest?.onCharacteristicChanged(it, it.value)
-            bleIndicateRequest?.onCharacteristicChanged(it, it.value)
+            val properties = characteristic.properties
+            if (properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) {
+                // 这是 Indicate
+                bleIndicateRequest?.onCharacteristicChanged(it, it.value)
+                bleEventCallback?.callCharacteristicChanged(it.uuid?.toString(), 2, it.value)
+            } else if (properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0) {
+                // 这是 Notify
+                bleNotifyRequest?.onCharacteristicChanged(it, it.value)
+                bleEventCallback?.callCharacteristicChanged(it.uuid?.toString(), 1, it.value)
+            } else {
+
+            }
         }
     }
 
@@ -191,6 +225,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
         super.onMtuChanged(gatt, mtu, status)
         bleMtuRequest?.onMtuChanged(mtu, status)
+        bleEventCallback?.callMtuChanged(mtu)
     }
 
     /**
@@ -337,6 +372,12 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
 
     fun getShareBleTaskQueue() = bleTaskQueue
 
+    fun addBleEventCallback(bleEventCallback: BleEventCallback) {
+        this.bleEventCallback = bleEventCallback
+    }
+
+    fun getBleEventCallback() = bleEventCallback
+
     fun removeNotifyCallback(uuid: String?) {
         bleNotifyRequest?.removeNotifyCallback(uuid)
     }
@@ -365,6 +406,10 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         bleConnectRequest?.removeBleConnectCallback()
     }
 
+    fun removeBleEventCallback() {
+        bleEventCallback = null
+    }
+
     fun replaceBleConnectCallback(bleConnectCallback: BleConnectCallback) {
         bleConnectRequest?.removeBleConnectCallback()
         bleConnectRequest?.addBleConnectCallback(bleConnectCallback)
@@ -381,6 +426,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         bleIndicateRequest?.removeAllIndicateCallback()
         bleWriteRequest?.removeAllWriteCallback()
         bleReadRequest?.removeAllReadCallback()
+        bleEventCallback = null
     }
 
     fun close() {
@@ -397,5 +443,6 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         bleWriteRequest = null
         bleRssiRequest = null
         bleConnectRequest = null
+        bleEventCallback = null
     }
 }

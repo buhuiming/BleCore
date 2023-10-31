@@ -9,6 +9,7 @@ package com.bhm.ble.request.base
 import android.bluetooth.BluetoothGatt
 import android.util.SparseArray
 import com.bhm.ble.callback.BleConnectCallback
+import com.bhm.ble.callback.BleEventCallback
 import com.bhm.ble.callback.BleIndicateCallback
 import com.bhm.ble.callback.BleMtuChangedCallback
 import com.bhm.ble.callback.BleNotifyCallback
@@ -396,6 +397,16 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     @Synchronized
     override fun getAllConnectedDevice(): MutableList<BleDevice> {
         return bleConnectedDeviceManager.getAllConnectedDevice()
+    }
+
+    /**
+     * 添加设备的连接状态发生变化、indicate/notify收到数据、mtu改变的回调
+     */
+    override fun addBleEventCallback(bleDevice: BleDevice, bleEventCallback: BleEventCallback.() -> Unit) {
+        val callback = BleEventCallback()
+        callback.apply(bleEventCallback)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
+        request?.addBleEventCallback(callback)
     }
 
     /**

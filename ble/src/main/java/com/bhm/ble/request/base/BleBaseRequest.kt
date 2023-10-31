@@ -141,6 +141,11 @@ internal interface BleBaseRequest {
     fun getAllConnectedDevice(): MutableList<BleDevice>
 
     /**
+     * 添加设备的连接状态发生变化、indicate/notify收到数据、mtu改变的回调
+     */
+    fun addBleEventCallback(bleDevice: BleDevice, bleEventCallback: BleEventCallback.() -> Unit)
+
+    /**
      * 移除该设备的连接回调
      */
     fun removeBleConnectCallback(bleDevice: BleDevice)

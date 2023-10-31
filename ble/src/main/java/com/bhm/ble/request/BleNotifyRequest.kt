@@ -159,6 +159,8 @@ internal class BleNotifyRequest(
                 it.callCharacteristicChanged(value)
             }
         }
+        getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callCharacteristicChanged(
+            characteristic.uuid?.toString(), 1, value)
     }
 
     /**

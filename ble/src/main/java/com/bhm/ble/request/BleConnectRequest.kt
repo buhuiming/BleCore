@@ -96,7 +96,9 @@ internal class BleConnectRequest(
         if (bleManager.isConnected(bleDevice, false)) {
             lastState =  BleConnectLastState.Connected
             BleLogger.e("已连接")
-            bleConnectCallback.callConnectSuccess(createNewDeviceInfo(), bluetoothGatt)
+            val deviceInfo = createNewDeviceInfo()
+            bleConnectCallback.callConnectSuccess(deviceInfo, bluetoothGatt)
+            getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callConnected(deviceInfo, bluetoothGatt)
             autoSetMtu()
             return
         }
@@ -143,9 +145,14 @@ internal class BleConnectRequest(
             closeBluetoothGatt()
             removeAllCallback()
             BleLogger.e("${bleDevice.deviceAddress} -> 主动断开连接")
+            val deviceInfo = createNewDeviceInfo()
             bleConnectCallback?.callDisConnecting(
                 isActiveDisconnect.get(),
-                createNewDeviceInfo(), bluetoothGatt, BluetoothGatt.GATT_SUCCESS
+                deviceInfo, bluetoothGatt, BluetoothGatt.GATT_SUCCESS
+            )
+            getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callDisConnected(
+                isActiveDisconnect.get(),
+                deviceInfo, bluetoothGatt, BluetoothGatt.GATT_SUCCESS
             )
         }
     }
@@ -185,9 +192,14 @@ internal class BleConnectRequest(
                         closeBluetoothGatt()
                         removeAllCallback()
                         BleLogger.e("${bleDevice.deviceAddress} -> 自动断开连接")
+                        val deviceInfo = createNewDeviceInfo()
                         bleConnectCallback?.callDisConnecting(
                             isActiveDisconnect.get(),
-                            createNewDeviceInfo(), gatt, status
+                            deviceInfo, gatt, status
+                        )
+                        getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callDisConnected(
+                            isActiveDisconnect.get(),
+                            deviceInfo, gatt, status
                         )
                     }
                 }
@@ -205,7 +217,9 @@ internal class BleConnectRequest(
             currentConnectRetryCount = 0
             lastState = BleConnectLastState.Connected
             isActiveDisconnect.set(false)
-            bleConnectCallback?.callConnectSuccess(createNewDeviceInfo(), bluetoothGatt)
+            val deviceInfo = createNewDeviceInfo()
+            bleConnectCallback?.callConnectSuccess(deviceInfo, bluetoothGatt)
+            getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callConnected(deviceInfo, bluetoothGatt)
             autoSetMtu()
         } else {
             connectFail()
@@ -240,9 +254,14 @@ internal class BleConnectRequest(
      */
     @Synchronized
     fun close() {
+        val deviceInfo = createNewDeviceInfo()
         bleConnectCallback?.callDisConnecting(
             isActiveDisconnect.get(),
-            createNewDeviceInfo(), bluetoothGatt, BluetoothGatt.GATT_SUCCESS
+            deviceInfo, bluetoothGatt, BluetoothGatt.GATT_SUCCESS
+        )
+        getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callDisConnected(
+            isActiveDisconnect.get(),
+            deviceInfo, bluetoothGatt, BluetoothGatt.GATT_SUCCESS
         )
         lastState = BleConnectLastState.Disconnect
         disConnectGatt()
