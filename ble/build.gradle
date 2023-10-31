@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'maven-publish'
 }
 
 //ext.GROUP = "com.lute.ble"
@@ -9,11 +10,25 @@ plugins {
 ////引用gradle_upload.gradle
 //apply from: "${project.rootDir}/maven_upload.gradle"
 
-ext.GROUP = "com.github.buhuiming"
-ext.POM_ARTIFACT_ID = "BleCore"
-ext.VERSION_NAME = "1.4.2"
-//引用gradle_upload.gradle
-apply from: "${project.rootDir}/jitpack_maven_upload.gradle"
+//ext.GROUP = "com.github.buhuiming"
+//ext.POM_ARTIFACT_ID = "BleCore"
+//ext.VERSION_NAME = "1.4.3"
+////引用gradle_upload.gradle
+//apply from: "${project.rootDir}/jitpack_maven_upload.gradle"
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = 'com.github.buhuiming'
+            artifactId = 'BleCore'
+            version = '1.4.3'
+
+            afterEvaluate {
+                from components.release
+            }
+        }
+    }
+}
 
 android {
     namespace 'com.bhm.ble'
