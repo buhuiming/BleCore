@@ -6,32 +6,27 @@ plugins {
 
 //ext.GROUP = "com.lute.ble"
 //ext.POM_ARTIFACT_ID = "BleCore"
-//ext.VERSION_NAME = "1.4.6"
+//ext.VERSION_NAME = "1.5.0"
 ////引用gradle_upload.gradle
 //apply from: "${project.rootDir}/maven_upload.gradle"
 
-//ext.GROUP = "com.github.buhuiming"
-//ext.POM_ARTIFACT_ID = "BleCore"
-//ext.VERSION_NAME = "1.4.6"
-////引用gradle_upload.gradle
-//apply from: "${project.rootDir}/jitpack_maven_upload.gradle"
+afterEvaluate {
+    publishing {
+        publications {
+            // 这个mavenJava可以随便填，只是一个任务名字而已
+            // MavenPublication必须有，这个是调用的任务类
+            mavenJava(MavenPublication) {
+                // 这里头是artifacts的配置信息，不填会采用默认的
+                groupId = 'com.github.buhuiming'
+                artifactId = 'BleCore'
+                version = '1.5.0'
 
-publishing {
-    publications {
-        release(MavenPublication) {
-            groupId = 'com.github.buhuiming'
-            artifactId = 'BleCore'
-            version = '1.4.6'
-
-            afterEvaluate {
                 from components.release
                 artifact androidSourcesJar //打包源码，去除这行打的包将看不到源码
             }
         }
     }
 }
-
-
 // 用于打包源代码的任务
 tasks.register('androidSourcesJar', Jar) {
     archiveClassifier.set('sources')
