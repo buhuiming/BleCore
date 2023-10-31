@@ -1,32 +1,32 @@
 apply plugin: 'maven-publish'
 
-def RELEASE_REPOSITORY_URL = "http://localhost:8081/nexus/content/repositories/releases/"
-def SNAPSHOT_REPOSITORY_URL = "http://localhost:8081/nexus/content/repositories/snapshots/"
-def NEXUS_USERNAME = "admin"
-def NEXUS_PASSWORD = "admin123"
+//def RELEASE_REPOSITORY_URL = "http://localhost:8081/nexus/content/repositories/releases/"
+//def SNAPSHOT_REPOSITORY_URL = "http://localhost:8081/nexus/content/repositories/snapshots/"
+//def NEXUS_USERNAME = "admin"
+//def NEXUS_PASSWORD = "admin123"
 
 afterEvaluate {
     publishing {
-        repositories {
-            maven {
-                allowInsecureProtocol(true)
-                name("AndroidReleaseMaven")
-                url = RELEASE_REPOSITORY_URL
-                credentials {
-                    username = NEXUS_USERNAME
-                    password = NEXUS_PASSWORD
-                }
-            }
-            maven {
-                allowInsecureProtocol(true)
-                name("AndroidSnapshotMaven")
-                url = SNAPSHOT_REPOSITORY_URL
-                credentials {
-                    username = NEXUS_USERNAME
-                    password = NEXUS_PASSWORD
-                }
-            }
-        }
+//        repositories {
+//            maven {
+//                allowInsecureProtocol(true)
+//                name("AndroidReleaseMaven")
+//                url = RELEASE_REPOSITORY_URL
+//                credentials {
+//                    username = NEXUS_USERNAME
+//                    password = NEXUS_PASSWORD
+//                }
+//            }
+//            maven {
+//                allowInsecureProtocol(true)
+//                name("AndroidSnapshotMaven")
+//                url = SNAPSHOT_REPOSITORY_URL
+//                credentials {
+//                    username = NEXUS_USERNAME
+//                    password = NEXUS_PASSWORD
+//                }
+//            }
+//        }
         publications {
             Production(MavenPublication) {
                 from components.release
