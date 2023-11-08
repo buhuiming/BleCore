@@ -18,6 +18,7 @@ import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.data.Constants.DEFAULT_OPERATE_INTERVAL
 import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.request.base.BleRequestImp
 import com.bhm.ble.request.base.Request
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
@@ -143,7 +144,6 @@ internal class BleConnectRequest(
             disConnectGatt()
             refreshDeviceCache()
             closeBluetoothGatt()
-            removeAllCallback()
             BleLogger.e("${bleDevice.deviceAddress} -> 主动断开连接")
             val deviceInfo = createNewDeviceInfo()
             bleConnectCallback?.callDisConnecting(
@@ -154,6 +154,10 @@ internal class BleConnectRequest(
                 isActiveDisconnect.get(),
                 deviceInfo, bluetoothGatt, BluetoothGatt.GATT_SUCCESS
             )
+            BleRequestImp.get().getMainScope().launch {
+                delay(500)
+                removeAllCallback()
+            }
         }
     }
 
@@ -190,7 +194,6 @@ internal class BleConnectRequest(
                         lastState = BleConnectLastState.Disconnect
                         refreshDeviceCache()
                         closeBluetoothGatt()
-                        removeAllCallback()
                         BleLogger.e("${bleDevice.deviceAddress} -> 自动断开连接")
                         val deviceInfo = createNewDeviceInfo()
                         bleConnectCallback?.callDisConnecting(
@@ -201,6 +204,10 @@ internal class BleConnectRequest(
                             isActiveDisconnect.get(),
                             deviceInfo, gatt, status
                         )
+                        BleRequestImp.get().getMainScope().launch {
+                            delay(500)
+                            removeAllCallback()
+                        }
                     }
                 }
             }
@@ -414,8 +421,8 @@ internal class BleConnectRequest(
      * 移除设备管理池中的设备
      */
     private fun removeAllCallback() {
-        removeBleConnectedDevice()
         getBleConnectedDevice(bleDevice)?.removeAllCharacterCallback()
+        removeBleConnectedDevice()
     }
 
     /**

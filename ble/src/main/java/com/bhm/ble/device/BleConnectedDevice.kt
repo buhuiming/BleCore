@@ -421,7 +421,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         clearCharacterCallback()
     }
 
-    fun clearCharacterCallback() {
+    private fun clearCharacterCallback() {
         bleNotifyRequest?.removeAllNotifyCallback()
         bleIndicateRequest?.removeAllIndicateCallback()
         bleWriteRequest?.removeAllWriteCallback()
