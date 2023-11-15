@@ -111,3 +111,11 @@ n
 >app/src/main/java/com/bhm/demo/adapter/DetailsExpandAdapter.kt,7\9\791a276597d6c3f24ab3cf34d14c29642101baf7
 @
 app/build.gradle,f\4\f4a01d6a4fcb971362ec00a83903fd3902f52164
+^
+.ble/src/main/java/com/bhm/ble/utils/BleUtil.kt,5\4\54c7e934d1de2c5951d7e1da694b22a7adf9a75c
+j
+:app/src/main/java/com/bhm/demo/ui/OptionSettingActivity.kt,d\b\dbed5b4c83a4706eec4eb77df94622b7fe182d1f
+a
+1app/src/main/java/com/bhm/demo/ui/MainActivity.kt,9\a\9a9be1cad9854fa4730b6c085c26fd391e9a3c1d
+i
+9ble/src/main/java/com/bhm/ble/callback/BleScanCallback.kt,9\8\98dfac73ee990ea32c6f0e079bac322ca75f903a

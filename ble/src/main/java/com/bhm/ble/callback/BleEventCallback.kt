@@ -78,10 +78,8 @@ open class BleEventCallback : BleBaseCallback() {
     }
 
     open fun callCharacteristicChanged(uuid: String?, type: Int, data: ByteArray) {
-        //数据处理如果需要在非主线程，则需要自行切换
-        launchInMainThread {
-            characteristicChanged?.invoke(uuid, type, data)
-        }
+        //数据处理的线程需要自行切换
+        characteristicChanged?.invoke(uuid, type, data)
     }
 
     open fun callMtuChanged(mtu: Int) {

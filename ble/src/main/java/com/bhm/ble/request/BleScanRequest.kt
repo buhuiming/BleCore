@@ -17,6 +17,7 @@ import com.bhm.ble.data.Constants.DEFAULT_SCAN_MILLIS_TIMEOUT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_INTERVAL
 import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.request.base.BleRequestImp
 import com.bhm.ble.request.base.Request
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
@@ -244,23 +245,25 @@ internal class BleScanRequest private constructor() : Request() {
             if (!isScanning.get()) {
                 return
             }
-            result?.let {
-                val bleDevice = BleUtil.scanResultToBleDevice(it)
-                BleLogger.d(bleDevice.toString())
-                if ((getBleOptions()?.scanDeviceNames?.size?: 0 ) > 0) {
-                    if (!bleDevice.deviceName.isNullOrEmpty()) {
-                        getBleOptions()?.scanDeviceNames?.forEach { scanDeviceName ->
-                            if ((getBleOptions()?.containScanDeviceName == true &&
-                                        bleDevice.deviceName.uppercase()
-                                            .contains(scanDeviceName.uppercase())) ||
-                                bleDevice.deviceName.uppercase() == scanDeviceName.uppercase()
-                            ) {
-                                filterData(bleDevice)
+            BleRequestImp.get().getIOScope().launch {
+                result?.let {
+                    val bleDevice = BleUtil.scanResultToBleDevice(it)
+                    BleLogger.d(bleDevice.toString())
+                    if ((getBleOptions()?.scanDeviceNames?.size ?: 0) > 0) {
+                        if (!bleDevice.deviceName.isNullOrEmpty()) {
+                            getBleOptions()?.scanDeviceNames?.forEach { scanDeviceName ->
+                                if ((getBleOptions()?.containScanDeviceName == true &&
+                                            bleDevice.deviceName.uppercase()
+                                                .contains(scanDeviceName.uppercase())) ||
+                                    bleDevice.deviceName.uppercase() == scanDeviceName.uppercase()
+                                ) {
+                                    filterData(bleDevice)
+                                }
                             }
                         }
+                    } else {
+                        filterData(bleDevice)
                     }
-                } else {
-                    filterData(bleDevice)
                 }
             }
         }

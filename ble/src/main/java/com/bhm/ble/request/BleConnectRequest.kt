@@ -188,6 +188,9 @@ internal class BleConnectRequest(
                     //连接过程中断开，进入判断是否重连
                     checkIfContinueConnect(UnDefinedException("连接过程中断开"))
                 }
+                BleConnectLastState.ConnectFailure -> {
+                    BleLogger.i("连接失败后，设备触发断开连接")
+                }
                 //所有断开连接的情况
                 else -> {
                     if (!isActiveDisconnect.get()) {

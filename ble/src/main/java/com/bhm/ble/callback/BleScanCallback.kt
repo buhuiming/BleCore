@@ -77,15 +77,11 @@ open class BleScanCallback : BleBaseCallback() {
     }
 
     open fun callLeScan(bleDevice: BleDevice, currentScanCount: Int) {
-        launchInMainThread {
-            leScan?.invoke(bleDevice, currentScanCount)
-        }
+        leScan?.invoke(bleDevice, currentScanCount)
     }
 
     open fun callLeScanDuplicateRemoval(bleDevice: BleDevice, currentScanCount: Int) {
-        launchInMainThread {
-            leScanDuplicateRemoval?.invoke(bleDevice, currentScanCount)
-        }
+        leScanDuplicateRemoval?.invoke(bleDevice, currentScanCount)
     }
 
     open fun callScanFail(scanFailType: BleScanFailType) {
