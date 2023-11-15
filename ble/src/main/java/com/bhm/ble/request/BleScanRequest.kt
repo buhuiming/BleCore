@@ -23,6 +23,7 @@ import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.*
 import java.util.*
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -58,9 +59,9 @@ internal class BleScanRequest private constructor() : Request() {
 
     private var bleScanCallback: BleScanCallback? = null
 
-    private val results: MutableList<BleDevice> = arrayListOf()
+    private val results: ConcurrentLinkedQueue<BleDevice> = ConcurrentLinkedQueue()
 
-    private val duplicateRemovalResults: MutableList<BleDevice> = arrayListOf()
+    private val duplicateRemovalResults: ConcurrentLinkedQueue<BleDevice> = ConcurrentLinkedQueue()
 
     private var currentReyCount = 0
 
@@ -227,7 +228,7 @@ internal class BleScanRequest private constructor() : Request() {
                     bleScanCallback?.callScanFail(BleScanFailType.ScanError(-1, it))
                 }
             }
-            bleScanCallback?.callScanComplete(results, duplicateRemovalResults)
+            bleScanCallback?.callScanComplete(results.toMutableList(), duplicateRemovalResults.toMutableList())
             if (results.isEmpty()) {
                 BleLogger.d("没有扫描到数据")
             }
