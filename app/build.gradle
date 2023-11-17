@@ -11,8 +11,8 @@ android {
         applicationId "com.bhm.ble"
         minSdk 24
         targetSdk 33
-        versionCode 1531
-        versionName "1.5.31"
+        versionCode 153
+        versionName "1.5.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
