@@ -25,9 +25,9 @@ open class BleEventCallback : BleBaseCallback() {
     private var disConnected: ((isActiveDisConnected: Boolean, bleDevice: BleDevice,
                                 gatt: BluetoothGatt?, status: Int) -> Unit)? = null
 
-    private var characteristicChanged: ((uuid: String?, type: Int, data: ByteArray) -> Unit)? = null
+    private var characteristicChanged: ((uuid: String?, type: Int, bleDevice: BleDevice, data: ByteArray) -> Unit)? = null
 
-    private var mtuChanged: ((mtu: Int) -> Unit)? = null
+    private var mtuChanged: ((mtu: Int, bleDevice: BleDevice) -> Unit)? = null
 
     /**
      * 已连接
@@ -49,11 +49,11 @@ open class BleEventCallback : BleBaseCallback() {
      * 收到数据
      * type = 1 notify方式；type = 2 indicate方式
      */
-    fun onCharacteristicChanged(value: ((uuid: String?, type: Int, data: ByteArray) -> Unit)) {
+    fun onCharacteristicChanged(value: ((uuid: String?, type: Int, bleDevice: BleDevice, data: ByteArray) -> Unit)) {
         characteristicChanged = value
     }
 
-    fun onMtuChanged(value: ((mtu: Int) -> Unit)) {
+    fun onMtuChanged(value: ((mtu: Int, bleDevice: BleDevice) -> Unit)) {
         mtuChanged = value
     }
 
@@ -77,14 +77,14 @@ open class BleEventCallback : BleBaseCallback() {
         }
     }
 
-    open fun callCharacteristicChanged(uuid: String?, type: Int, data: ByteArray) {
+    open fun callCharacteristicChanged(uuid: String?, type: Int, bleDevice: BleDevice, data: ByteArray) {
         //数据处理的线程需要自行切换
-        characteristicChanged?.invoke(uuid, type, data)
+        characteristicChanged?.invoke(uuid, type, bleDevice, data)
     }
 
-    open fun callMtuChanged(mtu: Int) {
+    open fun callMtuChanged(mtu: Int, bleDevice: BleDevice) {
         launchInMainThread {
-            mtuChanged?.invoke(mtu)
+            mtuChanged?.invoke(mtu, bleDevice)
         }
     }
 }

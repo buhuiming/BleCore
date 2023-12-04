@@ -85,8 +85,8 @@ internal class BleWriteRequest(
                   dataArray: SparseArray<ByteArray>,
                   bleWriteCallback: BleWriteCallback) {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
-            bleWriteCallback.callWriteFail(0, dataArray.size(), NoBlePermissionException())
-            bleWriteCallback.callWriteComplete(false)
+            bleWriteCallback.callWriteFail(bleDevice, 0, dataArray.size(), NoBlePermissionException())
+            bleWriteCallback.callWriteComplete(bleDevice, false)
             return
         }
         if (dataArray.size() == 0) {
@@ -94,8 +94,8 @@ internal class BleWriteRequest(
                 getTaskId(writeUUID, operateRandomID, 0) + " -> 写数据失败，数据为空"
             )
             BleLogger.e(exception.message)
-            bleWriteCallback.callWriteFail(0, 0, exception)
-            bleWriteCallback.callWriteComplete(false)
+            bleWriteCallback.callWriteFail(bleDevice, 0, 0, exception)
+            bleWriteCallback.callWriteComplete(bleDevice, false)
             return
         }
         for (i in 0 until dataArray.size()) {
@@ -106,8 +106,8 @@ internal class BleWriteRequest(
                             " -> 写数据失败，第${i + 1}个数据包为空"
                 )
                 BleLogger.e(exception.message)
-                bleWriteCallback.callWriteFail(i + 1, dataArray.size(), exception)
-                bleWriteCallback.callWriteComplete(false)
+                bleWriteCallback.callWriteFail(bleDevice, i + 1, dataArray.size(), exception)
+                bleWriteCallback.callWriteComplete(bleDevice, false)
                 return
             }
             val mtu = getBleOptions()?.mtu?: DEFAULT_MTU
@@ -118,8 +118,8 @@ internal class BleWriteRequest(
                     , i + 1)} -> " + "写数据失败，第${i + 1}个数据包" +
                         "长度(${data.size}) + 3大于设定Mtu($mtu)")
                 BleLogger.e(exception.message)
-                bleWriteCallback.callWriteFail(i + 1, dataArray.size(), exception)
-                bleWriteCallback.callWriteComplete(false)
+                bleWriteCallback.callWriteFail(bleDevice, i + 1, dataArray.size(), exception)
+                bleWriteCallback.callWriteComplete(bleDevice, false)
                 return
             }
         }
@@ -151,8 +151,8 @@ internal class BleWriteRequest(
         } else {
             val exception = UnSupportException("$writeUUID -> 写数据失败，此特性不支持写数据")
             BleLogger.e(exception.message)
-            bleWriteCallback.callWriteFail(0, dataArray.size(), exception)
-            bleWriteCallback.callWriteComplete(false)
+            bleWriteCallback.callWriteFail(bleDevice, 0, dataArray.size(), exception)
+            bleWriteCallback.callWriteComplete(bleDevice, false)
         }
     }
 
@@ -183,12 +183,13 @@ internal class BleWriteRequest(
                                     "第${bleWriteData.currentPackage}包数据写失败，超时")
                         BleLogger.e(exception.message)
                         bleWriteData.bleWriteCallback.callWriteFail(
+                            bleDevice,
                             bleWriteData.currentPackage,
                             bleWriteData.totalPackage,
                             exception
                         )
                         if (bleWriteData.currentPackage == bleWriteData.totalPackage) {
-                            bleWriteData.bleWriteCallback.callWriteComplete(false)
+                            bleWriteData.bleWriteCallback.callWriteComplete(bleDevice, false)
                         }
                         //移除监听
                         for ((key, value) in bleWriteDataHashMap) {
@@ -263,6 +264,7 @@ internal class BleWriteRequest(
                     "失败，错误可能是没有权限、未连接、服务未绑定、不可写、请求忙碌等，code = $errorCode")
             BleLogger.e(exception.message)
             bleWriteData.bleWriteCallback.callWriteFail(
+                bleDevice,
                 bleWriteData.currentPackage,
                 bleWriteData.totalPackage,
                 exception
@@ -304,12 +306,13 @@ internal class BleWriteRequest(
                         cancelWriteJob(bleWriteData.writeUUID, taskId)
 
                         bleWriteData.bleWriteCallback.callWriteSuccess(
+                            bleDevice,
                             bleWriteData.currentPackage,
                             bleWriteData.totalPackage,
                             bleWriteData.data
                         )
                         if (bleWriteData.currentPackage == bleWriteData.totalPackage) {
-                            bleWriteData.bleWriteCallback.callWriteComplete(true)
+                            bleWriteData.bleWriteCallback.callWriteComplete(bleDevice, true)
                             iterator.remove()
                         }
                     } else {
@@ -319,6 +322,7 @@ internal class BleWriteRequest(
                         )
                         BleLogger.e(exception.message)
                         bleWriteData.bleWriteCallback.callWriteFail(
+                            bleDevice,
                             bleWriteData.currentPackage,
                             bleWriteData.totalPackage,
                             exception
@@ -351,13 +355,13 @@ internal class BleWriteRequest(
             val taskId = getTaskId(bleWriteData.writeUUID, bleWriteData.operateRandomID
                 , bleWriteData.currentPackage)
             cancelWriteJob(bleWriteData.writeUUID, taskId)
-            bleWriteData.bleWriteCallback.callWriteComplete(false)
+            bleWriteData.bleWriteCallback.callWriteComplete(bleDevice, false)
         } else {
             for (i in currentPackage..totalPackage) {
                 val id = getTaskId(bleWriteData.writeUUID, bleWriteData.operateRandomID, i)
                 cancelWriteJob(bleWriteData.writeUUID, id)
                 if (i == totalPackage) {
-                    bleWriteData.bleWriteCallback.callWriteComplete(false)
+                    bleWriteData.bleWriteCallback.callWriteComplete(bleDevice, false)
                 }
             }
         }

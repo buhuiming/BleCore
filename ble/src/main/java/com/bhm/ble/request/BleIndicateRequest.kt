@@ -69,7 +69,7 @@ internal class BleIndicateRequest(
                                      bleDescriptorGetType: BleDescriptorGetType,
                                      bleIndicateCallback: BleIndicateCallback) {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
-            bleIndicateCallback.callIndicateFail(NoBlePermissionException())
+            bleIndicateCallback.callIndicateFail(bleDevice, NoBlePermissionException())
             return
         }
         val characteristic = getCharacteristic(bleDevice, serviceUUID, indicateUUID)
@@ -102,7 +102,7 @@ internal class BleIndicateRequest(
                         if (it is TimeoutCancellationException || it is TimeoutCancelException) {
                             val exception = TimeoutCancelException("$indicateUUID -> 设置Indicate失败，设置超时")
                             BleLogger.e(exception.message)
-                            bleIndicateCallback.callIndicateFail(exception)
+                            bleIndicateCallback.callIndicateFail(bleDevice, exception)
                         }
                     }
                 }
@@ -111,7 +111,7 @@ internal class BleIndicateRequest(
         } else {
             val exception = UnSupportException("$indicateUUID -> 设置Indicate失败，此特性不支持通知")
             BleLogger.e(exception.message)
-            bleIndicateCallback.callIndicateFail(exception)
+            bleIndicateCallback.callIndicateFail(bleDevice, exception)
         }
     }
 
@@ -156,7 +156,7 @@ internal class BleIndicateRequest(
                 "收到Indicate数据：${BleUtil.bytesToHex(value)}")
         bleIndicateCallbackHashMap.values.forEach {
             if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
-                it.callCharacteristicChanged(value)
+                it.callCharacteristicChanged(bleDevice, value)
             }
         }
     }
@@ -173,14 +173,14 @@ internal class BleIndicateRequest(
                 && cancelIndicateJob(it.getKey(), getTaskId(it.getKey()))) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     BleLogger.d("${it.getKey()} -> 设置Indicate成功")
-                    it.callIndicateSuccess()
+                    it.callIndicateSuccess(bleDevice)
                 } else {
                     val exception = UnDefinedException(
                         "${it.getKey()} -> 设置Indicate失败，Descriptor写数据失败",
                         EXCEPTION_CODE_DESCRIPTOR_FAIL
                     )
                     BleLogger.e(exception.message)
-                    it.callIndicateFail(exception)
+                    it.callIndicateFail(bleDevice, exception)
                 }
             }
         }
@@ -204,7 +204,7 @@ internal class BleIndicateRequest(
             )
             cancelIndicateJob(indicateUUID, getTaskId(indicateUUID))
             BleLogger.e(exception.message)
-            bleIndicateCallback?.callIndicateFail(exception)
+            bleIndicateCallback?.callIndicateFail(bleDevice, exception)
             return false
         }
         val descriptorList = characteristic.descriptors
@@ -227,7 +227,7 @@ internal class BleIndicateRequest(
                 )
                 cancelIndicateJob(indicateUUID, getTaskId(indicateUUID))
                 BleLogger.e(exception.message)
-                bleIndicateCallback?.callIndicateFail(exception)
+                bleIndicateCallback?.callIndicateFail(bleDevice, exception)
                 return false
             }
             return true
@@ -244,7 +244,7 @@ internal class BleIndicateRequest(
                 )
                 cancelIndicateJob(indicateUUID, getTaskId(indicateUUID))
                 BleLogger.e(exception.message)
-                bleIndicateCallback?.callIndicateFail(exception)
+                bleIndicateCallback?.callIndicateFail(bleDevice, exception)
                 return false
             }
             val writeDescriptorCode = writeDescriptor(bluetoothGatt, descriptor, enable)
@@ -265,7 +265,7 @@ internal class BleIndicateRequest(
                 )
                 cancelIndicateJob(indicateUUID, getTaskId(indicateUUID))
                 BleLogger.e(exception.message)
-                bleIndicateCallback?.callIndicateFail(exception)
+                bleIndicateCallback?.callIndicateFail(bleDevice, exception)
                 return false
             }
         }

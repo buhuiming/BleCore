@@ -5,6 +5,8 @@
  */
 package com.bhm.ble.callback
 
+import com.bhm.ble.device.BleDevice
+
 
 /**
  * Rssi信号值回调
@@ -14,27 +16,27 @@ package com.bhm.ble.callback
  */
 open class BleRssiCallback : BleBaseCallback() {
 
-    private var success: ((rssi: Int) -> Unit)? = null
+    private var success: ((bleDevice: BleDevice, rssi: Int) -> Unit)? = null
 
-    private var fail: ((throwable: Throwable) -> Unit)? = null
+    private var fail: ((bleDevice: BleDevice, throwable: Throwable) -> Unit)? = null
 
-    fun onRssiFail(value: ((throwable: Throwable) -> Unit)) {
+    fun onRssiFail(value: ((bleDevice: BleDevice, throwable: Throwable) -> Unit)) {
         fail = value
     }
 
-    fun onRssiSuccess(value: ((rssi: Int) -> Unit)) {
+    fun onRssiSuccess(value: ((bleDevice: BleDevice, rssi: Int) -> Unit)) {
         success = value
     }
 
-    open fun callRssiFail(throwable: Throwable) {
+    open fun callRssiFail(bleDevice: BleDevice, throwable: Throwable) {
         launchInMainThread {
-            fail?.invoke(throwable)
+            fail?.invoke(bleDevice, throwable)
         }
     }
 
-    open fun callRssiSuccess(rssi: Int) {
+    open fun callRssiSuccess(bleDevice: BleDevice, rssi: Int) {
         launchInMainThread {
-            success?.invoke(rssi)
+            success?.invoke(bleDevice, rssi)
         }
     }
 }

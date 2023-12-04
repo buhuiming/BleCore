@@ -195,6 +195,11 @@ internal interface BleBaseRequest {
     fun removeAllCharacterCallback(bleDevice: BleDevice)
 
     /**
+     * 移除该设备Event回调
+     */
+    fun removeBleEventCallback(bleDevice: BleDevice)
+
+    /**
      * 断开所有设备的连接
      */
     fun disConnectAll()

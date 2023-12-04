@@ -5,6 +5,8 @@
  */
 package com.bhm.ble.callback
 
+import com.bhm.ble.device.BleDevice
+
 
 /**
  * 订阅通知回调
@@ -15,38 +17,38 @@ package com.bhm.ble.callback
  */
 open class BleIndicateCallback : BleBaseCallback() {
 
-    private var indicateSuccess: (() -> Unit)? = null
+    private var indicateSuccess: ((bleDevice: BleDevice) -> Unit)? = null
 
-    private var indicateFail: ((throwable: Throwable) -> Unit)? = null
+    private var indicateFail: ((bleDevice: BleDevice, throwable: Throwable) -> Unit)? = null
 
-    private var characteristicChanged: ((data: ByteArray) -> Unit)? = null
+    private var characteristicChanged: ((bleDevice: BleDevice, data: ByteArray) -> Unit)? = null
 
-    fun onIndicateFail(value: ((throwable: Throwable) -> Unit)) {
+    fun onIndicateFail(value: ((bleDevice: BleDevice, throwable: Throwable) -> Unit)) {
         indicateFail = value
     }
 
-    fun onIndicateSuccess(value: (() -> Unit)) {
+    fun onIndicateSuccess(value: ((bleDevice: BleDevice) -> Unit)) {
         indicateSuccess = value
     }
 
-    fun onCharacteristicChanged(value: ((data: ByteArray) -> Unit)) {
+    fun onCharacteristicChanged(value: ((bleDevice: BleDevice, data: ByteArray) -> Unit)) {
         characteristicChanged = value
     }
 
-    open fun callIndicateFail(throwable: Throwable) {
+    open fun callIndicateFail(bleDevice: BleDevice, throwable: Throwable) {
         launchInMainThread {
-            indicateFail?.invoke(throwable)
+            indicateFail?.invoke(bleDevice, throwable)
         }
     }
 
-    open fun callIndicateSuccess() {
+    open fun callIndicateSuccess(bleDevice: BleDevice) {
         launchInMainThread {
-            indicateSuccess?.invoke()
+            indicateSuccess?.invoke(bleDevice)
         }
     }
 
-    open fun callCharacteristicChanged(data: ByteArray) {
+    open fun callCharacteristicChanged(bleDevice: BleDevice, data: ByteArray) {
         //数据处理的线程需要自行切换
-        characteristicChanged?.invoke(data)
+        characteristicChanged?.invoke(bleDevice, data)
     }
 }

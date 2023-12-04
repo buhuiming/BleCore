@@ -69,7 +69,7 @@ internal class BleNotifyRequest(
                                    bleDescriptorGetType: BleDescriptorGetType,
                                    bleNotifyCallback: BleNotifyCallback) {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
-            bleNotifyCallback.callNotifyFail(NoBlePermissionException())
+            bleNotifyCallback.callNotifyFail(bleDevice, NoBlePermissionException())
             return
         }
         val characteristic = getCharacteristic(bleDevice, serviceUUID, notifyUUID)
@@ -102,7 +102,7 @@ internal class BleNotifyRequest(
                         if (it is TimeoutCancellationException || it is TimeoutCancelException) {
                             val exception = TimeoutCancelException("$notifyUUID -> 设置Notify失败，设置超时")
                             BleLogger.e(exception.message)
-                            bleNotifyCallback.callNotifyFail(exception)
+                            bleNotifyCallback.callNotifyFail(bleDevice, exception)
                         }
                     }
                 }
@@ -111,7 +111,7 @@ internal class BleNotifyRequest(
         } else {
             val exception = UnSupportException("$notifyUUID -> 设置Notify失败，此特性不支持通知")
             BleLogger.e(exception.message)
-            bleNotifyCallback.callNotifyFail(exception)
+            bleNotifyCallback.callNotifyFail(bleDevice, exception)
         }
     }
 
@@ -156,7 +156,7 @@ internal class BleNotifyRequest(
                 "收到Notify数据：${BleUtil.bytesToHex(value)}")
         bleNotifyCallbackHashMap.values.forEach {
             if (characteristic.uuid?.toString().equals(it.getKey(), ignoreCase = true)) {
-                it.callCharacteristicChanged(value)
+                it.callCharacteristicChanged(bleDevice, value)
             }
         }
     }
@@ -173,14 +173,14 @@ internal class BleNotifyRequest(
                 && cancelNotifyJob(it.getKey(), getTaskId(it.getKey()))) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     BleLogger.d("${it.getKey()} -> 设置Notify成功")
-                    it.callNotifySuccess()
+                    it.callNotifySuccess(bleDevice)
                 } else {
                     val exception = UnDefinedException(
                         "${it.getKey()} -> 设置Notify失败，Descriptor写数据失败",
                         EXCEPTION_CODE_DESCRIPTOR_FAIL
                     )
                     BleLogger.e(exception.message)
-                    it.callNotifyFail(exception)
+                    it.callNotifyFail(bleDevice, exception)
                 }
             }
         }
@@ -204,7 +204,7 @@ internal class BleNotifyRequest(
             )
             cancelNotifyJob(notifyUUID, getTaskId(notifyUUID))
             BleLogger.e(exception.message)
-            bleNotifyCallback?.callNotifyFail(exception)
+            bleNotifyCallback?.callNotifyFail(bleDevice, exception)
             return false
         }
         val descriptorList = characteristic.descriptors
@@ -227,7 +227,7 @@ internal class BleNotifyRequest(
                 )
                 cancelNotifyJob(notifyUUID, getTaskId(notifyUUID))
                 BleLogger.e(exception.message)
-                bleNotifyCallback?.callNotifyFail(exception)
+                bleNotifyCallback?.callNotifyFail(bleDevice, exception)
                 return false
             }
             return true
@@ -244,7 +244,7 @@ internal class BleNotifyRequest(
                 )
                 cancelNotifyJob(notifyUUID, getTaskId(notifyUUID))
                 BleLogger.e(exception.message)
-                bleNotifyCallback?.callNotifyFail(exception)
+                bleNotifyCallback?.callNotifyFail(bleDevice, exception)
                 return false
             }
             val writeDescriptorCode = writeDescriptor(bluetoothGatt, descriptor, enable)
@@ -265,7 +265,7 @@ internal class BleNotifyRequest(
                 )
                 cancelNotifyJob(notifyUUID, getTaskId(notifyUUID))
                 BleLogger.e(exception.message)
-                bleNotifyCallback?.callNotifyFail(exception)
+                bleNotifyCallback?.callNotifyFail(bleDevice, exception)
                 return false
             }
         }

@@ -5,6 +5,8 @@
  */
 package com.bhm.ble.callback
 
+import com.bhm.ble.device.BleDevice
+
 
 /**
  * mtu值变化回调
@@ -14,27 +16,27 @@ package com.bhm.ble.callback
  */
 open class BleMtuChangedCallback : BleBaseCallback() {
 
-    private var mtuChanged: ((mtu: Int) -> Unit)? = null
+    private var mtuChanged: ((bleDevice: BleDevice, mtu: Int) -> Unit)? = null
 
-    private var fail: ((throwable: Throwable) -> Unit)? = null
+    private var fail: ((bleDevice: BleDevice, throwable: Throwable) -> Unit)? = null
 
-    fun onSetMtuFail(value: ((throwable: Throwable) -> Unit)) {
+    fun onSetMtuFail(value: ((bleDevice: BleDevice, throwable: Throwable) -> Unit)) {
         fail = value
     }
 
-    fun onMtuChanged(value: ((mtu: Int) -> Unit)) {
+    fun onMtuChanged(value: ((bleDevice: BleDevice, mtu: Int) -> Unit)) {
         mtuChanged = value
     }
 
-    open fun callSetMtuFail(throwable: Throwable) {
+    open fun callSetMtuFail(bleDevice: BleDevice, throwable: Throwable) {
         launchInMainThread {
-            fail?.invoke(throwable)
+            fail?.invoke(bleDevice, throwable)
         }
     }
 
-    open fun callMtuChanged(mtu: Int) {
+    open fun callMtuChanged(bleDevice: BleDevice, mtu: Int) {
         launchInMainThread {
-            mtuChanged?.invoke(mtu)
+            mtuChanged?.invoke(bleDevice, mtu)
         }
     }
 }

@@ -123,21 +123,21 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                node: CharacteristicNode
     ) {
         BleManager.get().notify(bleDevice, node.serviceUUID, node.characteristicUUID, BleDescriptorGetType.AllDescriptor) {
-            onNotifyFail {
-                addLogMsg(LogEntity(Level.OFF, "notify失败：${it.message}"))
+            onNotifyFail { _, t ->
+                addLogMsg(LogEntity(Level.OFF, "notify失败：${t.message}"))
                 node.enableNotify = false
                 listRefreshMutableStateFlow.value = System.currentTimeMillis().toString()
             }
             onNotifySuccess {
                 addLogMsg(LogEntity(Level.FINE, "notify成功：${node.characteristicUUID}"))
             }
-            onCharacteristicChanged {
+            onCharacteristicChanged {_, data ->
                 //数据处理在IO线程，显示UI要切换到主线程
                 launchInMainThread {
                     addLogMsg(
                         LogEntity(
                             Level.INFO, "Notify接收到${node.characteristicUUID}的数据：" +
-                                    BleUtil.bytesToHex(it)
+                                    BleUtil.bytesToHex(data)
                         )
                     )
                 }
@@ -167,21 +167,21 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                  node: CharacteristicNode
     ) {
         BleManager.get().indicate(bleDevice, node.serviceUUID, node.characteristicUUID, BleDescriptorGetType.AllDescriptor) {
-            onIndicateFail {
-                addLogMsg(LogEntity(Level.OFF, "indicate失败：${it.message}"))
+            onIndicateFail {_, t ->
+                addLogMsg(LogEntity(Level.OFF, "indicate失败：${t.message}"))
                 node.enableIndicate = false
                 listRefreshMutableStateFlow.value = System.currentTimeMillis().toString()
             }
             onIndicateSuccess {
                 addLogMsg(LogEntity(Level.FINE, "indicate成功：${node.characteristicUUID}"))
             }
-            onCharacteristicChanged {
+            onCharacteristicChanged {_, data ->
                 //数据处理在IO线程，显示UI要切换到主线程
                 launchInMainThread {
                     addLogMsg(
                         LogEntity(
                             Level.INFO, "Indicate接收到${node.characteristicUUID}的数据：" +
-                                    BleUtil.bytesToHex(it)
+                                    BleUtil.bytesToHex(data)
                         )
                     )
                 }
@@ -221,11 +221,11 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
      */
     fun readRssi(bleDevice: BleDevice) {
         BleManager.get().readRssi(bleDevice) {
-            onRssiFail {
-                addLogMsg(LogEntity(Level.OFF, "读取信号值失败：${it.message}"))
+            onRssiFail {_, t ->
+                addLogMsg(LogEntity(Level.OFF, "读取信号值失败：${t.message}"))
             }
-            onRssiSuccess {
-                addLogMsg(LogEntity(Level.FINE, "${bleDevice.deviceAddress} -> 读取信号值成功：${it}"))
+            onRssiSuccess {_, rssi ->
+                addLogMsg(LogEntity(Level.FINE, "${bleDevice.deviceAddress} -> 读取信号值成功：${rssi}"))
             }
         }
     }
@@ -235,11 +235,11 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
      */
     fun setMtu(bleDevice: BleDevice) {
         BleManager.get().setMtu(bleDevice) {
-            onSetMtuFail {
-                addLogMsg(LogEntity(Level.OFF, "设置mtu值失败：${it.message}"))
+            onSetMtuFail {_, t ->
+                addLogMsg(LogEntity(Level.OFF, "设置mtu值失败：${t.message}"))
             }
-            onMtuChanged {
-                addLogMsg(LogEntity(Level.FINE, "${bleDevice.deviceAddress} -> 设置mtu值成功：${it}"))
+            onMtuChanged {_, mtu ->
+                addLogMsg(LogEntity(Level.FINE, "${bleDevice.deviceAddress} -> 设置mtu值成功：${mtu}"))
             }
         }
     }
@@ -251,11 +251,11 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                  node: CharacteristicNode
     ) {
         BleManager.get().readData(bleDevice, node.serviceUUID, node.characteristicUUID) {
-            onReadFail {
-                addLogMsg(LogEntity(Level.OFF, "读特征值数据失败：${it.message}"))
+            onReadFail {_, t ->
+                addLogMsg(LogEntity(Level.OFF, "读特征值数据失败：${t.message}"))
             }
-            onReadSuccess {
-                addLogMsg(LogEntity(Level.FINE, "${node.characteristicUUID} -> 读特征值数据成功：${BleUtil.bytesToHex(it)}"))
+            onReadSuccess {_, data ->
+                addLogMsg(LogEntity(Level.FINE, "${node.characteristicUUID} -> 读特征值数据成功：${BleUtil.bytesToHex(data)}"))
             }
         }
     }
@@ -275,15 +275,15 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
         val maxLength = mtu - 3
         val listData: SparseArray<ByteArray> = BleUtil.subpackage(data, maxLength)
         BleManager.get().writeData(bleDevice, node.serviceUUID, node.characteristicUUID, listData) {
-            onWriteFail { currentPackage, _, t ->
+            onWriteFail { _, currentPackage, _, t ->
                 addLogMsg(LogEntity(Level.OFF, "第${currentPackage}包数据写失败：${t.message}"))
             }
-            onWriteSuccess { currentPackage, _, justWrite ->
+            onWriteSuccess { _, currentPackage, _, justWrite ->
                 addLogMsg(LogEntity(Level.FINE, "${node.characteristicUUID} -> 第${currentPackage}包数据写成功：" +
                         BleUtil.bytesToHex(justWrite)
                 ))
             }
-            onWriteComplete { allSuccess ->
+            onWriteComplete { _, allSuccess ->
                 //代表所有数据写成功，可以在这个方法中处理成功的逻辑
                 addLogMsg(LogEntity(Level.FINE, "${node.characteristicUUID} -> 写数据完成，是否成功：$allSuccess"))
             }

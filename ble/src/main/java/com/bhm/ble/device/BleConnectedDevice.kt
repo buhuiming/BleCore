@@ -139,11 +139,11 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         if (properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) {
             // 这是 Indicate
             bleIndicateRequest?.onCharacteristicChanged(characteristic, value)
-            bleEventCallback?.callCharacteristicChanged(characteristic.uuid?.toString(), 2, value)
+            bleEventCallback?.callCharacteristicChanged(characteristic.uuid?.toString(), 2, bleDevice, value)
         } else if (properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0) {
             // 这是 Notify
             bleNotifyRequest?.onCharacteristicChanged(characteristic, value)
-            bleEventCallback?.callCharacteristicChanged(characteristic.uuid?.toString(), 1, value)
+            bleEventCallback?.callCharacteristicChanged(characteristic.uuid?.toString(), 1, bleDevice,  value)
         }
     }
 
@@ -162,11 +162,11 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
             if (properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) {
                 // 这是 Indicate
                 bleIndicateRequest?.onCharacteristicChanged(it, it.value)
-                bleEventCallback?.callCharacteristicChanged(it.uuid?.toString(), 2, it.value)
+                bleEventCallback?.callCharacteristicChanged(it.uuid?.toString(), 2, bleDevice, it.value)
             } else if (properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0) {
                 // 这是 Notify
                 bleNotifyRequest?.onCharacteristicChanged(it, it.value)
-                bleEventCallback?.callCharacteristicChanged(it.uuid?.toString(), 1, it.value)
+                bleEventCallback?.callCharacteristicChanged(it.uuid?.toString(), 1, bleDevice, it.value)
             } else {
 
             }
@@ -225,7 +225,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
         super.onMtuChanged(gatt, mtu, status)
         bleMtuRequest?.onMtuChanged(mtu, status)
-        bleEventCallback?.callMtuChanged(mtu)
+        bleEventCallback?.callMtuChanged(mtu, bleDevice)
     }
 
     /**

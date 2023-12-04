@@ -65,7 +65,7 @@ internal class BleReadRequest(
                            bleReadCallback: BleReadCallback
     ) {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
-            bleReadCallback.callReadFail(NoBlePermissionException())
+            bleReadCallback.callReadFail(bleDevice, NoBlePermissionException())
             return
         }
         val characteristic = getCharacteristic(bleDevice, serviceUUID, readUUID)
@@ -95,7 +95,7 @@ internal class BleReadRequest(
                         if (it is TimeoutCancellationException || it is TimeoutCancelException) {
                             val exception = TimeoutCancelException("$readUUID -> 读特征值数据失败，超时")
                             BleLogger.e(exception.message)
-                            bleReadCallback.callReadFail(exception)
+                            bleReadCallback.callReadFail(bleDevice, exception)
                         }
                     }
                 }
@@ -104,7 +104,7 @@ internal class BleReadRequest(
         } else {
             val exception = UnSupportException("$readUUID -> 读特征值数据失败，此特性不支持读特征值数据")
             BleLogger.e(exception.message)
-            bleReadCallback.callReadFail(exception)
+            bleReadCallback.callReadFail(bleDevice, exception)
         }
     }
 
@@ -124,14 +124,14 @@ internal class BleReadRequest(
                         "${it.getKey()} -> " +
                                 "读特征值数据成功：${BleUtil.bytesToHex(value)}"
                     )
-                    it.callReadSuccess(value)
+                    it.callReadSuccess(bleDevice, value)
                 } else {
                     val exception = UnDefinedException(
                         "${it.getKey()} -> " +
                                 "读特征值数据失败，status = $status"
                     )
                     BleLogger.e(exception.message)
-                    it.callReadFail(exception)
+                    it.callReadFail(bleDevice, exception)
                 }
             }
         }

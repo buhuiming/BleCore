@@ -5,6 +5,8 @@
  */
 package com.bhm.ble.callback
 
+import com.bhm.ble.device.BleDevice
+
 
 /**
  * 写回调
@@ -14,39 +16,39 @@ package com.bhm.ble.callback
  */
 open class BleWriteCallback : BleBaseCallback() {
 
-    private var writeSuccess: ((current: Int, total: Int, justWrite: ByteArray) -> Unit)? = null
+    private var writeSuccess: ((bleDevice: BleDevice, current: Int, total: Int, justWrite: ByteArray) -> Unit)? = null
 
-    private var writeFail: ((current: Int, total: Int, throwable: Throwable) -> Unit)? = null
+    private var writeFail: ((bleDevice: BleDevice, current: Int, total: Int, throwable: Throwable) -> Unit)? = null
 
-    private var writeComplete: ((allSuccess: Boolean) -> Unit)? = null
+    private var writeComplete: ((bleDevice: BleDevice, allSuccess: Boolean) -> Unit)? = null
 
-    fun onWriteFail(value: ((current: Int, total: Int, throwable: Throwable) -> Unit)) {
+    fun onWriteFail(value: ((bleDevice: BleDevice, current: Int, total: Int, throwable: Throwable) -> Unit)) {
         writeFail = value
     }
 
-    fun onWriteSuccess(value: ((current: Int, total: Int, justWrite: ByteArray) -> Unit)) {
+    fun onWriteSuccess(value: ((bleDevice: BleDevice, current: Int, total: Int, justWrite: ByteArray) -> Unit)) {
         writeSuccess = value
     }
 
-    fun onWriteComplete(value: ((allSuccess: Boolean) -> Unit)) {
+    fun onWriteComplete(value: ((bleDevice: BleDevice, allSuccess: Boolean) -> Unit)) {
         writeComplete = value
     }
 
-    open fun callWriteFail(current: Int, total: Int, throwable: Throwable) {
+    open fun callWriteFail(bleDevice: BleDevice, current: Int, total: Int, throwable: Throwable) {
         launchInMainThread {
-            writeFail?.invoke(current, total, throwable)
+            writeFail?.invoke(bleDevice, current, total, throwable)
         }
     }
 
-    open fun callWriteSuccess(current: Int, total: Int, justWrite: ByteArray) {
+    open fun callWriteSuccess(bleDevice: BleDevice, current: Int, total: Int, justWrite: ByteArray) {
         launchInMainThread {
-            writeSuccess?.invoke(current, total, justWrite)
+            writeSuccess?.invoke(bleDevice, current, total, justWrite)
         }
     }
 
-    open fun callWriteComplete(allSuccess: Boolean) {
+    open fun callWriteComplete(bleDevice: BleDevice, allSuccess: Boolean) {
         launchInMainThread {
-            writeComplete?.invoke(allSuccess)
+            writeComplete?.invoke(bleDevice, allSuccess)
         }
     }
 }

@@ -54,7 +54,7 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
     @Synchronized
     fun setMtu(mtu: Int, bleMtuChangedCallback: BleMtuChangedCallback) {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
-            bleMtuChangedCallback.callSetMtuFail(NoBlePermissionException())
+            bleMtuChangedCallback.callSetMtuFail(bleDevice, NoBlePermissionException())
             return
         }
         cancelSetMtuJob()
@@ -79,7 +79,7 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
                     if (it is TimeoutCancellationException || it is TimeoutCancelException) {
                         val exception = TimeoutCancelException("${bleDevice.deviceAddress} -> 设置Mtu超时")
                         BleLogger.e(exception.message)
-                        bleMtuChangedCallback.callSetMtuFail(exception)
+                        bleMtuChangedCallback.callSetMtuFail(bleDevice, exception)
                     }
                 }
             }
@@ -95,7 +95,7 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
             if (cancelSetMtuJob()) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     BleLogger.d("${bleDevice.deviceAddress} -> 设置Mtu成功：$mtu")
-                    it.callMtuChanged(mtu)
+                    it.callMtuChanged(bleDevice, mtu)
                     getBleOptions()?.mtu = mtu
                 } else {
                     val exception = UnDefinedException(
@@ -103,7 +103,7 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
                                 "设置Mtu失败，status = $status"
                     )
                     BleLogger.e(exception.message)
-                    it.callSetMtuFail(exception)
+                    it.callSetMtuFail(bleDevice, exception)
                 }
             }
         }

@@ -5,6 +5,8 @@
  */
 package com.bhm.ble.callback
 
+import com.bhm.ble.device.BleDevice
+
 
 /**
  * 订阅通知回调
@@ -15,38 +17,38 @@ package com.bhm.ble.callback
  */
 open class BleNotifyCallback : BleBaseCallback() {
 
-    private var notifySuccess: (() -> Unit)? = null
+    private var notifySuccess: ((bleDevice: BleDevice) -> Unit)? = null
 
-    private var notifyFail: ((throwable: Throwable) -> Unit)? = null
+    private var notifyFail: ((bleDevice: BleDevice, throwable: Throwable) -> Unit)? = null
 
-    private var characteristicChanged: ((data: ByteArray) -> Unit)? = null
+    private var characteristicChanged: ((bleDevice: BleDevice, data: ByteArray) -> Unit)? = null
 
-    fun onNotifyFail(value: ((throwable: Throwable) -> Unit)) {
+    fun onNotifyFail(value: ((bleDevice: BleDevice, throwable: Throwable) -> Unit)) {
         notifyFail = value
     }
 
-    fun onNotifySuccess(value: (() -> Unit)) {
+    fun onNotifySuccess(value: ((bleDevice: BleDevice) -> Unit)) {
         notifySuccess = value
     }
 
-    fun onCharacteristicChanged(value: ((data: ByteArray) -> Unit)) {
+    fun onCharacteristicChanged(value: ((bleDevice: BleDevice, data: ByteArray) -> Unit)) {
         characteristicChanged = value
     }
 
-    open fun callNotifyFail(throwable: Throwable) {
+    open fun callNotifyFail(bleDevice: BleDevice, throwable: Throwable) {
         launchInMainThread {
-            notifyFail?.invoke(throwable)
+            notifyFail?.invoke(bleDevice, throwable)
         }
     }
 
-    open fun callNotifySuccess() {
+    open fun callNotifySuccess(bleDevice: BleDevice) {
         launchInMainThread {
-            notifySuccess?.invoke()
+            notifySuccess?.invoke(bleDevice)
         }
     }
 
-    open fun callCharacteristicChanged(data: ByteArray) {
+    open fun callCharacteristicChanged(bleDevice: BleDevice, data: ByteArray) {
         //数据处理的线程需要自行切换
-        characteristicChanged?.invoke(data)
+        characteristicChanged?.invoke(bleDevice, data)
     }
 }

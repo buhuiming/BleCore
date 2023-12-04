@@ -435,13 +435,13 @@ internal class BleConnectRequest(
         if (getBleOptions()?.autoSetMtu == true) {
             getBleConnectedDevice(bleDevice)?.setMtu(getBleOptions()?.mtu?: DEFAULT_MTU,
                 object : BleMtuChangedCallback() {
-                    override fun callMtuChanged(mtu: Int) {
-                        super.callMtuChanged(mtu)
+                    override fun callMtuChanged(bleDevice: BleDevice, mtu: Int) {
+                        super.callMtuChanged(bleDevice, mtu)
                         BleLogger.d("${bleDevice.deviceAddress} -> 自动设置Mtu成功: $mtu")
                     }
 
-                    override fun callSetMtuFail(throwable: Throwable) {
-                        super.callSetMtuFail(throwable)
+                    override fun callSetMtuFail(bleDevice: BleDevice, throwable: Throwable) {
+                        super.callSetMtuFail(bleDevice, throwable)
                         BleLogger.e("${bleDevice.deviceAddress} -> " +
                                 "自动设置Mtu失败: ${throwable.message}")
                     }

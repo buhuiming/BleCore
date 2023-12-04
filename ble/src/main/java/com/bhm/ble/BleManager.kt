@@ -615,6 +615,14 @@ class BleManager private constructor() {
     }
 
     /**
+     * 移除该设备Event回调
+     */
+    fun removeBleEventCallback(bleDevice: BleDevice) {
+        checkInitialize()
+        bleBaseRequest?.removeBleEventCallback(bleDevice)
+    }
+
+    /**
      * 断开所有设备的连接，先回调状态，再close
      */
     @Synchronized

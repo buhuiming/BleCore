@@ -56,7 +56,7 @@ internal class BleRssiRequest(
     @Synchronized
     fun readRemoteRssi(bleRssiCallback: BleRssiCallback) {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
-            bleRssiCallback.callRssiFail(NoBlePermissionException())
+            bleRssiCallback.callRssiFail(bleDevice, NoBlePermissionException())
             return
         }
         cancelReadRssiJob()
@@ -80,7 +80,7 @@ internal class BleRssiRequest(
                     BleLogger.e(it.message)
                     if (it is TimeoutCancellationException || it is TimeoutCancelException) {
                         BleLogger.e("${bleDevice.deviceAddress} -> 读取Rssi超时")
-                        bleRssiCallback.callRssiFail(
+                        bleRssiCallback.callRssiFail(bleDevice,
                             TimeoutCancelException("${bleDevice.deviceAddress}" +
                                     " -> 读取Rssi失败，超时")
                         )
@@ -99,14 +99,14 @@ internal class BleRssiRequest(
             if (cancelReadRssiJob()) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     BleLogger.d("${bleDevice.deviceAddress} -> 读取Rssi成功：$rssi")
-                    it.callRssiSuccess(rssi)
+                    it.callRssiSuccess(bleDevice, rssi)
                 } else {
                     val exception = UnDefinedException(
                         "${bleDevice.deviceAddress} -> " +
                                 "读取Rssi失败，status = $status"
                     )
                     BleLogger.e(exception.message)
-                    it.callRssiFail(exception)
+                    it.callRssiFail(bleDevice, exception)
                 }
             }
         }

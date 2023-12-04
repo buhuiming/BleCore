@@ -5,6 +5,8 @@
  */
 package com.bhm.ble.callback
 
+import com.bhm.ble.device.BleDevice
+
 
 /**
  * 读回调
@@ -14,27 +16,27 @@ package com.bhm.ble.callback
  */
 open class BleReadCallback : BleBaseCallback() {
 
-    private var readSuccess: ((data: ByteArray) -> Unit)? = null
+    private var readSuccess: ((bleDevice: BleDevice, data: ByteArray) -> Unit)? = null
 
-    private var readFail: ((throwable: Throwable) -> Unit)? = null
+    private var readFail: ((bleDevice: BleDevice, throwable: Throwable) -> Unit)? = null
 
-    fun onReadFail(value: ((throwable: Throwable) -> Unit)) {
+    fun onReadFail(value: ((bleDevice: BleDevice, throwable: Throwable) -> Unit)) {
         readFail = value
     }
 
-    fun onReadSuccess(value: ((data: ByteArray) -> Unit)) {
+    fun onReadSuccess(value: ((bleDevice: BleDevice, data: ByteArray) -> Unit)) {
         readSuccess = value
     }
 
-    open fun callReadFail(throwable: Throwable) {
+    open fun callReadFail(bleDevice: BleDevice, throwable: Throwable) {
         launchInMainThread {
-            readFail?.invoke(throwable)
+            readFail?.invoke(bleDevice, throwable)
         }
     }
 
-    open fun callReadSuccess(data: ByteArray) {
+    open fun callReadSuccess(bleDevice: BleDevice, data: ByteArray) {
         launchInMainThread {
-            readSuccess?.invoke(data)
+            readSuccess?.invoke(bleDevice, data)
         }
     }
 }

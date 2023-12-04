@@ -235,7 +235,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         }
         val exception = UnConnectedException("$notifyUUID -> 设置Notify失败，设备未连接")
         BleLogger.e(exception.message)
-        callback.callNotifyFail(exception)
+        callback.callNotifyFail(bleDevice, exception)
     }
 
     /**
@@ -281,7 +281,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         }
         val exception = UnConnectedException("$indicateUUID -> 设置Indicate失败，设备未连接")
         BleLogger.e(exception.message)
-        callback.callIndicateFail(exception)
+        callback.callIndicateFail(bleDevice, exception)
     }
 
     /**
@@ -317,7 +317,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         }
         val exception = UnConnectedException("${bleDevice.deviceAddress} -> 读取Rssi失败，设备未连接")
         BleLogger.e(exception.message)
-        callback.callRssiFail(exception)
+        callback.callRssiFail(bleDevice, exception)
     }
 
     /**
@@ -335,7 +335,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         }
         val exception = UnConnectedException("${bleDevice.deviceAddress} -> 设置mtu失败，设备未连接")
         BleLogger.e(exception.message)
-        callback.callSetMtuFail(exception)
+        callback.callSetMtuFail(bleDevice, exception)
     }
 
     /**
@@ -366,7 +366,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         }
         val exception = UnConnectedException("$readUUID -> 读特征值数据失败，设备未连接")
         BleLogger.e(exception.message)
-        callback.callReadFail(exception)
+        callback.callReadFail(bleDevice, exception)
     }
 
     /**
@@ -387,8 +387,8 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         }
         val exception = UnConnectedException("$writeUUID -> 写数据失败，设备未连接")
         BleLogger.e(exception.message)
-        callback.callWriteFail(0, dataArray.size(), exception)
-        callback.callWriteComplete(false)
+        callback.callWriteFail(bleDevice, 0, dataArray.size(), exception)
+        callback.callWriteComplete(bleDevice, false)
     }
 
     /**
@@ -474,6 +474,14 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     override fun removeAllCharacterCallback(bleDevice: BleDevice) {
         val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.removeAllCharacterCallback()
+    }
+
+    /**
+     * 移除该设备Event回调
+     */
+    override fun removeBleEventCallback(bleDevice: BleDevice) {
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
+        request?.removeBleEventCallback()
     }
 
     /**

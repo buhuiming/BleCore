@@ -119,3 +119,5 @@ a
 1app/src/main/java/com/bhm/demo/ui/MainActivity.kt,9\a\9a9be1cad9854fa4730b6c085c26fd391e9a3c1d
 i
 9ble/src/main/java/com/bhm/ble/callback/BleScanCallback.kt,9\8\98dfac73ee990ea32c6f0e079bac322ca75f903a
+g
+7ble/src/main/java/com/bhm/ble/request/BleReadRequest.kt,f\2\f25afbb4385061bdb9965342e5eb4474aa843ff6
