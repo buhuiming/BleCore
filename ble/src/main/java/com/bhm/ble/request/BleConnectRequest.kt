@@ -57,11 +57,25 @@ internal class BleConnectRequest(
 
     private val waitTime = getBleOptions()?.operateInterval?: DEFAULT_OPERATE_INTERVAL
 
+    private var connectMillisTimeOut: Long? = null
+
+    private var connectRetryCount: Int? = null
+
+    private var connectRetryInterval: Long? = null
+
     /**
      * 连接设备
      */
     @Synchronized
-    fun connect(bleConnectCallback: BleConnectCallback) {
+    fun connect(
+        connectMillisTimeOut: Long?,
+        connectRetryCount: Int?,
+        connectRetryInterval: Long?,
+        bleConnectCallback: BleConnectCallback
+    ) {
+        this.connectMillisTimeOut = connectMillisTimeOut
+        this.connectRetryCount = connectRetryCount
+        this.connectRetryInterval = connectRetryInterval
         addBleConnectCallback(bleConnectCallback)
         if (bleDevice.deviceInfo == null) {
             BleLogger.e("连接失败：BluetoothDevice为空")
@@ -288,7 +302,7 @@ internal class BleConnectRequest(
         //初始化，待coreGattCallback回调再设置为连接中
         lastState = BleConnectLastState.ConnectIdle
         isActiveDisconnect.set(false)
-        var connectTime = getBleOptions()?.connectMillisTimeOut?: DEFAULT_CONNECT_MILLIS_TIMEOUT
+        var connectTime = connectMillisTimeOut?: (getBleOptions()?.connectMillisTimeOut?: DEFAULT_CONNECT_MILLIS_TIMEOUT)
         if (connectTime <= 0) {
             connectTime = DEFAULT_CONNECT_MILLIS_TIMEOUT
         }
@@ -316,7 +330,7 @@ internal class BleConnectRequest(
      */
     private fun onCompletion(throwable: Throwable?) {
         if (isContinueConnect(throwable)) {
-            val retryInterval = getBleOptions()?.connectRetryInterval?: DEFAULT_CONNECT_RETRY_INTERVAL
+            val retryInterval = connectRetryInterval?: (getBleOptions()?.connectRetryInterval?: DEFAULT_CONNECT_RETRY_INTERVAL)
             waitConnectJob = bleConnectCallback?.launchInMainThread {
                 delay(retryInterval)
                 currentConnectRetryCount ++
@@ -382,7 +396,7 @@ internal class BleConnectRequest(
             return false
         }
         if (!isActiveDisconnect.get() && lastState != BleConnectLastState.Connected) {
-            var retryCount = getBleOptions()?.connectRetryCount?: 0
+            var retryCount = connectRetryCount?: (getBleOptions()?.connectRetryCount?: 0)
             if (retryCount < 0) {
                 retryCount = 0
             }

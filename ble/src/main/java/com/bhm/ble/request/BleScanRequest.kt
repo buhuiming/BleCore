@@ -65,22 +65,46 @@ internal class BleScanRequest private constructor() : Request() {
 
     private var currentReyCount = 0
 
+    private var scanMillisTimeOut: Long? = null
+
+    private var scanRetryCount: Int? = null
+
+    private var scanRetryInterval: Long? = null
+
     /**
      * 开始扫描
      */
     @Synchronized
-    fun startScan(bleScanCallback: BleScanCallback) {
+    fun startScan(
+        scanMillisTimeOut: Long?,
+        scanRetryCount: Int?,
+        scanRetryInterval: Long?,
+        bleScanCallback: BleScanCallback
+    ) {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
             bleScanCallback.callScanFail(BleScanFailType.NoBlePermission)
             return
         }
-        initScannerAndStart(bleScanCallback)
+        initScannerAndStart(
+            scanMillisTimeOut,
+            scanRetryCount,
+            scanRetryInterval,
+            bleScanCallback
+        )
     }
 
     /**
      * 初始化扫描参数
      */
-    private fun initScannerAndStart(bleScanCallback: BleScanCallback) {
+    private fun initScannerAndStart(
+        scanMillisTimeOut: Long?,
+        scanRetryCount: Int?,
+        scanRetryInterval: Long?,
+        bleScanCallback: BleScanCallback
+    ) {
+        this.scanMillisTimeOut = scanMillisTimeOut
+        this.scanRetryCount = scanRetryCount
+        this.scanRetryInterval = scanRetryInterval
         this.bleScanCallback = bleScanCallback
         val bleManager = getBleManager()
         if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext)) {
@@ -166,7 +190,7 @@ internal class BleScanRequest private constructor() : Request() {
         BleLogger.d("开始第${currentReyCount + 1}次扫描")
         isScanning.set(true)
         cancelScan.set(false)
-        var scanTime = getBleOptions()?.scanMillisTimeOut?: DEFAULT_SCAN_MILLIS_TIMEOUT
+        var scanTime = scanMillisTimeOut?: (getBleOptions()?.scanMillisTimeOut?: DEFAULT_SCAN_MILLIS_TIMEOUT)
         //不支持无限扫描，可以设置scanMillisTimeOut + setScanRetryCountAndInterval
         if (scanTime <= 0) {
             scanTime = DEFAULT_SCAN_MILLIS_TIMEOUT
@@ -187,7 +211,7 @@ internal class BleScanRequest private constructor() : Request() {
      */
     private fun ifContinueScan(): Boolean {
         if (!cancelScan.get()) {
-            var retryCount = getBleOptions()?.scanRetryCount?: 0
+            var retryCount = scanRetryCount?: (getBleOptions()?.scanRetryCount?: 0)
             if (retryCount < 0) {
                 retryCount = 0
             }
@@ -208,7 +232,7 @@ internal class BleScanRequest private constructor() : Request() {
         isScanning.set(false)
         scanner?.stopScan(scanCallback)
         if (ifContinueScan()) {
-            val retryInterval = getBleOptions()?.scanRetryInterval?: DEFAULT_SCAN_RETRY_INTERVAL
+            val retryInterval = scanRetryInterval?: (getBleOptions()?.scanRetryInterval?: DEFAULT_SCAN_RETRY_INTERVAL)
             waitScanJob = bleScanCallback?.launchInDefaultThread {
                 delay(retryInterval)
                 currentReyCount ++

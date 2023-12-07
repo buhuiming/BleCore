@@ -69,10 +69,20 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     /**
      * 开始扫描
      */
-    override fun startScan(bleScanCallback: BleScanCallback.() -> Unit) {
+    override fun startScan(
+        scanMillisTimeOut: Long?,
+        scanRetryCount: Int?,
+        scanRetryInterval: Long?,
+        bleScanCallback: BleScanCallback.() -> Unit
+    ) {
         val callback = BleScanCallback()
         callback.apply(bleScanCallback)
-        BleScanRequest.get().startScan(callback)
+        BleScanRequest.get().startScan(
+            scanMillisTimeOut,
+            scanRetryCount,
+            scanRetryInterval,
+            callback
+        )
     }
 
     /**
@@ -92,7 +102,13 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     /**
      * 扫描并连接，如果扫描到多个设备，则会连接第一个
      */
-    override fun startScanAndConnect(bleScanCallback: BleScanCallback.() -> Unit,
+    override fun startScanAndConnect(scanMillisTimeOut: Long?,
+                                     scanRetryCount: Int?,
+                                     scanRetryInterval: Long?,
+                                     connectMillisTimeOut: Long?,
+                                     connectRetryCount: Int?,
+                                     connectRetryInterval: Long?,
+                                     bleScanCallback: BleScanCallback.() -> Unit,
                                      bleConnectCallback: BleConnectCallback.() -> Unit) {
         val scanCallback = BleScanCallback()
         scanCallback.apply(bleScanCallback)
@@ -102,7 +118,11 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         var device: BleDevice? = null
         connectCallback.launchInMainThread {
             suspendCoroutine { continuation ->
-                startScan {
+                startScan(
+                    scanMillisTimeOut,
+                    scanRetryCount,
+                    scanRetryInterval,
+                ) {
                     onScanStart {
                         scanCallback.callScanStart()
                     }
@@ -137,7 +157,12 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                     ), BleConnectFailType.ScanNullableBluetoothDevice)
                 return@launchInMainThread
             }
-            connect(device!!) {
+            connect(
+                device!!,
+                connectMillisTimeOut,
+                connectRetryCount,
+                connectRetryInterval
+            ) {
                 onConnectStart {
                     connectCallback.callConnectStart()
                 }
@@ -160,12 +185,23 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     /**
      * 开始连接
      */
-    override fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit) {
+    override fun connect(
+        bleDevice: BleDevice,
+        connectMillisTimeOut: Long?,
+        connectRetryCount: Int?,
+        connectRetryInterval: Long?,
+        bleConnectCallback: BleConnectCallback.() -> Unit
+    ) {
         val callback = BleConnectCallback()
         callback.apply(bleConnectCallback)
         val request = bleConnectedDeviceManager.buildBleConnectedDevice(bleDevice)
         request?.let {
-            it.connect(callback)
+            it.connect(
+                connectMillisTimeOut,
+                connectRetryCount,
+                connectRetryInterval,
+                callback
+            )
             return
         }
         val exception = UnDefinedException("${bleDevice.deviceAddress} -> 连接失败，BleConnectedDevice为空")

@@ -84,11 +84,34 @@ class BleManager private constructor() {
 
     /**
      * 开始扫描
+     * @param scanMillisTimeOut 扫描超时时间，单位毫秒，只对单次扫描有效
+     * @param scanRetryCount 设置扫描重试次数，只对单次扫描有效
+     * @param scanRetryInterval 设置扫描重试间隔，单位毫秒，只对单次扫描有效
      */
     @Synchronized
-    fun startScan(bleScanCallback: BleScanCallback.() -> Unit) {
+    fun startScan(
+        scanMillisTimeOut: Long?,
+        scanRetryCount: Int?,
+        scanRetryInterval: Long?,
+        bleScanCallback: BleScanCallback.() -> Unit
+    ) {
         checkInitialize()
-        bleBaseRequest?.startScan(bleScanCallback)
+        bleBaseRequest?.startScan(
+            scanMillisTimeOut,
+            scanRetryCount,
+            scanRetryInterval,
+            bleScanCallback
+        )
+    }
+
+    /**
+     * 开始扫描
+     */
+    @Synchronized
+    fun startScan(
+        bleScanCallback: BleScanCallback.() -> Unit
+    ) {
+        startScan(null, null, null, bleScanCallback)
     }
 
     /**
@@ -146,12 +169,62 @@ class BleManager private constructor() {
 
     /**
      * 连接
+     * @param connectMillisTimeOut 连接超时时间，单位毫秒，只对单次连接有效
+     * @param connectRetryCount 设置连接重试次数，只对单次连接有效
+     * @param connectRetryInterval 设置连接重试间隔，只对单次连接有效
+     */
+    @Synchronized
+    fun connect(bleDevice: BleDevice,
+                connectMillisTimeOut: Long?,
+                connectRetryCount: Int?,
+                connectRetryInterval: Long?,
+                bleConnectCallback: BleConnectCallback.() -> Unit
+    ) {
+        checkInitialize()
+        stopScan()
+        bleBaseRequest?.connect(
+            bleDevice,
+            connectMillisTimeOut,
+            connectRetryCount,
+            connectRetryInterval,
+            bleConnectCallback
+        )
+    }
+
+    /**
+     * 通过地址连接
+     * @param connectMillisTimeOut 连接超时时间，单位毫秒，只对单次连接有效
+     * @param connectRetryCount 设置连接重试次数，只对单次连接有效
+     * @param connectRetryInterval 设置连接重试间隔，单位毫秒，只对单次连接有效
+     */
+    @Synchronized
+    fun connect(address: String,
+                connectMillisTimeOut: Long?,
+                connectRetryCount: Int?,
+                connectRetryInterval: Long?,
+                bleConnectCallback: BleConnectCallback.() -> Unit
+    ) {
+        connect(
+            buildBleDeviceByDeviceAddress(address),
+            connectMillisTimeOut,
+            connectRetryCount,
+            connectRetryInterval,
+            bleConnectCallback
+        )
+    }
+
+    /**
+     * 连接
      */
     @Synchronized
     fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit) {
-        checkInitialize()
-        stopScan()
-        bleBaseRequest?.connect(bleDevice, bleConnectCallback)
+        connect(
+            bleDevice,
+            null,
+            null,
+            null,
+            bleConnectCallback
+        )
     }
 
     /**
@@ -159,14 +232,50 @@ class BleManager private constructor() {
      */
     @Synchronized
     fun connect(address: String, bleConnectCallback: BleConnectCallback.() -> Unit) {
-        connect(buildBleDeviceByDeviceAddress(address), bleConnectCallback)
+        connect(
+            address,
+            null,
+            null,
+            null,
+            bleConnectCallback
+        )
+    }
+
+    @Synchronized
+    fun startScanAndConnect(scanMillisTimeOut: Long?,
+                            scanRetryCount: Int?,
+                            scanRetryInterval: Long?,
+                            connectMillisTimeOut: Long?,
+                            connectRetryCount: Int?,
+                            connectRetryInterval: Long?,
+                            bleScanCallback: BleScanCallback.() -> Unit,
+                            bleConnectCallback: BleConnectCallback.() -> Unit) {
+        checkInitialize()
+        bleBaseRequest?.startScanAndConnect(
+            scanMillisTimeOut,
+            scanRetryCount,
+            scanRetryInterval,
+            connectMillisTimeOut,
+            connectRetryCount,
+            connectRetryInterval,
+            bleScanCallback,
+            bleConnectCallback
+        )
     }
 
     @Synchronized
     fun startScanAndConnect(bleScanCallback: BleScanCallback.() -> Unit,
                             bleConnectCallback: BleConnectCallback.() -> Unit) {
-        checkInitialize()
-        bleBaseRequest?.startScanAndConnect(bleScanCallback, bleConnectCallback)
+        startScanAndConnect(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            bleScanCallback,
+            bleConnectCallback
+        )
     }
 
     /**

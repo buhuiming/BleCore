@@ -23,7 +23,12 @@ internal interface BleBaseRequest {
     /**
      * 开始扫描
      */
-    fun startScan(bleScanCallback: BleScanCallback.() -> Unit)
+    fun startScan(
+        scanMillisTimeOut: Long?,
+        scanRetryCount: Int?,
+        scanRetryInterval: Long?,
+        bleScanCallback: BleScanCallback.() -> Unit
+    )
 
     /**
      * 是否扫描中
@@ -38,13 +43,22 @@ internal interface BleBaseRequest {
     /**
      * 扫描并连接，如果扫描到多个设备，则会连接第一个
      */
-    fun startScanAndConnect(bleScanCallback: BleScanCallback.() -> Unit,
+    fun startScanAndConnect(scanMillisTimeOut: Long?,
+                            scanRetryCount: Int?,
+                            scanRetryInterval: Long?,
+                            connectMillisTimeOut: Long?,
+                            connectRetryCount: Int?,
+                            connectRetryInterval: Long?,
+                            bleScanCallback: BleScanCallback.() -> Unit,
                             bleConnectCallback: BleConnectCallback.() -> Unit)
 
     /**
      * 开始连接
      */
     fun connect(bleDevice: BleDevice,
+                connectMillisTimeOut: Long?,
+                connectRetryCount: Int?,
+                connectRetryInterval: Long?,
                 bleConnectCallback: BleConnectCallback.() -> Unit)
 
     /**

@@ -231,9 +231,19 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     /**
      * 连接设备
      */
-    fun connect(bleConnectCallback: BleConnectCallback) {
+    fun connect(
+        connectMillisTimeOut: Long?,
+        connectRetryCount: Int?,
+        connectRetryInterval: Long?,
+        bleConnectCallback: BleConnectCallback
+    ) {
         initBleConnectRequest()
-        bleConnectRequest?.connect(bleConnectCallback)
+        bleConnectRequest?.connect(
+            connectMillisTimeOut,
+            connectRetryCount,
+            connectRetryInterval,
+            bleConnectCallback
+        )
     }
 
     /**
