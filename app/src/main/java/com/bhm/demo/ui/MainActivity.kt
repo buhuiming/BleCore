@@ -1,5 +1,6 @@
 package com.bhm.demo.ui
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.view.View
 import android.widget.Toast
@@ -40,6 +41,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
         viewModel.initBle()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun initEvent() {
         super.initEvent()
         lifecycleScope.launch {
@@ -69,7 +71,11 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
             viewModel.refreshStateFlow.collect {
                 delay(300)
                 dismissLoading()
-                it?.bleDevice?.let { bleDevice ->
+                if (it?.bleDevice == null) {
+                    listAdapter?.notifyDataSetChanged()
+                    return@collect
+                }
+                it.bleDevice.let { bleDevice ->
                     val position = listAdapter?.data?.indexOf(bleDevice) ?: -1
                     if (position >= 0) {
                         listAdapter?.notifyItemChanged(position)

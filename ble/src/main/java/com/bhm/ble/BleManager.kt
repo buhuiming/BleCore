@@ -4,17 +4,21 @@ package com.bhm.ble
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
+import android.content.IntentFilter
+import android.os.Build
 import android.util.SparseArray
 import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.callback.*
 import com.bhm.ble.data.BleDescriptorGetType
 import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.receiver.BluetoothReceiver
 import com.bhm.ble.request.base.BleBaseRequest
 import com.bhm.ble.request.base.BleRequestImp
 import com.bhm.ble.utils.BleLogger
@@ -755,6 +759,22 @@ class BleManager private constructor() {
     }
 
     /**
+     * 注册系统蓝牙广播
+     */
+    fun registerBluetoothStateReceiver(bluetoothCallback: BluetoothCallback.() -> Unit) {
+        checkInitialize()
+        bleBaseRequest?.registerBluetoothStateReceiver(bluetoothCallback)
+    }
+
+    /**
+     * 取消注册系统蓝牙广播
+     */
+    fun unRegisterBluetoothStateReceiver() {
+        checkInitialize()
+        bleBaseRequest?.unRegisterBluetoothStateReceiver()
+    }
+
+    /**
      * 断开某个设备的连接 释放资源
      */
     @Synchronized
@@ -779,8 +799,17 @@ class BleManager private constructor() {
     /**
      * 通过设备地址构建BleDevice对象
      */
+    @SuppressLint("MissingPermission")
     fun buildBleDeviceByDeviceAddress(deviceAddress: String): BleDevice {
         val deviceInfo = bluetoothManager?.adapter?.getRemoteDevice(deviceAddress)
-        return BleDevice(deviceInfo, "", deviceAddress, 0, 0, null, null)
+        return BleDevice(
+            deviceInfo,
+            deviceInfo?.name?: "",
+            deviceAddress,
+            0,
+            0,
+            null,
+            null
+        )
     }
 }

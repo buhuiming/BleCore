@@ -303,6 +303,10 @@ BleDescriptorGetType设计原则
      [indicate]的bleIndicateCallback、[setMtu]的bleMtuChangedCallback之后，当其他地方需要监听这些回调时比较
     不方便，所以添加addBleEventCallback来实现。addBleEventCallback与上述回调共存
 
+#### 23 v1.7.0新增系统蓝牙变化广播监听
+    BleManager.get().registerBluetoothStateReceiver()
+    BleManager.get().unRegisterBluetoothStateReceiver
+
 #### [问题锦集](https://juejin.cn/post/6844903896100372494)，但愿对你有帮助
 
 * 1、关闭系统蓝牙，没有触发onConnectionStateChange

@@ -224,6 +224,16 @@ internal interface BleBaseRequest {
     fun removeBleScanCallback()
 
     /**
+     * 注册系统蓝牙广播
+     */
+    fun registerBluetoothStateReceiver(bluetoothCallback: BluetoothCallback.() -> Unit)
+
+    /**
+     * 取消注册系统蓝牙广播
+     */
+    fun unRegisterBluetoothStateReceiver()
+
+    /**
      * 断开某个设备的连接 释放资源
      */
     fun close(bleDevice: BleDevice)

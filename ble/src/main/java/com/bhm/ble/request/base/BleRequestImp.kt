@@ -6,8 +6,13 @@
 
 package com.bhm.ble.request.base
 
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGatt
+import android.content.Context
+import android.content.IntentFilter
+import android.os.Build
 import android.util.SparseArray
+import com.bhm.ble.BleManager
 import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.callback.BleEventCallback
 import com.bhm.ble.callback.BleIndicateCallback
@@ -17,12 +22,14 @@ import com.bhm.ble.callback.BleReadCallback
 import com.bhm.ble.callback.BleRssiCallback
 import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.callback.BleWriteCallback
+import com.bhm.ble.callback.BluetoothCallback
 import com.bhm.ble.data.BleConnectFailType
 import com.bhm.ble.data.BleDescriptorGetType
 import com.bhm.ble.data.UnConnectedException
 import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.receiver.BluetoothReceiver
 import com.bhm.ble.request.BleScanRequest
 import com.bhm.ble.utils.BleLogger
 import kotlinx.coroutines.CoroutineScope
@@ -49,6 +56,8 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     private val defaultScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val bleConnectedDeviceManager = BleConnectedDeviceManager.get()
+
+    private var bluetoothReceiver: BluetoothReceiver? = null
 
     companion object {
 
@@ -528,12 +537,51 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
+     * 注册系统蓝牙广播
+     */
+    override fun registerBluetoothStateReceiver(bluetoothCallback: BluetoothCallback.() -> Unit) {
+        if (bluetoothReceiver == null) {
+            bluetoothReceiver = BluetoothReceiver()
+            val callback = BluetoothCallback()
+            callback.apply(bluetoothCallback)
+            bluetoothReceiver?.setBluetoothCallback(callback)
+            val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                BleManager.get().getContext()?.registerReceiver(
+                    bluetoothReceiver,
+                    filter,
+                    Context.RECEIVER_EXPORTED
+                )
+            } else {
+                BleManager.get().getContext()?.registerReceiver(
+                    bluetoothReceiver,
+                    filter
+                )
+            }
+            BleLogger.i("注册系统蓝牙广播")
+        }
+    }
+
+    /**
+     * 取消注册系统蓝牙广播
+     */
+    override fun unRegisterBluetoothStateReceiver() {
+        //取消注册系统蓝牙广播
+        bluetoothReceiver?.let {
+            BleManager.get().getContext()?.unregisterReceiver(it)
+        }
+        bluetoothReceiver = null
+        BleLogger.i("取消注册系统蓝牙广播")
+    }
+
+    /**
      * 断开所有连接 释放资源
      */
     override fun closeAll() {
         mainScope.cancel()
         ioScope.cancel()
         defaultScope.cancel()
+        unRegisterBluetoothStateReceiver()
         BleScanRequest.get().close()
         bleConnectedDeviceManager.closeAll()
         instance = null

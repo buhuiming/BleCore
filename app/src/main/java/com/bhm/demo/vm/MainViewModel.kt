@@ -66,6 +66,11 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                 .setConnectRetryCountAndInterval(2, 1000)
                 .build()
         )
+        BleManager.get().registerBluetoothStateReceiver {
+            onStateOff {
+                refreshMutableStateFlow.value = RefreshBleDevice(null, System.currentTimeMillis())
+            }
+        }
     }
 
     /**
