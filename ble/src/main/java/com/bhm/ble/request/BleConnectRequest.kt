@@ -112,6 +112,7 @@ internal class BleConnectRequest(
             lastState =  BleConnectLastState.Connected
             BleLogger.e("已连接")
             val deviceInfo = createNewDeviceInfo()
+            addBleConnectedDevice()
             bleConnectCallback.callConnectSuccess(deviceInfo, bluetoothGatt)
             getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callConnected(deviceInfo, bluetoothGatt)
             autoSetMtu()
@@ -242,6 +243,7 @@ internal class BleConnectRequest(
             lastState = BleConnectLastState.Connected
             isActiveDisconnect.set(false)
             val deviceInfo = createNewDeviceInfo()
+            addBleConnectedDevice()
             bleConnectCallback?.callConnectSuccess(deviceInfo, bluetoothGatt)
             getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callConnected(deviceInfo, bluetoothGatt)
             autoSetMtu()
@@ -432,6 +434,14 @@ internal class BleConnectRequest(
      */
     private fun removeBleConnectedDevice() {
         BleConnectedDeviceManager.get().removeBleConnectedDevice(bleDevice.getKey())
+    }
+
+    /**
+     * 连接成功，保证管理器中存在该对象。
+     * 因为连接失败后，会删除该对象，然后满足重连条件的时候该对象不存在
+     */
+    private fun addBleConnectedDevice() {
+        BleConnectedDeviceManager.get().buildBleConnectedDevice(bleDevice)
     }
 
     /**
