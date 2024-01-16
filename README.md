@@ -1,6 +1,6 @@
 # BleCore Android蓝牙低功耗(BLE)快速开发框架
 
-## 本项目持续维护更新
+## 本项目持续维护更新[![](https://jitpack.io/v/buhuiming/BleCore.svg)](https://jitpack.io/#buhuiming/BleCore)
 
 *   minSdk 24
 *   targetSdk 33
