@@ -177,6 +177,21 @@ internal class BleConnectRequest(
     }
 
     /**
+     * 取消/停止连接
+     */
+    @Synchronized
+    fun stopConnect() {
+        if (lastState == BleConnectLastState.ConnectIdle ||
+            lastState == BleConnectLastState.Connecting) {
+            val throwable = ActiveStopConnectedException("连接过程中取消/停止连接")
+            connectJob?.cancel(throwable)
+            waitConnectJob?.cancel(throwable)
+        } else {
+            BleLogger.i("非连接过程中，取消/停止连接无效")
+        }
+    }
+
+    /**
      * 当连接上设备或者失去连接时会触发
      */
     fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
@@ -339,7 +354,7 @@ internal class BleConnectRequest(
                 startConnectJob()
             }
             waitConnectJob?.invokeOnCompletion {
-                if (it is ActiveDisConnectedException || it is CompleteException) {
+                if (it is ActiveDisConnectedException || it is CompleteException || it is ActiveStopConnectedException) {
                     onCompletion(it)
                 }
             }
@@ -364,6 +379,14 @@ internal class BleConnectRequest(
                     //主动断开
                     is ActiveDisConnectedException -> {
                         disConnectGatt()
+                    }
+                    is ActiveStopConnectedException -> {
+                        connectFail()
+                        BleLogger.e("${bleDevice.deviceAddress} -> 连接失败：${it.message}")
+                        bleConnectCallback?.callConnectFail(
+                            createNewDeviceInfo(),
+                            BleConnectFailType.ConnectException(it)
+                        )
                     }
                     //连接失败
                     else -> {
@@ -394,7 +417,7 @@ internal class BleConnectRequest(
      * 是否继续连接
      */
     private fun isContinueConnect(throwable: Throwable?): Boolean {
-        if (throwable is ActiveDisConnectedException || throwable is CompleteException) {
+        if (throwable is ActiveDisConnectedException || throwable is CompleteException || throwable is ActiveStopConnectedException) {
             return false
         }
         if (!isActiveDisconnect.get() && lastState != BleConnectLastState.Connected) {

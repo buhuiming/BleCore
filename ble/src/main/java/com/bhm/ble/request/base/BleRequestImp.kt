@@ -228,6 +228,15 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
+     * 取消/停止连接
+     */
+    override fun stopConnect(bleDevice: BleDevice) {
+        bleConnectedDeviceManager
+            .getBleConnectedDevice(bleDevice)
+            ?.stopConnect()
+    }
+
+    /**
      * 是否已连接
      */
     override fun isConnected(bleDevice: BleDevice): Boolean {

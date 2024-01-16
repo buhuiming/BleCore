@@ -283,6 +283,17 @@ class BleManager private constructor() {
     }
 
     /**
+     * 取消/停止连接
+     */
+    @Synchronized
+    fun stopConnect(bleDevice: BleDevice?) {
+        checkInitialize()
+        bleDevice?.let {
+            bleBaseRequest?.stopConnect(it)
+        }
+    }
+
+    /**
      * 断开连接
      */
     @Synchronized

@@ -61,6 +61,14 @@ open class UnSupportException(msg: String? = "设备不支持此功能") : Cance
 open class ActiveDisConnectedException(msg: String? = null) : CancellationException(msg)
 
 /**
+ * 连接中，主动取消/停止连接时抛出的Exception
+ *
+ * @author Buhuiming
+ * @date 2024年01月16日 09时18分
+ */
+open class ActiveStopConnectedException(msg: String? = null) : CancellationException(msg)
+
+/**
  * 未定义的Exception
  *
  * @author Buhuiming

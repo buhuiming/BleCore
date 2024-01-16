@@ -254,6 +254,13 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     }
 
     /**
+     * 取消/停止连接
+     */
+    fun stopConnect() {
+        bleConnectRequest?.stopConnect()
+    }
+
+    /**
      * 获取设备的BluetoothGatt对象
      */
     fun getBluetoothGatt(): BluetoothGatt? {

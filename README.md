@@ -161,7 +161,7 @@ setTaskQueueType方法，有3个选项分别是：
     BleManager.get().connect(deviceAddress)
 
 *    在某些型号手机上，connectGatt必须在主线程才能有效，所以把连接过程放在主线程，回调也在主线程。
-*    为保证重连成功率，建议断开后间隔一段时间之后进行重连。
+*    为保证重连成功率，建议断开后间隔一段时间之后进行重连。（非常关键，因为断开后会有释放资源的等待时间，如果马上重连，会导致连接的资源会被释放掉，而产生错误）
 *    
 
 #### 6、断开连接
@@ -307,10 +307,17 @@ BleDescriptorGetType设计原则
     BleManager.get().registerBluetoothStateReceiver()
     BleManager.get().unRegisterBluetoothStateReceiver()
 
+#### 24、v1.7.2新增stopConnect方法停止或者取消连接
+    BleManager.get().stopConnect(device)
+
 #### [问题锦集](https://juejin.cn/post/6844903896100372494)，但愿对你有帮助
 
 * 1、关闭系统蓝牙，没有触发onConnectionStateChange
-       解决方案：1、操作前判断蓝牙状态，2、蓝牙广播
+  解决方案：
+  1、操作前判断蓝牙状态，
+  2、系统蓝牙变化广播监听
+     BleManager.get().registerBluetoothStateReceiver(getBluetoothCallback())
+     BleManager.get().unRegisterBluetoothStateReceiver()
 
 
 ## License
