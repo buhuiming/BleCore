@@ -307,7 +307,7 @@ BleDescriptorGetType设计原则
     BleManager.get().registerBluetoothStateReceiver()
     BleManager.get().unRegisterBluetoothStateReceiver()
 
-#### 24、v1.7.2新增stopConnect方法停止或者取消连接
+#### 24、v1.8.0新增stopConnect方法停止或者取消连接
     BleManager.get().stopConnect(device)
 
 #### [问题锦集](https://juejin.cn/post/6844903896100372494)，但愿对你有帮助
