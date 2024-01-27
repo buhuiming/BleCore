@@ -42,7 +42,6 @@ internal class BleWriteRequest(
     private val bleWriteDataHashMap:
             ConcurrentHashMap<String, MutableList<BleWriteData>> = ConcurrentHashMap()
 
-    @Synchronized
     private fun addBleWriteData(uuid: String, bleWriteData: BleWriteData) {
         if (bleWriteDataHashMap.containsKey(uuid) && bleWriteDataHashMap[uuid] != null) {
             bleWriteDataHashMap[uuid]?.add(bleWriteData)
@@ -53,7 +52,6 @@ internal class BleWriteRequest(
         }
     }
 
-    @Synchronized
     fun removeWriteCallback(uuid: String?, bleWriteCallback: BleWriteCallback? = null) {
         if (bleWriteDataHashMap.containsKey(uuid)) {
             if (bleWriteCallback != null) {
@@ -73,7 +71,6 @@ internal class BleWriteRequest(
         }
     }
 
-    @Synchronized
     fun removeAllWriteCallback() {
         bleWriteDataHashMap.clear()
     }

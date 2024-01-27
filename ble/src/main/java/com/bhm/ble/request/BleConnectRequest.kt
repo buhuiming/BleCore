@@ -405,9 +405,12 @@ internal class BleConnectRequest(
     }
 
     /**
-     * 判断是否进入重连机制
+     * 判断是否进入重连机制，如果当前没有进入重新机制，则进入重连机制；如果进入了重连机制，则不打断重连的顺序
      */
     private fun checkIfContinueConnect(throwable: Throwable?) {
+        if (currentConnectRetryCount == 0) {
+            return
+        }
         refreshDeviceCache()
         closeBluetoothGatt()
         onCompletion(throwable)
