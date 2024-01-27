@@ -360,12 +360,13 @@ internal class BleConnectRequest(
             }
         } else {
             throwable?.let {
-                BleLogger.e(it.message)
                 when (it) {
                     //连接超时
                     is TimeoutCancellationException -> {
                         connectFail()
-                        BleLogger.e("${bleDevice.deviceAddress} -> 连接失败：超时")
+                        val connectTime = connectMillisTimeOut?: (getBleOptions()?.connectMillisTimeOut?: DEFAULT_CONNECT_MILLIS_TIMEOUT)
+                        val retryCount = connectRetryCount?: (getBleOptions()?.connectRetryCount?: 0)
+                        BleLogger.e("${bleDevice.deviceAddress} -> 连接失败：超时${connectTime * retryCount}ms")
                         bleConnectCallback?.callConnectFail(
                             createNewDeviceInfo(),
                             BleConnectFailType.ConnectTimeOut
@@ -374,10 +375,12 @@ internal class BleConnectRequest(
                     //连接成功
                     is CompleteException -> {
                         //发现服务
+                        BleLogger.e(it.message)
                         findService()
                     }
                     //主动断开
                     is ActiveDisConnectedException -> {
+                        BleLogger.e(it.message)
                         disConnectGatt()
                     }
                     is ActiveStopConnectedException -> {
@@ -408,7 +411,7 @@ internal class BleConnectRequest(
      * 判断是否进入重连机制，如果当前没有进入重新机制，则进入重连机制；如果进入了重连机制，则不打断重连的顺序
      */
     private fun checkIfContinueConnect(throwable: Throwable?) {
-        if (currentConnectRetryCount == 0) {
+        if (currentConnectRetryCount != 0) {
             return
         }
         refreshDeviceCache()
