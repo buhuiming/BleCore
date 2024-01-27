@@ -366,7 +366,7 @@ internal class BleConnectRequest(
                         connectFail()
                         val connectTime = connectMillisTimeOut?: (getBleOptions()?.connectMillisTimeOut?: DEFAULT_CONNECT_MILLIS_TIMEOUT)
                         val retryCount = connectRetryCount?: (getBleOptions()?.connectRetryCount?: 0)
-                        BleLogger.e("${bleDevice.deviceAddress} -> 连接失败：超时${connectTime * retryCount}ms")
+                        BleLogger.e("${bleDevice.deviceAddress} -> 连接失败：超时${connectTime * (retryCount + 1)}ms")
                         bleConnectCallback?.callConnectFail(
                             createNewDeviceInfo(),
                             BleConnectFailType.ConnectTimeOut
