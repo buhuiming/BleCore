@@ -108,15 +108,16 @@ internal class BleConnectRequest(
             bleConnectCallback.callConnectFail(createNewDeviceInfo(), BleConnectFailType.AlreadyConnecting)
             return
         }
-        if (bleManager.isConnected(bleDevice, false)) {
-            lastState =  BleConnectLastState.Connected
-            BleLogger.e("已连接")
-            val deviceInfo = createNewDeviceInfo()
-            addBleConnectedDevice()
-            bleConnectCallback.callConnectSuccess(deviceInfo, bluetoothGatt)
-            getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callConnected(deviceInfo, bluetoothGatt)
-            autoSetMtu()
-            return
+        if (bleManager.isConnected(bleDevice, true)) {
+            BleLogger.e("设备已连接，重连连接")
+            //如果不重连，则bluetoothGatt是null，则Notify会失败
+//            lastState =  BleConnectLastState.Connected
+//            val deviceInfo = createNewDeviceInfo()
+//            addBleConnectedDevice()
+//            bleConnectCallback.callConnectSuccess(deviceInfo, bluetoothGatt)
+//            getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callConnected(deviceInfo, bluetoothGatt)
+//            autoSetMtu()
+//            return
         }
         bleConnectCallback.callConnectStart()
         startConnectJob()
@@ -198,6 +199,13 @@ internal class BleConnectRequest(
         BleLogger.i("onConnectionStateChange： status = $status " +
                 ", newState = $newState , currentThread = ${Thread.currentThread().name} " +
                 ", bleAddress = ${bleDevice.deviceAddress} , lastState = $lastState")
+        if (lastState == BleConnectLastState.ConnectFailure) {
+            //上一个状态为null即调用了close，就不再处理，这里出现有些手机，调用了close之后，还会触发onConnectionStateChange
+            disConnectGatt()
+            refreshDeviceCache()
+            closeBluetoothGatt()
+            return
+        }
         bluetoothGatt = gatt
         if (newState == BluetoothProfile.STATE_CONNECTED) {
             //连接成功
@@ -287,6 +295,10 @@ internal class BleConnectRequest(
      */
     @Synchronized
     fun getBluetoothGatt(): BluetoothGatt? {
+        if (bluetoothGatt == null) {
+            bluetoothGatt = bleDevice.deviceInfo?.connectGatt(getBleManager().getContext(),
+                autoConnect, coreGattCallback, BluetoothDevice.TRANSPORT_LE)
+        }
         return bluetoothGatt
     }
 
@@ -304,7 +316,7 @@ internal class BleConnectRequest(
             isActiveDisconnect.get(),
             deviceInfo, bluetoothGatt, BluetoothGatt.GATT_SUCCESS
         )
-        lastState = BleConnectLastState.Disconnect
+        lastState = null
         disConnectGatt()
         refreshDeviceCache()
         closeBluetoothGatt()
