@@ -109,15 +109,14 @@ internal class BleConnectRequest(
             return
         }
         if (bleManager.isConnected(bleDevice, true)) {
-            BleLogger.e("设备已连接，重连连接")
-            //如果不重连，则bluetoothGatt是null，则Notify会失败
-//            lastState =  BleConnectLastState.Connected
-//            val deviceInfo = createNewDeviceInfo()
-//            addBleConnectedDevice()
-//            bleConnectCallback.callConnectSuccess(deviceInfo, bluetoothGatt)
-//            getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callConnected(deviceInfo, bluetoothGatt)
-//            autoSetMtu()
-//            return
+            BleLogger.e("设备已连接")
+            lastState =  BleConnectLastState.Connected
+            val deviceInfo = createNewDeviceInfo()
+            addBleConnectedDevice()
+            bleConnectCallback.callConnectSuccess(deviceInfo, bluetoothGatt)
+            getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callConnected(deviceInfo, bluetoothGatt)
+            autoSetMtu()
+            return
         }
         bleConnectCallback.callConnectStart()
         startConnectJob()
