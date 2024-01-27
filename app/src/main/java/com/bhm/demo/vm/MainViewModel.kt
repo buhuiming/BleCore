@@ -222,6 +222,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
             val hasScanPermission = hasScanPermission(activity)
             if (hasScanPermission) {
                 BleManager.get().startScanAndConnect(
+                    false,
                     getScanCallback(false),
                     connectCallback
                 )
@@ -234,7 +235,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
      */
     fun connect(bleDevice: BleDevice?) {
         bleDevice?.let { device ->
-            BleManager.get().connect(device, connectCallback)
+            BleManager.get().connect(device, false, connectCallback)
         }
     }
 

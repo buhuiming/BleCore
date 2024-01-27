@@ -235,6 +235,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         connectMillisTimeOut: Long?,
         connectRetryCount: Int?,
         connectRetryInterval: Long?,
+        isForceConnect: Boolean = false,
         bleConnectCallback: BleConnectCallback
     ) {
         initBleConnectRequest()
@@ -242,6 +243,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
             connectMillisTimeOut,
             connectRetryCount,
             connectRetryInterval,
+            isForceConnect,
             bleConnectCallback
         )
     }

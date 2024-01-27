@@ -4,21 +4,17 @@ package com.bhm.ble
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
-import android.content.IntentFilter
-import android.os.Build
 import android.util.SparseArray
 import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.callback.*
 import com.bhm.ble.data.BleDescriptorGetType
 import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.device.BleDevice
-import com.bhm.ble.receiver.BluetoothReceiver
 import com.bhm.ble.request.base.BleBaseRequest
 import com.bhm.ble.request.base.BleRequestImp
 import com.bhm.ble.utils.BleLogger
@@ -176,12 +172,14 @@ class BleManager private constructor() {
      * @param connectMillisTimeOut 连接超时时间，单位毫秒，只对单次连接有效
      * @param connectRetryCount 设置连接重试次数，只对单次连接有效
      * @param connectRetryInterval 设置连接重试间隔，只对单次连接有效
+     * @param isForceConnect 是否强制连接(针对已连接情况，是否重连)
      */
     @Synchronized
     fun connect(bleDevice: BleDevice,
                 connectMillisTimeOut: Long?,
                 connectRetryCount: Int?,
                 connectRetryInterval: Long?,
+                isForceConnect: Boolean = false,
                 bleConnectCallback: BleConnectCallback.() -> Unit
     ) {
         checkInitialize()
@@ -191,6 +189,7 @@ class BleManager private constructor() {
             connectMillisTimeOut,
             connectRetryCount,
             connectRetryInterval,
+            isForceConnect,
             bleConnectCallback
         )
     }
@@ -206,6 +205,7 @@ class BleManager private constructor() {
                 connectMillisTimeOut: Long?,
                 connectRetryCount: Int?,
                 connectRetryInterval: Long?,
+                isForceConnect: Boolean = false,
                 bleConnectCallback: BleConnectCallback.() -> Unit
     ) {
         connect(
@@ -213,6 +213,7 @@ class BleManager private constructor() {
             connectMillisTimeOut,
             connectRetryCount,
             connectRetryInterval,
+            isForceConnect,
             bleConnectCallback
         )
     }
@@ -221,12 +222,17 @@ class BleManager private constructor() {
      * 连接
      */
     @Synchronized
-    fun connect(bleDevice: BleDevice, bleConnectCallback: BleConnectCallback.() -> Unit) {
+    fun connect(
+        bleDevice: BleDevice,
+        isForceConnect: Boolean = false,
+        bleConnectCallback: BleConnectCallback.() -> Unit
+    ) {
         connect(
             bleDevice,
             null,
             null,
             null,
+            isForceConnect,
             bleConnectCallback
         )
     }
@@ -235,12 +241,17 @@ class BleManager private constructor() {
      * 通过地址连接
      */
     @Synchronized
-    fun connect(address: String, bleConnectCallback: BleConnectCallback.() -> Unit) {
+    fun connect(
+        address: String,
+        isForceConnect: Boolean = false,
+        bleConnectCallback: BleConnectCallback.() -> Unit
+    ) {
         connect(
             address,
             null,
             null,
             null,
+            isForceConnect,
             bleConnectCallback
         )
     }
@@ -252,6 +263,7 @@ class BleManager private constructor() {
                             connectMillisTimeOut: Long?,
                             connectRetryCount: Int?,
                             connectRetryInterval: Long?,
+                            isForceConnect: Boolean = false,
                             bleScanCallback: BleScanCallback.() -> Unit,
                             bleConnectCallback: BleConnectCallback.() -> Unit) {
         checkInitialize()
@@ -262,14 +274,18 @@ class BleManager private constructor() {
             connectMillisTimeOut,
             connectRetryCount,
             connectRetryInterval,
+            isForceConnect,
             bleScanCallback,
             bleConnectCallback
         )
     }
 
     @Synchronized
-    fun startScanAndConnect(bleScanCallback: BleScanCallback.() -> Unit,
-                            bleConnectCallback: BleConnectCallback.() -> Unit) {
+    fun startScanAndConnect(
+        isForceConnect: Boolean = false,
+        bleScanCallback: BleScanCallback.() -> Unit,
+        bleConnectCallback: BleConnectCallback.() -> Unit
+    ) {
         startScanAndConnect(
             null,
             null,
@@ -277,6 +293,7 @@ class BleManager private constructor() {
             null,
             null,
             null,
+            isForceConnect,
             bleScanCallback,
             bleConnectCallback
         )

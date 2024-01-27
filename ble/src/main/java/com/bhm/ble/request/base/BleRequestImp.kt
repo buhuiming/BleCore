@@ -117,6 +117,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                                      connectMillisTimeOut: Long?,
                                      connectRetryCount: Int?,
                                      connectRetryInterval: Long?,
+                                     isForceConnect: Boolean,
                                      bleScanCallback: BleScanCallback.() -> Unit,
                                      bleConnectCallback: BleConnectCallback.() -> Unit) {
         val scanCallback = BleScanCallback()
@@ -170,7 +171,8 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                 device!!,
                 connectMillisTimeOut,
                 connectRetryCount,
-                connectRetryInterval
+                connectRetryInterval,
+                isForceConnect
             ) {
                 onConnectStart {
                     connectCallback.callConnectStart()
@@ -199,6 +201,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         connectMillisTimeOut: Long?,
         connectRetryCount: Int?,
         connectRetryInterval: Long?,
+        isForceConnect: Boolean,
         bleConnectCallback: BleConnectCallback.() -> Unit
     ) {
         val callback = BleConnectCallback()
@@ -209,6 +212,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                 connectMillisTimeOut,
                 connectRetryCount,
                 connectRetryInterval,
+                isForceConnect,
                 callback
             )
             return

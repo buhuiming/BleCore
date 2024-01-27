@@ -71,6 +71,7 @@ internal class BleConnectRequest(
         connectMillisTimeOut: Long?,
         connectRetryCount: Int?,
         connectRetryInterval: Long?,
+        isForceConnect: Boolean = false,
         bleConnectCallback: BleConnectCallback
     ) {
         this.connectMillisTimeOut = connectMillisTimeOut
@@ -109,14 +110,17 @@ internal class BleConnectRequest(
             return
         }
         if (bleManager.isConnected(bleDevice, true)) {
-            BleLogger.e("设备已连接")
-            lastState =  BleConnectLastState.Connected
-            val deviceInfo = createNewDeviceInfo()
-            addBleConnectedDevice()
-            bleConnectCallback.callConnectSuccess(deviceInfo, bluetoothGatt)
-            getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callConnected(deviceInfo, bluetoothGatt)
-            autoSetMtu()
-            return
+            BleLogger.e("设备已连接，是否强制重连$isForceConnect")
+            if (!isForceConnect) {
+                lastState = BleConnectLastState.Connected
+                val deviceInfo = createNewDeviceInfo()
+                addBleConnectedDevice()
+                bleConnectCallback.callConnectSuccess(deviceInfo, bluetoothGatt)
+                getBleConnectedDevice(bleDevice)?.getBleEventCallback()
+                    ?.callConnected(deviceInfo, bluetoothGatt)
+                autoSetMtu()
+                return
+            }
         }
         bleConnectCallback.callConnectStart()
         startConnectJob()

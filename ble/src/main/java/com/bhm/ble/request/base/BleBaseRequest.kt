@@ -49,6 +49,7 @@ internal interface BleBaseRequest {
                             connectMillisTimeOut: Long?,
                             connectRetryCount: Int?,
                             connectRetryInterval: Long?,
+                            isForceConnect: Boolean = false,
                             bleScanCallback: BleScanCallback.() -> Unit,
                             bleConnectCallback: BleConnectCallback.() -> Unit)
 
@@ -59,6 +60,7 @@ internal interface BleBaseRequest {
                 connectMillisTimeOut: Long?,
                 connectRetryCount: Int?,
                 connectRetryInterval: Long?,
+                isForceConnect: Boolean = false,
                 bleConnectCallback: BleConnectCallback.() -> Unit)
 
     /**

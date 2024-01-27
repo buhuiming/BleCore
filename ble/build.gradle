@@ -19,7 +19,7 @@ afterEvaluate {
                 // 这里头是artifacts的配置信息，不填会采用默认的
                 groupId = 'com.github.buhuiming'
                 artifactId = 'BleCore'
-                version = '1.8.5'
+                version = '1.9.0'
 
                 from components.release
                 artifact androidSourcesJar //打包源码，去除这行打的包将看不到源码
