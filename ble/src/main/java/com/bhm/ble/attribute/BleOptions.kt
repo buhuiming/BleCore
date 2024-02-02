@@ -157,6 +157,13 @@ class BleOptions private constructor(builder: Builder) {
         /**
          * 非主动断开后是否自动连接，默认为[AUTO_CONNECT]
          */
+        @Deprecated(message = "请在业务层处理自动重连，autoConnect设计的初衷是为了断开重连，利用bluetoothGatt" +
+                "的重连，但BleCore在断开连接或连接失败后，bluetoothGatt会被close掉释放资源，bluetoothGatt的重连" +
+                "不再作用，此函数将会被删除",
+            replaceWith = ReplaceWith(
+                "BleConnectCallback.onDisConnected、BleManager.connect"
+            )
+        )
         fun setAutoConnect(autoConnect: Boolean) = apply {
             this.autoConnect = autoConnect
         }

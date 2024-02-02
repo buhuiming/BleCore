@@ -110,12 +110,12 @@ internal class BleConnectRequest(
             return
         }
         //主要针对某些机型，当触发连接超时回调连接失败并释放资源之后，此时外设开启触发手机系统已连接，但BleCore资源被释放
-        // (bluetoothGatt是null)，而导致BleCore和系统的连接状态不一致，进而setMtu和Notify/Indicate都失败。
+        // (bluetoothGatt是null)，或BleCore和系统的连接状态不一致，而导致setMtu和Notify/Indicate都失败。
         val systemConnectStatus = bleManager.isConnected(bleDevice, true)
         val bleCoreConnectStatus = bleManager.isConnected(bleDevice, false)
         BleLogger.e("设备当前连接状态，系统已连接$systemConnectStatus，" +
                 "BleCore连接状态$bleCoreConnectStatus，" +
-                " 是否强制重连$isForceConnect， " +
+                " 是否强制连接$isForceConnect， " +
                 "bluetoothGatt是否为空${bluetoothGatt == null}")
         //如果BleCore或者系统对应的状态是未连接、或者强制连接的情况
         if (!systemConnectStatus || !bleCoreConnectStatus || isForceConnect || bluetoothGatt == null) {
