@@ -312,6 +312,7 @@ BleDescriptorGetType设计原则
     BleManager.get().stopConnect(device)
 
 #### [问题锦集](https://juejin.cn/post/6844903896100372494)，但愿对你有帮助
+    https://blog.51cto.com/u_16213573/7811086
 
 * 1、关闭系统蓝牙，没有触发onConnectionStateChange
   解决方案：
