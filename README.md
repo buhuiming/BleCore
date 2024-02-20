@@ -40,7 +40,7 @@
             implementation 'com.github.buhuiming:BleCore:latest version'
         }
 
-#### 1、添加权限
+#### 添加权限
 
     //动态申请
     val LOCATION_PERMISSION = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
@@ -317,7 +317,10 @@ BleDescriptorGetType设计原则
 
 #### [问题锦集](https://juejin.cn/post/6844903896100372494)，但愿对你有帮助
     https://blog.51cto.com/u_16213573/7811086
+* 1、少部分机型会存在断开连接(gatt.disconnect)后，连接状态仍未刷新，导致其他机型连接不上外设。
+  [参考](https://stackoverflow.com/questions/44521828/android-ble-gatt-disconnected-vs-device-disconnected)
 
+#### 其他
 * 1、关闭系统蓝牙，没有触发onConnectionStateChange
   解决方案：
   1、操作前判断蓝牙状态，

@@ -133,7 +133,8 @@ class BleManager private constructor() {
     }
 
     /**
-     * 是否已连接
+     * 是否已连接，确保已获取到权限
+     *
      * 操作断开连接后，getConnectionState马上回去到的状态还是连接状态，所以需要bleBaseRequest?.isConnected判断
      *  @param simplySystemStatus 为true，只根据系统的状态规则；为false，会根据sdk的状态；
      *  此字段的意义在于：有时，sdk资源被系统回收(状态未连接)，但是系统的状态是已连接。
@@ -143,6 +144,9 @@ class BleManager private constructor() {
         return isConnected(buildBleDeviceByDeviceAddress(bleDeviceAddress), simplySystemStatus)
     }
 
+    /**
+     * 是否已连接，确保已获取到权限
+     */
     @SuppressLint("MissingPermission")
     fun isConnected(bleDevice: BleDevice?, simplySystemStatus: Boolean = true): Boolean {
         checkInitialize()
@@ -630,7 +634,7 @@ class BleManager private constructor() {
     }
 
     /**
-     * 获取系统已连接设备集合
+     * 获取系统已连接设备集合，确保已获取到权限
      */
     @SuppressLint("MissingPermission")
     @Synchronized
@@ -825,7 +829,7 @@ class BleManager private constructor() {
     }
 
     /**
-     * 通过设备地址构建BleDevice对象
+     * 通过设备地址构建BleDevice对象，确保已获取到权限
      */
     @SuppressLint("MissingPermission")
     fun buildBleDeviceByDeviceAddress(deviceAddress: String): BleDevice {

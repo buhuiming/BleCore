@@ -168,8 +168,6 @@ internal class BleConnectRequest(
         } else {
             lastState = BleConnectLastState.Disconnect
             disConnectGatt()
-            refreshDeviceCache()
-            closeBluetoothGatt()
             BleLogger.e("${bleDevice.deviceAddress} -> 主动断开连接")
             val deviceInfo = createNewDeviceInfo()
             bleConnectCallback?.callDisConnecting(
@@ -181,7 +179,7 @@ internal class BleConnectRequest(
                 deviceInfo, bluetoothGatt, BluetoothGatt.GATT_SUCCESS
             )
             BleRequestImp.get().getMainScope().launch {
-                delay(500)
+                delay(600)
                 removeAllCallback()
             }
         }
@@ -234,17 +232,21 @@ internal class BleConnectRequest(
                 }
                 BleConnectLastState.Connecting -> {
                     //连接过程中断开，进入判断是否重连
+                    refreshDeviceCache()
+                    closeBluetoothGatt()
                     checkIfContinueConnect(UnDefinedException("连接过程中断开"))
                 }
                 BleConnectLastState.ConnectFailure -> {
                     BleLogger.i("连接失败后，设备触发断开连接")
+                    refreshDeviceCache()
+                    closeBluetoothGatt()
                 }
                 //所有断开连接的情况
                 else -> {
+                    refreshDeviceCache()
+                    closeBluetoothGatt()
                     if (!isActiveDisconnect.get()) {
                         lastState = BleConnectLastState.Disconnect
-                        refreshDeviceCache()
-                        closeBluetoothGatt()
                         BleLogger.e("${bleDevice.deviceAddress} -> 自动断开连接")
                         val deviceInfo = createNewDeviceInfo()
                         bleConnectCallback?.callDisConnecting(
@@ -256,7 +258,7 @@ internal class BleConnectRequest(
                             deviceInfo, gatt, status
                         )
                         BleRequestImp.get().getMainScope().launch {
-                            delay(500)
+                            delay(600)
                             removeAllCallback()
                         }
                     }
@@ -432,8 +434,6 @@ internal class BleConnectRequest(
         if (currentConnectRetryCount != 0) {
             return
         }
-        refreshDeviceCache()
-        closeBluetoothGatt()
         onCompletion(throwable)
     }
 
@@ -550,7 +550,9 @@ internal class BleConnectRequest(
      */
     @Synchronized
     private fun disConnectGatt() {
-        bluetoothGatt?.disconnect()
+        if (getBleManager().isConnected(bleDevice, true)) {
+            bluetoothGatt?.disconnect()
+        }
     }
 
     /**
