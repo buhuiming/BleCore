@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 rootProject.name = "BleCore"
 include ':app'
 include ':ble'
+include ':support'

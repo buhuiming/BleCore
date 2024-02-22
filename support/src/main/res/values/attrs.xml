@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr format="integer" name="gravity">
+        <flag name="start" value="0"/>
+        <flag name="end" value="1"/>
+        <flag name="center" value="2"/>
+    </attr>
+
+    <attr format="boolean" name="isOnlyShow"/>
+
+    <declare-styleable name="ChoseView">
+        <attr format="integer" name="viewType">
+            <flag name="fixed" value="0"/>
+            <flag name="scrollView" value="1"/>
+            <flag name="recyclerView" value="2"/>
+        </attr>
+        <attr name="isOnlyShow"/>
+        <attr name="gravity"/>
+        <attr format="integer" name="choseStyle">
+            <flag name="single" value="0"/>
+            <flag name="singleUnNeeded" value="1"/>
+            <flag name="multiple" value="2"/>
+        </attr>
+        <attr name="spanCount"/>
+        <attr format="dimension" name="itemViewHeight"/>
+        <attr format="dimension" name="itemViewWidth"/>
+        <attr format="dimension" name="itemViewStrokeWidth"/>
+        <attr format="dimension" name="itemViewPaddingStart"/>
+        <attr format="dimension" name="itemViewPaddingTop"/>
+        <attr format="dimension" name="itemViewPaddingEnd"/>
+        <attr format="dimension" name="itemViewPaddingBottom"/>
+        <attr format="dimension" name="itemViewCorners"/>
+        <attr format="dimension" name="itemViewMargin"/>
+        <attr format="color" name="unCheckBgColor"/>
+        <attr format="color" name="checkBgColor"/>
+        <attr format="color" name="unCheckTextColor"/>
+        <attr format="color" name="checkTextColor"/>
+        <attr format="color" name="unCheckStrokeColor"/>
+        <attr format="color" name="checkStrokeColor"/>
+        <attr format="dimension" name="itemViewTextSize"/>
+        <attr format="boolean" name="isCircularView"/>
+    </declare-styleable>
+</resources>

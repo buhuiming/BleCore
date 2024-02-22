@@ -1,0 +1,73 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    compileSdk 33
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 33
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+    buildFeatures {
+        viewBinding true
+        dataBinding true
+    }
+    namespace 'com.bhm.support.sdk'
+}
+
+dependencies {
+
+    api "androidx.core:core-ktx:$rootProject.coreKtxVersion"
+    api "androidx.appcompat:appcompat:$rootProject.appcompatVersion"
+    api "com.google.android.material:material:$rootProject.materialVersion"
+    api "androidx.multidex:multidex:$rootProject.multidexVersion"
+
+    // Lifecycle components
+    api "androidx.lifecycle:lifecycle-extensions:$rootProject.lifecycleExtensionsVersion"
+    api "androidx.lifecycle:lifecycle-viewmodel-ktx:$rootProject.lifecycleVersion"
+    api "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.lifecycleVersion"
+
+    // network & serialization
+    api "com.google.code.gson:gson:$rootProject.gsonVersion"
+    api "com.squareup.retrofit2:converter-gson:$rootProject.retrofitVersion"
+    api "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
+    api "com.squareup.okhttp3:logging-interceptor:$rootProject.interceptorVersion"
+
+    //log
+    api "com.jakewharton.timber:timber:$rootProject.timberLog"
+
+    //eventbus
+    api "org.greenrobot:eventbus:$rootProject.eventbus"
+
+    //Http
+    api "com.github.buhuiming:NetCore:$rootProject.netCore"
+
+    //https://github.com/JavaNoober/BackgroundLibrary
+    api "com.github.JavaNoober.BackgroundLibrary:libraryx:$rootProject.BackgroundLibrary"
+
+    //图片缓存 glide https://github.com/bumptech/glide
+    api "com.github.bumptech.glide:glide:$rootProject.glide"
+
+    //noinspection GradleDependency 一个强大的RecyclerAdapter框架 https://github.com/CymChad/BaseRecyclerViewAdapterHelper
+//    api "com.github.CymChad:BaseRecyclerViewAdapterHelper:$rootProject.baseRecyclerViewAdapterHelper"
+//    api "io.github.cymchad:BaseRecyclerViewAdapterHelper:4.0.0"
+}

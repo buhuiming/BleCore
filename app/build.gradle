@@ -11,8 +11,8 @@ android {
         applicationId "com.bhm.ble"
         minSdk 24
         targetSdk 33
-        versionCode 194
-        versionName "1.9.4"
+        versionCode 195
+        versionName "1.9.5"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -41,8 +41,8 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
     implementation "io.github.cymchad:BaseRecyclerViewAdapterHelper:3.0.13"
-    implementation 'com.github.buhuiming:SupportCore:1.0.6'
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.12'
 
     implementation project(":ble")
+    implementation project(":support")
 }

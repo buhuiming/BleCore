@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFF</color><!--主色-->
+    <color name="color_main">#3D3DED</color><!--主色-->
+    <color name="color_2f">#212427</color><!--重要文字、标题-->
+</resources>

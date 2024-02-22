@@ -127,3 +127,7 @@ k
 ;ble/src/main/java/com/bhm/ble/receiver/BluetoothReceiver.kt,2\b\2b01a856cb025e04658b988ce2fa81c12a055016
 k
 ;ble/src/main/java/com/bhm/ble/callback/BluetoothCallback.kt,f\7\f73c6e413c34b7a4b7a45e17bdd0c92ea7c77578
+D
+support/build.gradle,b\7\b70e40198d92273afe90dbf870db20f9c082ee25
+q
+Asupport/src/main/java/com/bhm/support/sdk/common/BaseViewModel.kt,6\6\66fb75e3afe8084b862b0b26998bcc18c0600b89
