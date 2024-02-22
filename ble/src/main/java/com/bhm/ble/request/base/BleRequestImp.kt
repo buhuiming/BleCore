@@ -165,6 +165,16 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                         null,
                         null,
                     ), BleConnectFailType.ScanNullableBluetoothDevice)
+                bleConnectedDeviceManager.getBleConnectedDevice(device!!)?.getBleEventCallback()?.callConnectFail(
+                    BleDevice(null,
+                        "",
+                        "",
+                        0,
+                        0,
+                        null,
+                        null,
+                    ), BleConnectFailType.ScanNullableBluetoothDevice
+                )
                 return@launchInMainThread
             }
             connect(
@@ -176,18 +186,29 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             ) {
                 onConnectStart {
                     connectCallback.callConnectStart()
+                    bleConnectedDeviceManager.getBleConnectedDevice(device!!)?.getBleEventCallback()?.callConnectStart()
                 }
                 onConnectSuccess { bleDevice, gatt ->
                     connectCallback.callConnectSuccess(bleDevice, gatt)
+                    bleConnectedDeviceManager.getBleConnectedDevice(device!!)?.getBleEventCallback()?.callConnected(bleDevice, gatt)
                 }
                 onDisConnecting { isActiveDisConnected, bleDevice, gatt, status ->
                     connectCallback.callDisConnecting(isActiveDisConnected, bleDevice, gatt, status)
+                    bleConnectedDeviceManager.getBleConnectedDevice(device!!)?.getBleEventCallback()?.callDisConnecting(
+                        isActiveDisConnected, bleDevice, gatt, status
+                    )
                 }
                 onDisConnected { isActiveDisConnected, bleDevice, gatt, status ->
                     connectCallback.callDisConnected(isActiveDisConnected, bleDevice, gatt, status)
+                    bleConnectedDeviceManager.getBleConnectedDevice(device!!)?.getBleEventCallback()?.callDisConnected(
+                        isActiveDisConnected, bleDevice, gatt, status
+                    )
                 }
                 onConnectFail { bleDevice, connectFailType ->
                     connectCallback.callConnectFail(bleDevice, connectFailType)
+                    bleConnectedDeviceManager.getBleConnectedDevice(device!!)?.getBleEventCallback()?.callConnectFail(
+                        bleDevice, connectFailType
+                    )
                 }
             }
         }
@@ -220,6 +241,8 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         val exception = UnDefinedException("${bleDevice.deviceAddress} -> 连接失败，BleConnectedDevice为空")
         BleLogger.e(exception.message)
         callback.callConnectFail(bleDevice, BleConnectFailType.ConnectException(exception))
+        bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callConnectFail(
+            bleDevice, BleConnectFailType.ConnectException(exception))
     }
 
     /**
