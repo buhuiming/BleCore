@@ -142,6 +142,7 @@ internal class BleWriteRequest(
                 addBleWriteData(writeUUID, bleWriteData)
                 startWriteJob(
                     characteristic,
+                    (getTaskQueue(bleWriteData.writeUUID)?.getTaskList()?.size()?: 0) + i + 1,
                     bleWriteData
                 )
             }
@@ -155,10 +156,12 @@ internal class BleWriteRequest(
 
     @SuppressLint("MissingPermission")
     private fun startWriteJob(characteristic: BluetoothGattCharacteristic,
+                              index: Int,
                               bleWriteData: BleWriteData) {
         var mContinuation: Continuation<Throwable?>? = null
         val task = getTask(
             getTaskId(bleWriteData.writeUUID, bleWriteData.operateRandomID, bleWriteData.currentPackage),
+            getOperateTime() * index,
             block = {
                 suspendCoroutine<Throwable?> { continuation ->
                     mContinuation = continuation

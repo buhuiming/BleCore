@@ -94,6 +94,8 @@ internal class BleTaskQueue(private val tag: String = "") {
         }
     }
 
+    fun getTaskList() = taskList
+
     /**
      * 任务的超时计时
      */

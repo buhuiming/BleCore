@@ -7,6 +7,7 @@ package com.bhm.ble.request.base
 
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
+import android.util.Log
 import com.bhm.ble.BleManager
 import com.bhm.ble.control.BleTask
 import com.bhm.ble.data.Constants.DEFAULT_OPERATE_INTERVAL
@@ -37,7 +38,7 @@ internal abstract class Request {
     /**
      * 获取操作时间
      */
-    private fun getOperateTime(): Long {
+    fun getOperateTime(): Long {
         var operateTime = getBleOptions()?.operateMillisTimeOut ?: DEFAULT_OPERATE_MILLIS_TIMEOUT
         if (operateTime <= 0) {
             operateTime = DEFAULT_OPERATE_MILLIS_TIMEOUT
@@ -65,9 +66,28 @@ internal abstract class Request {
         interrupt: (task: BleTask, throwable: Throwable?) -> Unit,
         callback: (task: BleTask, throwable: Throwable?) -> Unit
     ): BleTask {
+        return getTask(
+            taskId,
+            getOperateTime(),
+            block,
+            interrupt,
+            callback
+        )
+    }
+
+    /**
+     * 生成一个任务
+     */
+    fun getTask(
+        taskId: String,
+        durationTimeMillis: Long,
+        block: suspend BleTask.() -> Unit,
+        interrupt: (task: BleTask, throwable: Throwable?) -> Unit,
+        callback: (task: BleTask, throwable: Throwable?) -> Unit
+    ): BleTask {
         return BleTask(
             taskId = taskId,
-            durationTimeMillis = getOperateTime(),
+            durationTimeMillis = durationTimeMillis,
             operateInterval = getOperateInterval(),
             callInMainThread = false,
             autoDoNextTask = true,
