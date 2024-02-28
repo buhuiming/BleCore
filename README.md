@@ -329,6 +329,8 @@ BleDescriptorGetType设计原则
      BleManager.get().unRegisterBluetoothStateReceiver()
 
 
+#### 考虑把Collections.synchronizedList换成其他不会导致死锁的集合
+
 ## License
 
 ```

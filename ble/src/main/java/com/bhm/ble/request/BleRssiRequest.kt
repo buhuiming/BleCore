@@ -39,12 +39,10 @@ internal class BleRssiRequest(
 
     private val bleTaskQueue: BleTaskQueue = BleTaskQueue("Rssi队列")
 
-    @Synchronized
     private fun addRssiCallback(callback: BleRssiCallback) {
         bleRssiCallback = callback
     }
 
-    @Synchronized
     fun removeRssiCallback() {
         bleRssiCallback = null
     }
@@ -53,7 +51,6 @@ internal class BleRssiRequest(
      * 读取信号值
      */
     @SuppressLint("MissingPermission")
-    @Synchronized
     fun readRemoteRssi(bleRssiCallback: BleRssiCallback) {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
             bleRssiCallback.callRssiFail(bleDevice, NoBlePermissionException())
@@ -117,7 +114,6 @@ internal class BleRssiRequest(
     /**
      * 取消读取Rssi任务
      */
-    @Synchronized
     private fun cancelReadRssiJob(): Boolean {
         return bleTaskQueue.removeTask(getTaskId())
     }

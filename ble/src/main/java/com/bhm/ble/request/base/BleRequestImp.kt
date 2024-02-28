@@ -63,7 +63,6 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
 
         private var instance: BleRequestImp? = BleRequestImp()
 
-        @Synchronized
         fun get(): BleRequestImp {
             return instance?: BleRequestImp()
         }
@@ -475,7 +474,6 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     /**
      * 获取所有已连接设备集合
      */
-    @Synchronized
     override fun getAllConnectedDevice(): MutableList<BleDevice> {
         return bleConnectedDeviceManager.getAllConnectedDevice()
     }

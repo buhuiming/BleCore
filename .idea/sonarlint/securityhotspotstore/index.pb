@@ -131,3 +131,5 @@ D
 support/build.gradle,b\7\b70e40198d92273afe90dbf870db20f9c082ee25
 q
 Asupport/src/main/java/com/bhm/support/sdk/common/BaseViewModel.kt,6\6\66fb75e3afe8084b862b0b26998bcc18c0600b89
+n
+>ble/src/main/java/com/bhm/ble/request/BleSetPriorityRequest.kt,1\d\1d21d7aa3b22a5f8b40c4be46c5d310d75562fd7

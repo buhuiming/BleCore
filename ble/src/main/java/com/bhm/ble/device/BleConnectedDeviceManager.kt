@@ -28,7 +28,6 @@ internal class BleConnectedDeviceManager private constructor() {
 
         private var instance: BleConnectedDeviceManager = BleConnectedDeviceManager()
 
-        @Synchronized
         fun get(): BleConnectedDeviceManager {
             if (instance == null) {
                 instance = BleConnectedDeviceManager()
@@ -62,7 +61,6 @@ internal class BleConnectedDeviceManager private constructor() {
     /**
      * 移除设备控制器
      */
-    @Synchronized
     fun removeBleConnectedDevice(key: String) {
         if (bleLruHashMap.containsKey(key)) {
             bleLruHashMap.remove(key)
@@ -72,7 +70,6 @@ internal class BleConnectedDeviceManager private constructor() {
     /**
      * 是否存在该设备
      */
-    @Synchronized
     fun isContainDevice(bleDevice: BleDevice): Boolean {
         return bleLruHashMap.containsKey(bleDevice.getKey())
     }
@@ -80,7 +77,6 @@ internal class BleConnectedDeviceManager private constructor() {
     /**
      * 获取所有已连接设备集合
      */
-    @Synchronized
     fun getAllConnectedDevice(): MutableList<BleDevice> {
         val list = mutableListOf<BleDevice>()
         bleLruHashMap.forEach {
@@ -96,7 +92,6 @@ internal class BleConnectedDeviceManager private constructor() {
     /**
      * 断开某个设备的连接 释放资源
      */
-    @Synchronized
     fun close(bleDevice: BleDevice) {
         getBleConnectedDevice(bleDevice)?.close()
         bleLruHashMap.remove(bleDevice.getKey())
@@ -105,7 +100,6 @@ internal class BleConnectedDeviceManager private constructor() {
     /**
      * 断开所有设备的连接
      */
-    @Synchronized
     fun disConnectAll() {
         bleLruHashMap.values.forEach {
             it?.disConnect()
@@ -117,7 +111,6 @@ internal class BleConnectedDeviceManager private constructor() {
     /**
      * 断开所有连接 释放资源
      */
-    @Synchronized
     fun closeAll() {
         bleLruHashMap.values.forEach {
             it?.close()

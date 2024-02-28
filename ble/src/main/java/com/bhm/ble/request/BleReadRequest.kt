@@ -38,19 +38,16 @@ internal class BleReadRequest(
     private val bleReadCallbackHashMap:
             ConcurrentHashMap<String, BleReadCallback> = ConcurrentHashMap()
 
-    @Synchronized
     private fun addReadCallback(uuid: String, bleReadCallback: BleReadCallback) {
         bleReadCallbackHashMap[uuid] = bleReadCallback
     }
 
-    @Synchronized
     fun removeReadCallback(uuid: String?) {
         if (bleReadCallbackHashMap.containsKey(uuid)) {
             bleReadCallbackHashMap.remove(uuid)
         }
     }
 
-    @Synchronized
     fun removeAllReadCallback() {
         bleReadCallbackHashMap.clear()
     }
@@ -59,7 +56,6 @@ internal class BleReadRequest(
      * read
      */
     @SuppressLint("MissingPermission")
-    @Synchronized
     fun readCharacteristic(serviceUUID: String,
                            readUUID: String,
                            bleReadCallback: BleReadCallback
@@ -142,7 +138,6 @@ internal class BleReadRequest(
     /**
      * 取消读特征值数据任务
      */
-    @Synchronized
     private fun cancelReadJob(readUUID: String?, taskId: String): Boolean {
         return getTaskQueue(readUUID?: "")?.removeTask(taskId)?: false
     }

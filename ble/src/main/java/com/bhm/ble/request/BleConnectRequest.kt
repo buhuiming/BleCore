@@ -66,7 +66,6 @@ internal class BleConnectRequest(
     /**
      * 连接设备
      */
-    @Synchronized
     fun connect(
         connectMillisTimeOut: Long?,
         connectRetryCount: Int?,
@@ -152,7 +151,6 @@ internal class BleConnectRequest(
     /**
      * 主动断开连接，上层API调用
      */
-    @Synchronized
     fun disConnect() {
         if (bleDevice.deviceInfo == null) {
             BleLogger.e("断开失败：BluetoothDevice为空")
@@ -216,7 +214,6 @@ internal class BleConnectRequest(
     /**
      * 取消/停止连接
      */
-    @Synchronized
     fun stopConnect() {
         if (lastState == BleConnectLastState.ConnectIdle ||
             lastState == BleConnectLastState.Connecting) {
@@ -330,12 +327,10 @@ internal class BleConnectRequest(
         }
     }
 
-    @Synchronized
     fun addBleConnectCallback(bleConnectCallback: BleConnectCallback) {
         this.bleConnectCallback = bleConnectCallback
     }
 
-    @Synchronized
     fun removeBleConnectCallback() {
         bleConnectCallback = null
     }
@@ -343,7 +338,6 @@ internal class BleConnectRequest(
     /**
      * 获取设备的BluetoothGatt对象
      */
-    @Synchronized
     fun getBluetoothGatt(): BluetoothGatt? {
         return bluetoothGatt
     }
@@ -351,7 +345,6 @@ internal class BleConnectRequest(
     /**
      * 断开所有连接 释放资源
      */
-    @Synchronized
     fun close() {
         val deviceInfo = createNewDeviceInfo()
         bleConnectCallback?.callDisConnecting(
@@ -602,7 +595,6 @@ internal class BleConnectRequest(
     /**
      * Gatt断开连接，需要一段时间才会触发onConnectionStateChange
      */
-    @Synchronized
     private fun disConnectGatt() {
         if (getBleManager().isConnected(bleDevice, true)) {
             bluetoothGatt?.disconnect()
@@ -612,7 +604,6 @@ internal class BleConnectRequest(
     /**
      * 刷新缓存
      */
-    @Synchronized
     private fun refreshDeviceCache() {
         try {
             val refresh = BluetoothGatt::class.java.getMethod("refresh")
@@ -629,7 +620,6 @@ internal class BleConnectRequest(
     /**
      * 关闭Gatt
      */
-    @Synchronized
     private fun closeBluetoothGatt() {
         bluetoothGatt?.close()
     }

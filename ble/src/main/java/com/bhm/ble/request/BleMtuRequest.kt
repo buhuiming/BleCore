@@ -37,12 +37,10 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
 
     private var bleMtuChangedCallback: BleMtuChangedCallback? = null
 
-    @Synchronized
     private fun addMtuChangedCallback(callback: BleMtuChangedCallback) {
         bleMtuChangedCallback = callback
     }
 
-    @Synchronized
     fun removeMtuChangedCallback() {
         bleMtuChangedCallback = null
     }
@@ -51,7 +49,6 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
      * 设置mtu
      */
     @SuppressLint("MissingPermission")
-    @Synchronized
     fun setMtu(mtu: Int, bleMtuChangedCallback: BleMtuChangedCallback) {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
             bleMtuChangedCallback.callSetMtuFail(bleDevice, NoBlePermissionException())
@@ -114,7 +111,6 @@ internal class BleMtuRequest(private val bleDevice: BleDevice,
     /**
      * 取消设置Mtu任务
      */
-    @Synchronized
     private fun cancelSetMtuJob(): Boolean {
         return bleTaskQueue.removeTask(getTaskId())
     }

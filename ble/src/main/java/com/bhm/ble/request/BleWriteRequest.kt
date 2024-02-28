@@ -75,7 +75,6 @@ internal class BleWriteRequest(
         bleWriteDataHashMap.clear()
     }
 
-    @Synchronized
     fun writeData(serviceUUID: String,
                   writeUUID: String,
                   operateRandomID: String,
@@ -181,16 +180,6 @@ internal class BleWriteRequest(
                             getTaskId(bleWriteData.writeUUID, bleWriteData.operateRandomID,
                                 bleWriteData.currentPackage) + " -> " +
                                     "第${bleWriteData.currentPackage}包数据写失败，超时")
-                        BleLogger.e(exception.message)
-                        bleWriteData.bleWriteCallback.callWriteFail(
-                            bleDevice,
-                            bleWriteData.currentPackage,
-                            bleWriteData.totalPackage,
-                            exception
-                        )
-                        if (bleWriteData.currentPackage == bleWriteData.totalPackage) {
-                            bleWriteData.bleWriteCallback.callWriteComplete(bleDevice, false)
-                        }
                         //移除监听
                         for ((key, value) in bleWriteDataHashMap) {
                             if (!bleWriteData.writeUUID.equals(key, ignoreCase = true)) {
@@ -205,6 +194,16 @@ internal class BleWriteRequest(
                                     }
                                 }
                             }
+                        }
+                        BleLogger.e(exception.message)
+                        bleWriteData.bleWriteCallback.callWriteFail(
+                            bleDevice,
+                            bleWriteData.currentPackage,
+                            bleWriteData.totalPackage,
+                            exception
+                        )
+                        if (bleWriteData.currentPackage == bleWriteData.totalPackage) {
+                            bleWriteData.bleWriteCallback.callWriteComplete(bleDevice, false)
                         }
                     }
                 }
@@ -370,7 +369,6 @@ internal class BleWriteRequest(
     /**
      * 取消写数据任务
      */
-    @Synchronized
     private fun cancelWriteJob(writeUUID: String?, taskId: String) {
         getTaskQueue(writeUUID?: "")?.removeTask(taskId)
     }

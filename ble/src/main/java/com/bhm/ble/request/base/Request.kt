@@ -7,7 +7,6 @@ package com.bhm.ble.request.base
 
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
-import android.util.Log
 import com.bhm.ble.BleManager
 import com.bhm.ble.control.BleTask
 import com.bhm.ble.data.Constants.DEFAULT_OPERATE_INTERVAL
@@ -15,7 +14,7 @@ import com.bhm.ble.data.Constants.DEFAULT_OPERATE_MILLIS_TIMEOUT
 import com.bhm.ble.device.BleConnectedDevice
 import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
-import java.util.*
+import java.util.UUID
 
 
 /**

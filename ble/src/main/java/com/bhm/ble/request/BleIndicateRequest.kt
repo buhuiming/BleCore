@@ -43,19 +43,16 @@ internal class BleIndicateRequest(
     private val bleIndicateCallbackHashMap:
             ConcurrentHashMap<String, BleIndicateCallback> = ConcurrentHashMap()
 
-    @Synchronized
     private fun addIndicateCallback(uuid: String, bleIndicateCallback: BleIndicateCallback) {
         bleIndicateCallbackHashMap[uuid] = bleIndicateCallback
     }
 
-    @Synchronized
     fun removeIndicateCallback(uuid: String?) {
         if (bleIndicateCallbackHashMap.containsKey(uuid)) {
             bleIndicateCallbackHashMap.remove(uuid)
         }
     }
 
-    @Synchronized
     fun removeAllIndicateCallback() {
         bleIndicateCallbackHashMap.clear()
     }
@@ -63,7 +60,6 @@ internal class BleIndicateRequest(
     /**
      * indicate
      */
-    @Synchronized
     fun enableCharacteristicIndicate(serviceUUID: String,
                                      indicateUUID: String,
                                      bleDescriptorGetType: BleDescriptorGetType,
@@ -118,7 +114,6 @@ internal class BleIndicateRequest(
     /**
      * stop indicate
      */
-    @Synchronized
     fun disableCharacteristicIndicate(serviceUUID: String,
                                       indicateUUID: String,
                                       bleDescriptorGetType: BleDescriptorGetType): Boolean {

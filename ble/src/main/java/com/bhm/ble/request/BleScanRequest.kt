@@ -40,7 +40,6 @@ internal class BleScanRequest private constructor() : Request() {
 
         private var instance: BleScanRequest = BleScanRequest()
 
-        @Synchronized
         fun get(): BleScanRequest {
             if (instance == null) {
                 instance = BleScanRequest()
@@ -74,7 +73,6 @@ internal class BleScanRequest private constructor() : Request() {
     /**
      * 开始扫描
      */
-    @Synchronized
     fun startScan(
         scanMillisTimeOut: Long?,
         scanRetryCount: Int?,
@@ -353,7 +351,6 @@ internal class BleScanRequest private constructor() : Request() {
     /**
      * 停止扫描
      */
-    @Synchronized
     fun stopScan() {
         isScanning.set(false)
         cancelScan.set(true)

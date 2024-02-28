@@ -43,19 +43,16 @@ internal class BleNotifyRequest(
     private val bleNotifyCallbackHashMap:
             ConcurrentHashMap<String, BleNotifyCallback> = ConcurrentHashMap()
 
-    @Synchronized
     private fun addNotifyCallback(uuid: String, bleNotifyCallback: BleNotifyCallback) {
         bleNotifyCallbackHashMap[uuid] = bleNotifyCallback
     }
 
-    @Synchronized
     fun removeNotifyCallback(uuid: String?) {
         if (bleNotifyCallbackHashMap.containsKey(uuid)) {
             bleNotifyCallbackHashMap.remove(uuid)
         }
     }
 
-    @Synchronized
     fun removeAllNotifyCallback() {
         bleNotifyCallbackHashMap.clear()
     }
@@ -63,7 +60,6 @@ internal class BleNotifyRequest(
     /**
      * notify
      */
-    @Synchronized
     fun enableCharacteristicNotify(serviceUUID: String,
                                    notifyUUID: String,
                                    bleDescriptorGetType: BleDescriptorGetType,
@@ -118,7 +114,6 @@ internal class BleNotifyRequest(
     /**
      * stop notify
      */
-    @Synchronized
     fun disableCharacteristicNotify(serviceUUID: String,
                                     notifyUUID: String,
                                     bleDescriptorGetType: BleDescriptorGetType): Boolean {

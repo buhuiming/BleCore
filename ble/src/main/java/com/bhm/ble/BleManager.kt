@@ -40,7 +40,6 @@ class BleManager private constructor() {
 
         private var instance: BleManager = BleManager()
 
-        @Synchronized
         fun get(): BleManager {
             if (instance == null) {
                 instance = BleManager()
@@ -52,7 +51,6 @@ class BleManager private constructor() {
     /**
      * 初始化，使用BleManager其他方法前，需先调用此方法
      */
-    @Synchronized
     fun init(context: Application, option: BleOptions? = null) {
         application = context
         bleOptions = option
@@ -107,7 +105,6 @@ class BleManager private constructor() {
     /**
      * 开始扫描
      */
-    @Synchronized
     fun startScan(
         bleScanCallback: BleScanCallback.() -> Unit
     ) {
@@ -204,7 +201,6 @@ class BleManager private constructor() {
      * @param connectRetryCount 设置连接重试次数，只对单次连接有效
      * @param connectRetryInterval 设置连接重试间隔，单位毫秒，只对单次连接有效
      */
-    @Synchronized
     fun connect(address: String,
                 connectMillisTimeOut: Long?,
                 connectRetryCount: Int?,
@@ -225,7 +221,6 @@ class BleManager private constructor() {
     /**
      * 连接
      */
-    @Synchronized
     fun connect(
         bleDevice: BleDevice,
         isForceConnect: Boolean = false,
@@ -244,7 +239,6 @@ class BleManager private constructor() {
     /**
      * 通过地址连接
      */
-    @Synchronized
     fun connect(
         address: String,
         isForceConnect: Boolean = false,
@@ -284,7 +278,6 @@ class BleManager private constructor() {
         )
     }
 
-    @Synchronized
     fun startScanAndConnect(
         isForceConnect: Boolean = false,
         bleScanCallback: BleScanCallback.() -> Unit,
@@ -326,7 +319,6 @@ class BleManager private constructor() {
     /**
      * 通过地址断开连接
      */
-    @Synchronized
     fun disConnect(address: String) {
         disConnect(buildBleDeviceByDeviceAddress(address))
     }
@@ -348,7 +340,6 @@ class BleManager private constructor() {
             "notify(BleDevice, String, String, BleDescriptorGetType, BleNotifyCallback)"
         )
     )
-    @Synchronized
     fun notify(bleDevice: BleDevice,
                serviceUUID: String,
                notifyUUID: String,
@@ -394,7 +385,6 @@ class BleManager private constructor() {
             "stopNotify(BleDevice, String, String, BleDescriptorGetType)"
         )
     )
-    @Synchronized
     fun stopNotify(
         bleDevice: BleDevice,
         serviceUUID: String,
@@ -440,7 +430,6 @@ class BleManager private constructor() {
             "indicate(BleDevice, String, String, BleDescriptorGetType, BleIndicateCallback)"
         )
     )
-    @Synchronized
     fun indicate(bleDevice: BleDevice,
                  serviceUUID: String,
                  indicateUUID: String,
@@ -486,7 +475,6 @@ class BleManager private constructor() {
             "stopIndicate(BleDevice, String, String, BleDescriptorGetType)"
         )
     )
-    @Synchronized
     fun stopIndicate(
         bleDevice: BleDevice,
         serviceUUID: String,
@@ -536,7 +524,6 @@ class BleManager private constructor() {
     /**
      * 设置mtu
      */
-    @Synchronized
     fun setMtu(bleDevice: BleDevice, bleMtuChangedCallback: BleMtuChangedCallback.() -> Unit) {
         setMtu(bleDevice, getOptions()?.mtu?: DEFAULT_MTU, bleMtuChangedCallback)
     }
@@ -593,7 +580,6 @@ class BleManager private constructor() {
      * 写数据
      * 注意：因为分包后每一个包，可能是包含完整的协议，所以分包由业务层处理，组件只会根据包的长度和mtu值对比后是否拦截
      */
-    @Synchronized
     fun writeData(bleDevice: BleDevice,
                   serviceUUID: String,
                   writeUUID: String,
@@ -678,7 +664,6 @@ class BleManager private constructor() {
     /**
      * 替换该设备的连接回调
      */
-    @Synchronized
     fun replaceBleConnectCallback(address: String, bleConnectCallback: BleConnectCallback.() -> Unit) {
         replaceBleConnectCallback(buildBleDeviceByDeviceAddress(address), bleConnectCallback)
     }
