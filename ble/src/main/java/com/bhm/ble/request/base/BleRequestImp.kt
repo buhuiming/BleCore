@@ -164,16 +164,6 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                         null,
                         null,
                     ), BleConnectFailType.ScanNullableBluetoothDevice)
-                bleConnectedDeviceManager.getBleConnectedDevice(device!!)?.getBleEventCallback()?.callConnectFail(
-                    BleDevice(null,
-                        "",
-                        "",
-                        0,
-                        0,
-                        null,
-                        null,
-                    ), BleConnectFailType.ScanNullableBluetoothDevice
-                )
                 return@launchInMainThread
             }
             connect(
