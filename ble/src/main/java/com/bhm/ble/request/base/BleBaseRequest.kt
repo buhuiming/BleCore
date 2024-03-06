@@ -157,6 +157,21 @@ internal interface BleBaseRequest {
                   bleWriteCallback: BleWriteCallback.() -> Unit)
 
     /**
+     * 放入一个写队列，写成功，则从队列中取下一个数据，写失败，则重试[retryWriteCount]次
+     * 与[writeData]的区别在于，[writeData]写成功，则从队列中取下一个数据，写失败，则不再继续写后面的数据
+     *
+     * @param skipErrorPacketData 是否跳过数据长度为0的数据包
+     * @param retryWriteCount 写失败后重试的次数
+     */
+    fun writeQueueData(bleDevice: BleDevice,
+                       serviceUUID: String,
+                       writeUUID: String,
+                       dataArray: SparseArray<ByteArray>,
+                       skipErrorPacketData: Boolean = false,
+                       retryWriteCount: Int = 0,
+                       bleWriteCallback: BleWriteCallback.() -> Unit)
+
+    /**
      * 获取所有已连接设备集合
      */
     fun getAllConnectedDevice(): MutableList<BleDevice>

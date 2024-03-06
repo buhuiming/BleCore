@@ -611,6 +611,64 @@ class BleManager private constructor() {
     }
 
     /**
+     * OTA推荐此方法
+     * 放入一个写队列，写成功，则从队列中取下一个数据，写失败，则重试[retryWriteCount]次
+     * 与[writeData]的区别在于，[writeData]写成功，则从队列中取下一个数据，写失败，则不再继续写后面的数据
+     * 注意：因为分包后每一个包，可能是包含完整的协议，所以分包由业务层处理，组件只会根据包的长度和mtu值对比后是否拦截
+     *
+     * @param skipErrorPacketData 是否跳过数据长度为0的数据包
+     * @param retryWriteCount 写失败后重试的次数
+     */
+    fun writeQueueData(bleDevice: BleDevice,
+                       serviceUUID: String,
+                       writeUUID: String,
+                       data: ByteArray,
+                       skipErrorPacketData: Boolean = false,
+                       retryWriteCount: Int = 0,
+                       bleWriteCallback: BleWriteCallback.() -> Unit) {
+        writeQueueData(
+            bleDevice,
+            serviceUUID,
+            writeUUID,
+            SparseArray<ByteArray>(1).apply {
+                put(0, data)
+            },
+            skipErrorPacketData,
+            retryWriteCount,
+            bleWriteCallback
+        )
+    }
+
+    /**
+     * OTA推荐此方法
+     * 放入一个写队列，写成功，则从队列中取下一个数据，写失败，则重试[retryWriteCount]次
+     * 与[writeData]的区别在于，[writeData]写成功，则从队列中取下一个数据，写失败，则不再继续写后面的数据
+     * 注意：因为分包后每一个包，可能是包含完整的协议，所以分包由业务层处理，组件只会根据包的长度和mtu值对比后是否拦截
+     *
+     * @param skipErrorPacketData 是否跳过数据长度为0的数据包
+     * @param retryWriteCount 写失败后重试的次数
+     */
+    @Synchronized
+    fun writeQueueData(bleDevice: BleDevice,
+                       serviceUUID: String,
+                       writeUUID: String,
+                       dataArray: SparseArray<ByteArray>,
+                       skipErrorPacketData: Boolean = false,
+                       retryWriteCount: Int = 0,
+                       bleWriteCallback: BleWriteCallback.() -> Unit) {
+        checkInitialize()
+        bleBaseRequest?.writeQueueData(
+            bleDevice,
+            serviceUUID,
+            writeUUID,
+            dataArray,
+            skipErrorPacketData,
+            retryWriteCount,
+            bleWriteCallback
+        )
+    }
+
+    /**
      * 获取所有已连接设备集合(不包含其他应用连接的设备、系统连接的设备)
      */
     @Synchronized

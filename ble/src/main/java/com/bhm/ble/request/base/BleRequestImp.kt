@@ -462,6 +462,35 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
+     * 放入一个写队列，写成功，则从队列中取下一个数据，写失败，则重试[retryWriteCount]次
+     * 与[writeData]的区别在于，[writeData]写成功，则从队列中取下一个数据，写失败，则不再继续写后面的数据
+     *
+     * @param skipErrorPacketData 是否跳过数据长度为0的数据包
+     * @param retryWriteCount 写失败后重试的次数
+     */
+    override fun writeQueueData(
+        bleDevice: BleDevice,
+        serviceUUID: String,
+        writeUUID: String,
+        dataArray: SparseArray<ByteArray>,
+        skipErrorPacketData: Boolean,
+        retryWriteCount: Int,
+        bleWriteCallback: BleWriteCallback.() -> Unit
+    ) {
+        val callback = BleWriteCallback()
+        callback.apply(bleWriteCallback)
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
+        request?.let {
+            it.writeQueueData(serviceUUID, writeUUID, dataArray, skipErrorPacketData, retryWriteCount, callback)
+            return
+        }
+        val exception = UnConnectedException("$writeUUID -> 写数据失败，设备未连接")
+        BleLogger.e(exception.message)
+        callback.callWriteFail(bleDevice, 0, dataArray.size(), exception)
+        callback.callWriteComplete(bleDevice, false)
+    }
+
+    /**
      * 获取所有已连接设备集合
      */
     override fun getAllConnectedDevice(): MutableList<BleDevice> {

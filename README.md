@@ -315,6 +315,10 @@ BleDescriptorGetType设计原则
 #### v1.8.0新增stopConnect方法停止或者取消连接
     BleManager.get().stopConnect(device)
 
+#### v2.0.0新增writeQueueData方法
+    BleManager.get().writeQueueData()，此方法支持跳过空数据包，支持写失败后重试，提高成功率。可以用于OTA升级
+    
+
 #### [问题锦集](https://juejin.cn/post/6844903896100372494)，但愿对你有帮助
     https://blog.51cto.com/u_16213573/7811086
 * 1、少部分机型会存在断开连接(gatt.disconnect)后，连接状态仍未刷新，导致其他机型连接不上外设。

@@ -381,10 +381,34 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
                   bleWriteCallback: BleWriteCallback) {
         //以时间戳为id，来标记一次写操作
         initBleWriteRequest()
-        bleWriteRequest?.writeData(serviceUUID,
+        bleWriteRequest?.writeData(
+            serviceUUID,
             writeUUID,
             System.currentTimeMillis().toString(),
             dataArray,
+            bleWriteCallback
+        )
+    }
+
+    /**
+     * 放入一个写队列，写成功，则从队列中取下一个数据，写失败，则重试[retryWriteCount]次
+     * 与[writeData]的区别在于，[writeData]写成功，则从队列中取下一个数据，写失败，则不再继续写后面的数据
+     */
+    fun writeQueueData(serviceUUID: String,
+                       writeUUID: String,
+                       dataArray: SparseArray<ByteArray>,
+                       skipErrorPacketData: Boolean = false,
+                       retryWriteCount: Int = 0,
+                       bleWriteCallback: BleWriteCallback) {
+        //以时间戳为id，来标记一次写操作
+        initBleWriteRequest()
+        bleWriteRequest?.writeQueueData(
+            serviceUUID,
+            writeUUID,
+            System.currentTimeMillis().toString(),
+            dataArray,
+            skipErrorPacketData,
+            retryWriteCount,
             bleWriteCallback
         )
     }

@@ -48,7 +48,7 @@ internal abstract class Request {
     /**
      * 获取操作间隔
      */
-    private fun getOperateInterval(): Long {
+    fun getOperateInterval(): Long {
         var operateInterval = getBleOptions()?.operateInterval ?: DEFAULT_OPERATE_INTERVAL
         if (operateInterval <= 0) {
             operateInterval = DEFAULT_OPERATE_INTERVAL

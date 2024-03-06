@@ -20,13 +20,22 @@ import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.BleTaskQueueRequest
 import com.bhm.ble.utils.BleLogger
 import com.bhm.ble.utils.BleUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.math.max
 
 
 /**
@@ -41,6 +50,26 @@ internal class BleWriteRequest(
 
     private val bleWriteDataHashMap:
             ConcurrentHashMap<String, MutableList<BleWriteData>> = ConcurrentHashMap()
+
+    /**
+     * 写数据队列。写成功才写下一包。Ble库目前没有这样处理
+     */
+    private val linkedBlockingQueue = LinkedBlockingQueue<ByteArray>()
+
+    /**
+     * 添加任务线程
+     */
+    private val addWriteJobScope = CoroutineScope(Dispatchers.IO)
+
+    /**
+     * 写队列线程
+     */
+    private val writeJobScope = CoroutineScope(Dispatchers.IO)
+
+    /**
+     * 当前重写次数
+     */
+    private var currentRetryWriteCount = AtomicInteger(0)
 
     private fun addBleWriteData(uuid: String, bleWriteData: BleWriteData) {
         if (bleWriteDataHashMap.containsKey(uuid) && bleWriteDataHashMap[uuid] != null) {
@@ -73,6 +102,60 @@ internal class BleWriteRequest(
 
     fun removeAllWriteCallback() {
         bleWriteDataHashMap.clear()
+    }
+
+    /**
+     * 放入一个写队列，写成功，则从队列中取下一个数据，写失败，则重试[retryWriteCount]次
+     *  与[writeData]的区别在于，[writeData]写成功，则从队列中取下一个数据，写失败，则不再继续写后面的数据
+     */
+    fun writeQueueData(
+        serviceUUID: String,
+        writeUUID: String,
+        operateRandomID: String,
+        dataArray: SparseArray<ByteArray>,
+        skipErrorPacketData: Boolean = false,
+        retryWriteCount: Int = 0,
+        bleWriteCallback: BleWriteCallback
+    ) {
+        if (!BleUtil.isPermission(getBleManager().getContext())) {
+            bleWriteCallback.callWriteFail(bleDevice, 0, dataArray.size(), NoBlePermissionException())
+            bleWriteCallback.callWriteComplete(bleDevice, false)
+            return
+        }
+        if (dataArray.size() == 0) {
+            val exception = UnDefinedException(
+                getTaskId(writeUUID, operateRandomID, 0) + " -> 写数据失败，数据为空"
+            )
+            BleLogger.e(exception.message)
+            bleWriteCallback.callWriteFail(bleDevice, 0, 0, exception)
+            bleWriteCallback.callWriteComplete(bleDevice, false)
+            return
+        }
+        addWriteJobScope.launch {
+            if (linkedBlockingQueue.isEmpty()) {
+                for (i in 0 until dataArray.size()) {
+                    val data = dataArray.valueAt(i)
+                    withContext(Dispatchers.IO) {
+                        linkedBlockingQueue.put(data)
+                    }
+                    startWriteQueueJob(
+                        serviceUUID,
+                        writeUUID,
+                        operateRandomID,
+                        skipErrorPacketData,
+                        retryWriteCount,
+                        bleWriteCallback
+                    )
+                }
+                return@launch
+            }
+            for (i in 0 until dataArray.size()) {
+                val data = dataArray.valueAt(i)
+                withContext(Dispatchers.IO) {
+                    linkedBlockingQueue.put(data)
+                }
+            }
+        }
     }
 
     fun writeData(serviceUUID: String,
@@ -210,6 +293,103 @@ internal class BleWriteRequest(
             }
         )
         getTaskQueue(bleWriteData.writeUUID)?.addTask(task)
+    }
+
+    private fun startWriteQueueJob(
+        serviceUUID: String,
+        writeUUID: String,
+        operateRandomID: String,
+        skipErrorPacketData: Boolean = false,
+        retryWriteCount: Int = 0,
+        bleWriteCallback: BleWriteCallback
+    ) {
+        writeJobScope.launch {
+            //写数据间隔，写太快会导致设备忙碌而失败率高
+            delay(getOperateInterval())
+            val currentWriteData = linkedBlockingQueue.peek()
+            if (currentWriteData != null && currentWriteData.isEmpty() && skipErrorPacketData) {
+                linkedBlockingQueue.poll()
+                if (linkedBlockingQueue.isNotEmpty()) {
+                    startWriteQueueJob(
+                        serviceUUID,
+                        writeUUID,
+                        operateRandomID,
+                        true,
+                        retryWriteCount,
+                        bleWriteCallback
+                    )
+                }
+                return@launch
+            }
+            currentWriteData?.let { data ->
+                writeData(
+                    serviceUUID,
+                    writeUUID,
+                    operateRandomID,
+                    SparseArray<ByteArray>(1).apply {
+                        put(0, data)
+                    },
+                    object : BleWriteCallback() {
+                        override fun callWriteFail(
+                            bleDevice: BleDevice,
+                            current: Int,
+                            total: Int,
+                            throwable: Throwable
+                        ) {
+                            super.callWriteFail(bleDevice, current, total, throwable)
+                            bleWriteCallback.callWriteFail(bleDevice, current, total, throwable)
+                            launchInIOThread {
+                                currentRetryWriteCount.set(currentRetryWriteCount.get() + 1)
+                                val isCancelRetry = currentRetryWriteCount.get() > retryWriteCount
+                                BleLogger.e("写失败，指定重试${retryWriteCount}次，是否进入下一次重试：${!isCancelRetry}")
+                                if (isCancelRetry) {
+                                    //如果重试了retryWriteCount次还是失败，则丢掉此包，写下一包
+                                    currentRetryWriteCount.set(0)
+                                    if (linkedBlockingQueue.isNotEmpty()) {
+                                        linkedBlockingQueue.poll()
+                                    }
+                                }
+                                delay(200L + (max(currentRetryWriteCount.get(), 1) - 1)* 1000)
+                                if (linkedBlockingQueue.isNotEmpty()) {
+                                    startWriteQueueJob(
+                                        serviceUUID,
+                                        writeUUID,
+                                        operateRandomID,
+                                        skipErrorPacketData,
+                                        retryWriteCount,
+                                        bleWriteCallback
+                                    )
+                                }
+                            }
+                        }
+
+                        override fun callWriteSuccess(
+                            bleDevice: BleDevice,
+                            current: Int,
+                            total: Int,
+                            justWrite: ByteArray
+                        ) {
+                            super.callWriteSuccess(bleDevice, current, total, justWrite)
+                            bleWriteCallback.callWriteSuccess(bleDevice, current, total, justWrite)
+                            currentRetryWriteCount.set(0)
+                            if (linkedBlockingQueue.isNotEmpty()) {
+                                linkedBlockingQueue.poll()
+                            }
+                            if (linkedBlockingQueue.isNotEmpty()) {
+                                startWriteQueueJob(
+                                    serviceUUID,
+                                    writeUUID,
+                                    operateRandomID,
+                                    skipErrorPacketData,
+                                    retryWriteCount,
+                                    bleWriteCallback
+                                )
+                            }
+                        }
+                    }
+                )
+            }
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -376,5 +556,9 @@ internal class BleWriteRequest(
     override fun close() {
         super.close()
         removeAllWriteCallback()
+        currentRetryWriteCount.set(0)
+        addWriteJobScope.cancel()
+        writeJobScope.cancel()
+        linkedBlockingQueue.clear()
     }
 }
