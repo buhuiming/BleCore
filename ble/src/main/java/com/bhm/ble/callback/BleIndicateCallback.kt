@@ -17,38 +17,38 @@ import com.bhm.ble.device.BleDevice
  */
 open class BleIndicateCallback : BleBaseCallback() {
 
-    private var indicateSuccess: ((bleDevice: BleDevice) -> Unit)? = null
+    private var indicateSuccess: ((bleDevice: BleDevice, indicateUUID: String) -> Unit)? = null
 
-    private var indicateFail: ((bleDevice: BleDevice, throwable: Throwable) -> Unit)? = null
+    private var indicateFail: ((bleDevice: BleDevice, indicateUUID: String, throwable: Throwable) -> Unit)? = null
 
-    private var characteristicChanged: ((bleDevice: BleDevice, data: ByteArray) -> Unit)? = null
+    private var characteristicChanged: ((bleDevice: BleDevice, indicateUUID: String, data: ByteArray) -> Unit)? = null
 
-    fun onIndicateFail(value: ((bleDevice: BleDevice, throwable: Throwable) -> Unit)) {
+    fun onIndicateFail(value: ((bleDevice: BleDevice, indicateUUID: String, throwable: Throwable) -> Unit)) {
         indicateFail = value
     }
 
-    fun onIndicateSuccess(value: ((bleDevice: BleDevice) -> Unit)) {
+    fun onIndicateSuccess(value: ((bleDevice: BleDevice, indicateUUID: String) -> Unit)) {
         indicateSuccess = value
     }
 
-    fun onCharacteristicChanged(value: ((bleDevice: BleDevice, data: ByteArray) -> Unit)) {
+    fun onCharacteristicChanged(value: ((bleDevice: BleDevice, indicateUUID: String, data: ByteArray) -> Unit)) {
         characteristicChanged = value
     }
 
-    open fun callIndicateFail(bleDevice: BleDevice, throwable: Throwable) {
+    open fun callIndicateFail(bleDevice: BleDevice, indicateUUID: String, throwable: Throwable) {
         launchInMainThread {
-            indicateFail?.invoke(bleDevice, throwable)
+            indicateFail?.invoke(bleDevice, indicateUUID, throwable)
         }
     }
 
-    open fun callIndicateSuccess(bleDevice: BleDevice) {
+    open fun callIndicateSuccess(bleDevice: BleDevice, indicateUUID: String) {
         launchInMainThread {
-            indicateSuccess?.invoke(bleDevice)
+            indicateSuccess?.invoke(bleDevice, indicateUUID)
         }
     }
 
-    open fun callCharacteristicChanged(bleDevice: BleDevice, data: ByteArray) {
+    open fun callCharacteristicChanged(bleDevice: BleDevice, indicateUUID: String, data: ByteArray) {
         //数据处理的线程需要自行切换
-        characteristicChanged?.invoke(bleDevice, data)
+        characteristicChanged?.invoke(bleDevice, indicateUUID, data)
     }
 }

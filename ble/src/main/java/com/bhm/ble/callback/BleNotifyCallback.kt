@@ -17,38 +17,38 @@ import com.bhm.ble.device.BleDevice
  */
 open class BleNotifyCallback : BleBaseCallback() {
 
-    private var notifySuccess: ((bleDevice: BleDevice) -> Unit)? = null
+    private var notifySuccess: ((bleDevice: BleDevice, notifyUUID: String) -> Unit)? = null
 
-    private var notifyFail: ((bleDevice: BleDevice, throwable: Throwable) -> Unit)? = null
+    private var notifyFail: ((bleDevice: BleDevice, notifyUUID: String, throwable: Throwable) -> Unit)? = null
 
-    private var characteristicChanged: ((bleDevice: BleDevice, data: ByteArray) -> Unit)? = null
+    private var characteristicChanged: ((bleDevice: BleDevice, notifyUUID: String, data: ByteArray) -> Unit)? = null
 
-    fun onNotifyFail(value: ((bleDevice: BleDevice, throwable: Throwable) -> Unit)) {
+    fun onNotifyFail(value: ((bleDevice: BleDevice, notifyUUID: String, throwable: Throwable) -> Unit)) {
         notifyFail = value
     }
 
-    fun onNotifySuccess(value: ((bleDevice: BleDevice) -> Unit)) {
+    fun onNotifySuccess(value: ((bleDevice: BleDevice, notifyUUID: String) -> Unit)) {
         notifySuccess = value
     }
 
-    fun onCharacteristicChanged(value: ((bleDevice: BleDevice, data: ByteArray) -> Unit)) {
+    fun onCharacteristicChanged(value: ((bleDevice: BleDevice, notifyUUID: String, data: ByteArray) -> Unit)) {
         characteristicChanged = value
     }
 
-    open fun callNotifyFail(bleDevice: BleDevice, throwable: Throwable) {
+    open fun callNotifyFail(bleDevice: BleDevice, notifyUUID: String, throwable: Throwable) {
         launchInMainThread {
-            notifyFail?.invoke(bleDevice, throwable)
+            notifyFail?.invoke(bleDevice, notifyUUID, throwable)
         }
     }
 
-    open fun callNotifySuccess(bleDevice: BleDevice) {
+    open fun callNotifySuccess(bleDevice: BleDevice, notifyUUID: String) {
         launchInMainThread {
-            notifySuccess?.invoke(bleDevice)
+            notifySuccess?.invoke(bleDevice, notifyUUID)
         }
     }
 
-    open fun callCharacteristicChanged(bleDevice: BleDevice, data: ByteArray) {
+    open fun callCharacteristicChanged(bleDevice: BleDevice, notifyUUID: String, data: ByteArray) {
         //数据处理的线程需要自行切换
-        characteristicChanged?.invoke(bleDevice, data)
+        characteristicChanged?.invoke(bleDevice, notifyUUID, data)
     }
 }

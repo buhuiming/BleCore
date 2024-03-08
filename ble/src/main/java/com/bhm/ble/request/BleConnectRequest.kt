@@ -492,6 +492,8 @@ internal class BleConnectRequest(
             if (retryCount < 0) {
                 retryCount = 0
             }
+            //满足重连条件，则先把上一次连接的状态close
+            closeBluetoothGatt()
             if (retryCount > 0 && currentConnectRetryCount < retryCount) {
                 BleLogger.i("${bleDevice.deviceAddress} -> 满足重连条件：" +
                         "currentConnectRetryCount = $currentConnectRetryCount")

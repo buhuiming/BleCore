@@ -305,7 +305,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         }
         val exception = UnConnectedException("$notifyUUID -> 设置Notify失败，设备未连接")
         BleLogger.e(exception.message)
-        callback.callNotifyFail(bleDevice, exception)
+        callback.callNotifyFail(bleDevice, notifyUUID, exception)
     }
 
     /**
@@ -351,7 +351,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         }
         val exception = UnConnectedException("$indicateUUID -> 设置Indicate失败，设备未连接")
         BleLogger.e(exception.message)
-        callback.callIndicateFail(bleDevice, exception)
+        callback.callIndicateFail(bleDevice, indicateUUID, exception)
     }
 
     /**
