@@ -123,15 +123,15 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                node: CharacteristicNode
     ) {
         BleManager.get().notify(bleDevice, node.serviceUUID, node.characteristicUUID, BleDescriptorGetType.AllDescriptor) {
-            onNotifyFail { _, t ->
+            onNotifyFail { _, _, t ->
                 addLogMsg(LogEntity(Level.OFF, "notify失败：${t.message}"))
                 node.enableNotify = false
                 listRefreshMutableStateFlow.value = System.currentTimeMillis().toString()
             }
-            onNotifySuccess {
+            onNotifySuccess { _, _ ->
                 addLogMsg(LogEntity(Level.FINE, "notify成功：${node.characteristicUUID}"))
             }
-            onCharacteristicChanged {_, data ->
+            onCharacteristicChanged {_, _, data ->
                 //数据处理在IO线程，显示UI要切换到主线程
                 launchInMainThread {
                     addLogMsg(
@@ -167,15 +167,15 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
                  node: CharacteristicNode
     ) {
         BleManager.get().indicate(bleDevice, node.serviceUUID, node.characteristicUUID, BleDescriptorGetType.AllDescriptor) {
-            onIndicateFail {_, t ->
+            onIndicateFail {_, _, t ->
                 addLogMsg(LogEntity(Level.OFF, "indicate失败：${t.message}"))
                 node.enableIndicate = false
                 listRefreshMutableStateFlow.value = System.currentTimeMillis().toString()
             }
-            onIndicateSuccess {
+            onIndicateSuccess { _, _, ->
                 addLogMsg(LogEntity(Level.FINE, "indicate成功：${node.characteristicUUID}"))
             }
-            onCharacteristicChanged {_, data ->
+            onCharacteristicChanged {_, _, data ->
                 //数据处理在IO线程，显示UI要切换到主线程
                 launchInMainThread {
                     addLogMsg(
