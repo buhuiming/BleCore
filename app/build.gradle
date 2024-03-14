@@ -5,14 +5,14 @@ plugins {
 
 android {
     namespace 'com.bhm.demo'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.bhm.ble"
         minSdk 24
-        targetSdk 33
-        versionCode 203
-        versionName "2.0.3"
+        targetSdk 34
+        versionCode 210
+        versionName "2.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

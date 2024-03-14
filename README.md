@@ -4,7 +4,7 @@
 
 *   当前版本[![](https://jitpack.io/v/buhuiming/BleCore.svg)](https://jitpack.io/#buhuiming/BleCore) 
 *   minSdk 24
-*   targetSdk 33
+*   targetSdk 34
 
 #### * 基于Kotlin、协程
 #### * 基于sdk 33，最新API

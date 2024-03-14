@@ -87,10 +87,18 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                 LOCATION_PERMISSION,
                 {
                     BleLogger.d("获取到了权限")
-                    continuation.resume(true)
+                    try {
+                        continuation.resume(true)
+                    } catch (e: Exception) {
+                        BleLogger.e(e.message)
+                    }
                 }, {
                     BleLogger.w("缺少定位权限")
-                    continuation.resume(false)
+                    try {
+                        continuation.resume(false)
+                    } catch (e: Exception) {
+                        BleLogger.e(e.message)
+                    }
                 }
             )
         }
@@ -103,7 +111,11 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                 ) { _, _ ->
                     val enable = BleUtil.isGpsOpen(application)
                     BleLogger.i("是否打开了GPS: $enable")
-                    it.resume(enable)
+                    try {
+                        it.resume(enable)
+                    } catch (e: Exception) {
+                        BleLogger.e(e.message)
+                    }
                 }
             }
         }
@@ -118,7 +130,11 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                         delay(1000)
                         val enable = BleManager.get().isBleEnable()
                         BleLogger.i("是否打开了蓝牙: $enable")
-                        it.resume(enable)
+                        try {
+                            it.resume(enable)
+                        } catch (e: Exception) {
+                            BleLogger.e(e.message)
+                        }
                     }
                 }
             }

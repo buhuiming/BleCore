@@ -78,12 +78,20 @@ internal class BleReadRequest(
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation
                         if (getBluetoothGatt(bleDevice)?.readCharacteristic(characteristic) == false) {
-                            continuation.resume(UnDefinedException("Gatt读特征值数据失败"))
+                            try {
+                                continuation.resume(UnDefinedException("Gatt读特征值数据失败"))
+                            } catch (e: Exception) {
+                                BleLogger.e(e.message)
+                            }
                         }
                     }
                 },
                 interrupt = { _, throwable ->
-                    mContinuation?.resume(throwable)
+                    try {
+                        mContinuation?.resume(throwable)
+                    } catch (e: Exception) {
+                        BleLogger.e(e.message)
+                    }
                 },
                 callback = { _, throwable ->
                     throwable?.let {

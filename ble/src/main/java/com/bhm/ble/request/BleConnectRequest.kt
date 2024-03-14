@@ -115,8 +115,8 @@ internal class BleConnectRequest(
             return
         }
         if (lastState == BleConnectLastState.Connecting || lastState == BleConnectLastState.ConnectIdle) {
-            BleLogger.e("连接中")
-            removeBleConnectedDevice()
+            BleLogger.e("${bleDevice.deviceAddress}连接中")
+//            removeBleConnectedDevice()
             bleConnectCallback.callConnectFail(createNewDeviceInfo(), BleConnectFailType.AlreadyConnecting)
             getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callConnectFail(
                 createNewDeviceInfo(), BleConnectFailType.AlreadyConnecting
@@ -186,13 +186,13 @@ internal class BleConnectRequest(
             return
         }
         isActiveDisconnect.set(true)
+        lastState = BleConnectLastState.Disconnect
         if (lastState == BleConnectLastState.ConnectIdle ||
             lastState == BleConnectLastState.Connecting) {
             val throwable = ActiveDisConnectedException("连接过程中断开")
             connectJob?.cancel(throwable)
             waitConnectJob?.cancel(throwable)
         } else {
-            lastState = BleConnectLastState.Disconnect
             disConnectGatt()
             BleLogger.e("${bleDevice.deviceAddress} -> 主动断开连接")
             val deviceInfo = createNewDeviceInfo()
@@ -262,6 +262,7 @@ internal class BleConnectRequest(
                     //连接过程中断开，进入判断是否重连
                     refreshDeviceCache()
                     closeBluetoothGatt()
+                    lastState = BleConnectLastState.Disconnect
                     checkIfContinueConnect(UnDefinedException("连接过程中断开"))
                 }
                 BleConnectLastState.ConnectFailure -> {
@@ -273,8 +274,8 @@ internal class BleConnectRequest(
                 else -> {
                     refreshDeviceCache()
                     closeBluetoothGatt()
+                    lastState = BleConnectLastState.Disconnect
                     if (!isActiveDisconnect.get()) {
-                        lastState = BleConnectLastState.Disconnect
                         BleLogger.e("${bleDevice.deviceAddress} -> 自动断开连接")
                         val deviceInfo = createNewDeviceInfo()
                         bleConnectCallback?.callDisConnecting(
@@ -496,7 +497,7 @@ internal class BleConnectRequest(
             closeBluetoothGatt()
             if (retryCount > 0 && currentConnectRetryCount < retryCount) {
                 BleLogger.i("${bleDevice.deviceAddress} -> 满足重连条件：" +
-                        "currentConnectRetryCount = $currentConnectRetryCount")
+                        "当前连接失败次数：${currentConnectRetryCount + 1}次")
                 return true
             }
         }

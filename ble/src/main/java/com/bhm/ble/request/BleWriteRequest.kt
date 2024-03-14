@@ -252,7 +252,15 @@ internal class BleWriteRequest(
                 }
             },
             interrupt = { _, throwable ->
-                mContinuation?.resume(throwable)
+                try {
+                    try {
+                        mContinuation?.resume(throwable)
+                    } catch (e: Exception) {
+                        BleLogger.e(e.message)
+                    }
+                } catch (e: Exception) {
+                    BleLogger.e(e.message)
+                }
             },
             callback = { _, throwable ->
                 throwable?.let {

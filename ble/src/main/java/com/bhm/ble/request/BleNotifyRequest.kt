@@ -90,7 +90,11 @@ internal class BleNotifyRequest(
                     }
                 },
                 interrupt = { _, throwable ->
-                    mContinuation?.resume(throwable)
+                    try {
+                        mContinuation?.resume(throwable)
+                    } catch (e: Exception) {
+                        BleLogger.e(e.message)
+                    }
                 },
                 callback = { _, throwable ->
                     throwable?.let {

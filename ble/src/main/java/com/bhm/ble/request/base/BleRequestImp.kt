@@ -150,7 +150,11 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                     }
                     onScanComplete { bleDeviceList, bleDeviceDuplicateRemovalList ->
                         scanCallback.callScanComplete(bleDeviceList, bleDeviceDuplicateRemovalList)
-                        continuation.resume(device)
+                        try {
+                            continuation.resume(device)
+                        } catch (e: Exception) {
+                            BleLogger.e(e.message)
+                        }
                     }
                 }
             }
