@@ -5,9 +5,10 @@
 *   当前版本[![](https://jitpack.io/v/buhuiming/BleCore.svg)](https://jitpack.io/#buhuiming/BleCore) 
 *   minSdk 24
 *   targetSdk 34
+*   compileSdk 34
 
 #### * 基于Kotlin、协程
-#### * 基于sdk 33，最新API
+#### * 基于sdk 34，最新API
 #### * 详细的完整的容错机制
 #### * 基于多个蓝牙库的设计思想
 #### * 强大的Notify\Indicate\Read\Write任务队列

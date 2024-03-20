@@ -254,11 +254,7 @@ internal class BleConnectRequest(
             }
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             when (lastState) {
-                BleConnectLastState.ConnectIdle -> {
-                    //触发connectGatt之后，将开始连接的初始状态改成连接中
-                    lastState = BleConnectLastState.Connecting
-                }
-                BleConnectLastState.Connecting -> {
+                BleConnectLastState.ConnectIdle, BleConnectLastState.Connecting -> {
                     //连接过程中断开，进入判断是否重连
                     refreshDeviceCache()
                     closeBluetoothGatt()
@@ -368,7 +364,6 @@ internal class BleConnectRequest(
      * 开始连接
      */
     private fun startConnectJob() {
-        //初始化，待coreGattCallback回调再设置为连接中
         lastState = BleConnectLastState.ConnectIdle
         isActiveDisconnect.set(false)
         var connectTime = connectMillisTimeOut?: (getBleOptions()?.connectMillisTimeOut?: DEFAULT_CONNECT_MILLIS_TIMEOUT)
@@ -379,6 +374,7 @@ internal class BleConnectRequest(
             withTimeout(connectTime) {
                 //每次连接之前确保和上一次操作间隔一定时间
                 delay(waitTime)
+                lastState = BleConnectLastState.Connecting
                 bluetoothGatt = bleDevice.deviceInfo?.connectGatt(getBleManager().getContext(),
                     autoConnect, coreGattCallback, BluetoothDevice.TRANSPORT_LE)
                 BleLogger.d("${bleDevice.deviceAddress} -> 开始第${currentConnectRetryCount + 1}次连接")
