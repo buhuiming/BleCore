@@ -73,9 +73,6 @@ internal class BleConnectRequest(
         isForceConnect: Boolean = false,
         bleConnectCallback: BleConnectCallback
     ) {
-        this.connectMillisTimeOut = connectMillisTimeOut
-        this.connectRetryCount = connectRetryCount
-        this.connectRetryInterval = connectRetryInterval
         addBleConnectCallback(bleConnectCallback)
         if (bleDevice.deviceInfo == null) {
             BleLogger.e("连接失败：BluetoothDevice为空")
@@ -123,6 +120,9 @@ internal class BleConnectRequest(
             )
             return
         }
+        this.connectMillisTimeOut = connectMillisTimeOut
+        this.connectRetryCount = connectRetryCount
+        this.connectRetryInterval = connectRetryInterval
         //主要针对某些机型，当触发连接超时回调连接失败并释放资源之后，此时外设开启触发手机系统已连接，但BleCore资源被释放
         // (bluetoothGatt是null)，或BleCore和系统的连接状态不一致，而导致setMtu和Notify/Indicate都失败。
         val systemConnectStatus = bleManager.isConnected(bleDevice, true)
