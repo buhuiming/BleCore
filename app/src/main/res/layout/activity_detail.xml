@@ -44,7 +44,7 @@
                 android:textAllCaps="false"
                 android:textSize="13sp"
                 android:padding="0dp"
-                android:background="@color/purple_500"
+                android:background="@color/black"
                 android:text="ConnectionPriority"/>
 
         <Button
@@ -58,7 +58,7 @@
                 android:layout_gravity="end"
                 android:textSize="13sp"
                 android:padding="0dp"
-                android:background="@color/purple_500"
+                android:background="@color/black"
                 android:text="读取Rssi"/>
 
         <Button
@@ -72,7 +72,7 @@
                 android:layout_gravity="end"
                 android:textSize="13sp"
                 android:padding="0dp"
-                android:background="@color/purple_500"
+                android:background="@color/black"
                 android:text="设置Mtu"/>
 
         <Button
@@ -85,7 +85,7 @@
                 android:layout_gravity="end"
                 android:textSize="13sp"
                 android:padding="0dp"
-                android:background="@color/purple_500"
+                android:background="@color/black"
                 android:text="清除日志"/>
     </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -126,7 +126,7 @@
                 android:textSize="13sp"
                 android:padding="0dp"
                 android:enabled="false"
-                android:background="@color/purple_500"
+                android:background="@color/black"
                 android:text="发送"/>
     </androidx.appcompat.widget.LinearLayoutCompat>
 </androidx.appcompat.widget.LinearLayoutCompat>

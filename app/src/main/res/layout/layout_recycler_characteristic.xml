@@ -65,7 +65,7 @@
             android:textSize="13sp"
             android:padding="0dp"
             android:visibility="gone"
-            android:background="@color/purple_500"
+            android:background="@color/black"
             android:text="读数据"/>
 
     <CheckBox

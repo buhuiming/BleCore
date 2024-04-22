@@ -195,8 +195,23 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         value: ByteArray,
         status: Int
     ) {
-        super.onCharacteristicRead(gatt, characteristic, value, status)
+        //必须注释掉，否则会导致bleReadRequest?.onCharacteristicRead(characteristic, value, status)方法调用两次
+//        super.onCharacteristicRead(gatt, characteristic, value, status)
         bleReadRequest?.onCharacteristicRead(characteristic, value, status)
+    }
+
+    /**
+     * 兼容老的android系统版本，特别是华为(鸿蒙)系统个别版本会调用这个方法，而不触发[onCharacteristicRead]方法
+     */
+    override fun onCharacteristicRead(
+        gatt: BluetoothGatt?,
+        characteristic: BluetoothGattCharacteristic?,
+        status: Int
+    ) {
+        super.onCharacteristicRead(gatt, characteristic, status)
+        characteristic?.let {
+            bleReadRequest?.onCharacteristicRead(characteristic, characteristic.value?: byteArrayOf(), status)
+        }
     }
 
     /**

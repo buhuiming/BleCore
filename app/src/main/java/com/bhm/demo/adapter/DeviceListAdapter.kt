@@ -63,7 +63,7 @@ class DeviceListAdapter(data: MutableList<BleDevice>?
             holder.binding.btnConnect.text = "连接"
             holder.binding.btnOperate.isEnabled = false
             holder.binding.btnConnect.setBackgroundColor(ContextCompat
-                .getColor(holder.binding.btnConnect.context, R.color.purple_500))
+                .getColor(holder.binding.btnConnect.context, R.color.black))
         }
     }
 }

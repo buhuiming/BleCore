@@ -35,7 +35,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
 
     override fun initData() {
         super.initData()
-        AppTheme.setStatusBarColor(this, R.color.purple_500)
+        AppTheme.setStatusBarColor(this, R.color.black)
         LeakCanary.runCatching {  }
         initList()
         viewModel.initBle()

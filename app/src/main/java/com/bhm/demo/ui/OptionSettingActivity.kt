@@ -43,7 +43,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
 
     override fun initData() {
         super.initData()
-        AppTheme.setStatusBarColor(this, R.color.purple_500)
+        AppTheme.setStatusBarColor(this, R.color.black)
         val taskQueueTypes = arrayOf("Default", "Operate", "Independent")
         viewBinding.spTaskQueueType.adapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, taskQueueTypes)

@@ -471,7 +471,7 @@
                 android:gravity="center"
                 android:textSize="14sp"
                 android:padding="0dp"
-                android:background="@color/purple_500"
+                android:background="@color/black"
                 android:text="重置"/>
 
         <Button
@@ -485,7 +485,7 @@
                 android:gravity="center"
                 android:textSize="14sp"
                 android:padding="0dp"
-                android:background="@color/purple_500"
+                android:background="@color/black"
                 android:text="保存"/>
 
     </androidx.appcompat.widget.LinearLayoutCompat>

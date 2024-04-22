@@ -42,7 +42,7 @@
                 android:gravity="center"
                 android:textSize="12sp"
                 android:padding="0dp"
-                android:background="@color/purple_500"
+                android:background="@color/black"
                 android:text="连接指定设备"/>
 
         <Button
@@ -56,7 +56,7 @@
                 android:gravity="center"
                 android:textSize="14sp"
                 android:padding="0dp"
-                android:background="@color/purple_500"
+                android:background="@color/black"
                 android:text="设置"/>
 
         <Button
@@ -70,7 +70,7 @@
                 android:gravity="center"
                 android:textSize="14sp"
                 android:padding="0dp"
-                android:background="@color/purple_500"
+                android:background="@color/black"
                 android:text="开启扫描"/>
 
         <Button
@@ -85,7 +85,7 @@
                 android:gravity="center"
                 android:textSize="14sp"
                 android:padding="0dp"
-                android:background="@color/purple_500"
+                android:background="@color/black"
                 android:text="停着扫描"/>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
