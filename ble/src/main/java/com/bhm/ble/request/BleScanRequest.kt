@@ -195,7 +195,12 @@ internal class BleScanRequest private constructor() : Request() {
         }
         scanJob = bleScanCallback?.launchInIOThread {
             withTimeout(scanTime) {
-                scanner?.startScan(scanFilters, scanSetting, scanCallback)
+                try {
+                    scanner?.startScan(scanFilters, scanSetting, scanCallback)
+                } catch (e: Exception) {
+                    BleLogger.e("扫描失败： ${e.message}")
+                    bleScanCallback?.callScanFail(BleScanFailType.ScanError(-1, e))
+                }
                 delay(scanTime)
             }
         }
@@ -228,7 +233,13 @@ internal class BleScanRequest private constructor() : Request() {
                              scanSetting: ScanSettings?,
                              throwable: Throwable?) {
         isScanning.set(false)
-        scanner?.stopScan(scanCallback)
+        try {
+            scanner?.stopScan(scanCallback)
+        } catch (e: Exception) {
+            BleLogger.e("停止扫描失败： ${e.message}")
+            bleScanCallback?.callScanFail(BleScanFailType.ScanError(-1, e))
+            return
+        }
         if (ifContinueScan()) {
             val retryInterval = scanRetryInterval?: (getBleOptions()?.scanRetryInterval?: DEFAULT_SCAN_RETRY_INTERVAL)
             waitScanJob = bleScanCallback?.launchInDefaultThread {
