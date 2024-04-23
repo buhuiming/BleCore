@@ -18,11 +18,13 @@ import android.os.Build.VERSION_CODES
  */
 val LOCATION_PERMISSION = if (VERSION.SDK_INT < VERSION_CODES.S) {
     arrayOf(
+        //注册精准位置权限，否则可能Ble扫描不到设备
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION,
     )
 } else {
     arrayOf(
+        //注册精准位置权限，否则可能Ble扫描不到设备
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.BLUETOOTH_SCAN,

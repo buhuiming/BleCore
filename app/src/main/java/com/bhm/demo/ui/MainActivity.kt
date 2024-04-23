@@ -81,7 +81,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
                         listAdapter?.notifyItemChanged(position)
                     }
                     val isConnected= viewModel.isConnected(bleDevice)
-                    if (it.bleDevice.deviceAddress == "7C:DF:A1:A3:5A:BE") {
+                    if (it.bleDevice.deviceAddress == viewBinding.etAddress.text.toString()) {
                         viewBinding.btnConnect.isEnabled = !isConnected
                     }
                     if (isConnected && autoOpenDetailsActivity) {
@@ -115,10 +115,19 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
             if (ViewUtil.isInvalidClick(it)) {
                 return@setOnClickListener
             }
+            val address = viewBinding.etAddress.text.toString()
+            if (address.isEmpty()) {
+                Toast.makeText(application, "请输入设备地址", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            if (!Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$").matches(address)) {
+                Toast.makeText(application, "请输入正确的设备地址", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             autoOpenDetailsActivity = true
             showLoading("连接中...")
 //            viewModel.startScanAndConnect(this@MainActivity)
-            viewModel.connect("7C:DF:A1:A3:5A:BE")
+            viewModel.connect(viewBinding.etAddress.text.toString())
         }
 
         viewBinding.btnSetting.setOnClickListener {

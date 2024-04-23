@@ -24,6 +24,14 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
+    <EditText
+        android:id="@+id/etAddress"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginHorizontal="28dp"
+        android:text="49:A6:84:E0:4D:33"
+        android:hint="输入连接指定设备的地址"/>
+
     <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

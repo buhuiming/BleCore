@@ -203,6 +203,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     /**
      * 兼容老的android系统版本，特别是华为(鸿蒙)系统个别版本会调用这个方法，而不触发[onCharacteristicRead]方法
      */
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun onCharacteristicRead(
         gatt: BluetoothGatt?,
         characteristic: BluetoothGattCharacteristic?,
