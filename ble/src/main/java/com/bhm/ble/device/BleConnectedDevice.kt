@@ -134,7 +134,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         value: ByteArray
     ) {
         /*android 13调用的方法*/
-        super.onCharacteristicChanged(gatt, characteristic, value)
+//        super.onCharacteristicChanged(gatt, characteristic, value)
         val properties = characteristic.properties
         if (properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) {
             // 这是 Indicate
@@ -154,9 +154,9 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     ) {
         super.onCharacteristicChanged(gatt, characteristic)
         /*android 13过时的方法*/
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//            return
+//        }
         characteristic?.let {
             val properties = characteristic.properties
             if (properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) {

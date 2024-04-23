@@ -9,9 +9,11 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.utils.BleLogger
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.R
 import com.bhm.demo.adapter.DeviceListAdapter
+import com.bhm.demo.constants.LOCATION_PERMISSION
 import com.bhm.demo.databinding.ActivityMainBinding
 import com.bhm.demo.vm.MainViewModel
 import com.bhm.support.sdk.core.AppTheme
@@ -19,6 +21,7 @@ import com.bhm.support.sdk.utils.ViewUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import leakcanary.LeakCanary
+import kotlin.coroutines.resume
 
 /**
  * 主页面
@@ -115,19 +118,28 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
             if (ViewUtil.isInvalidClick(it)) {
                 return@setOnClickListener
             }
-            val address = viewBinding.etAddress.text.toString()
-            if (address.isEmpty()) {
-                Toast.makeText(application, "请输入设备地址", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            if (!Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$").matches(address)) {
-                Toast.makeText(application, "请输入正确的设备地址", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            autoOpenDetailsActivity = true
-            showLoading("连接中...")
+            requestPermission(
+                LOCATION_PERMISSION,
+                {
+                    BleLogger.d("获取到了权限")
+                    val address = viewBinding.etAddress.text.toString()
+                    if (address.isEmpty()) {
+                        Toast.makeText(application, "请输入设备地址", Toast.LENGTH_SHORT).show()
+                        return@requestPermission
+                    }
+                    if (!Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$").matches(address)) {
+                        Toast.makeText(application, "请输入正确的设备地址", Toast.LENGTH_SHORT).show()
+                        return@requestPermission
+                    }
+                    autoOpenDetailsActivity = true
+                    showLoading("连接中...")
 //            viewModel.startScanAndConnect(this@MainActivity)
-            viewModel.connect(viewBinding.etAddress.text.toString())
+                    viewModel.connect(viewBinding.etAddress.text.toString())
+
+                }, {
+                    BleLogger.w("缺少定位权限")
+                }
+            )
         }
 
         viewBinding.btnSetting.setOnClickListener {
