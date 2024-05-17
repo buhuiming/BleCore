@@ -325,7 +325,6 @@ BleDescriptorGetType设计原则
     通过第一步初始化时候，setEnableLog方法来决定是否使用BleCore的日志打印；
     业务层，通过实现BleLogEvent接口，如下：
 
-    ```
     class MainActivity : BaseActivity(), BleLogEvent {
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
@@ -333,8 +332,8 @@ BleDescriptorGetType设计原则
             BleLogManager.get().addLogListener(this)
         }
 
-        override fun onCreate(savedInstanceState: Bundle?) {
-            super.onCreate(savedInstanceState)
+        override fun onDestroy() {
+            super.onDestroy()
             //移除BleCore日志监听
             BleLogManager.get().removeLogListener(this)
         }
