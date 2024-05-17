@@ -3,7 +3,7 @@
  * 不能修改和删除上面的版权声明
  * 此代码属于buhuiming编写，在未经允许的情况下不得传播复制
  */
-package com.bhm.ble.utils
+package com.bhm.ble.log
 
 import android.util.Log
 import com.bhm.ble.data.Constants.MARK
@@ -20,27 +20,51 @@ object BleLogger {
     var isLogger = true
 
     fun d(msg: String?) {
-        if (isLogger && msg != null) {
-            Log.d(getClassNameForTag(), MARK + msg)
+        if (msg.isNullOrEmpty()) {
+            return
         }
+        val tag = getClassNameForTag()
+        if (isLogger) {
+            Log.d(tag, MARK + msg)
+        }
+        notifyLog(BleLogLevel.Debug, tag, MARK + msg)
     }
 
     fun i(msg: String?) {
-        if (isLogger && msg != null) {
-            Log.i(getClassNameForTag(), MARK + msg)
+        if (msg.isNullOrEmpty()) {
+            return
         }
+        val tag = getClassNameForTag()
+        if (isLogger) {
+            Log.i(tag, MARK + msg)
+        }
+        notifyLog(BleLogLevel.Info, tag, MARK + msg)
     }
 
     fun e(msg: String?) {
-        if (isLogger && msg != null) {
-            Log.e(getClassNameForTag(), MARK + msg)
+        if (msg.isNullOrEmpty()) {
+            return
         }
+        val tag = getClassNameForTag()
+        if (isLogger) {
+            Log.e(tag, MARK + msg)
+        }
+        notifyLog(BleLogLevel.Error, tag, MARK + msg)
     }
 
     fun w(msg: String?) {
-        if (isLogger && msg != null) {
-            Log.w(getClassNameForTag(), MARK + msg)
+        if (msg.isNullOrEmpty()) {
+            return
         }
+        val tag = getClassNameForTag()
+        if (isLogger) {
+            Log.w(tag, MARK + msg)
+        }
+        notifyLog(BleLogLevel.Warn, tag, MARK + msg)
+    }
+
+    private fun notifyLog(logLevel: BleLogLevel, tag: String, message: String?) {
+        BleLogManager.get().notifyLog(logLevel, tag, message)
     }
 
     /*

@@ -6,7 +6,7 @@
 package com.bhm.ble.control
 
 import com.bhm.ble.device.BleConnectedDevice
-import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.log.BleLogger
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -25,7 +25,7 @@ internal class BleLruHashMap(
 
     override fun put(key: String, value: BleConnectedDevice): BleConnectedDevice? {
         if (size == maxSize) {
-            BleLogger.e("超出最大连接设备数：${maxSize}，断开第一个设备的连接")
+            BleLogger.w("超出最大连接设备数：${maxSize}，断开第一个设备的连接")
             get(keyLists.firstOrNull())?.disConnect()
             remove(keyLists.firstOrNull())
             keyLists.removeFirstOrNull()

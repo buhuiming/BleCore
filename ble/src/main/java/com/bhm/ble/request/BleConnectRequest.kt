@@ -20,7 +20,7 @@ import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.BleRequestImp
 import com.bhm.ble.request.base.Request
-import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.log.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.*
 import java.util.*
@@ -127,7 +127,7 @@ internal class BleConnectRequest(
         // (bluetoothGatt是null)，或BleCore和系统的连接状态不一致，而导致setMtu和Notify/Indicate都失败。
         val systemConnectStatus = bleManager.isConnected(bleDevice, true)
         val bleCoreConnectStatus = bleManager.isConnected(bleDevice, false)
-        BleLogger.e("设备当前连接状态，系统已连接$systemConnectStatus，" +
+        BleLogger.e("设备[${bleDevice.deviceAddress}]当前连接状态，系统已连接$systemConnectStatus，" +
                 "BleCore连接状态$bleCoreConnectStatus，" +
                 " 是否强制连接$isForceConnect， " +
                 "bluetoothGatt是否为空${bluetoothGatt == null}")
@@ -153,7 +153,7 @@ internal class BleConnectRequest(
      */
     fun disConnect() {
         if (bleDevice.deviceInfo == null) {
-            BleLogger.e("断开失败：BluetoothDevice为空")
+            BleLogger.e("[${bleDevice.deviceAddress}]断开失败：BluetoothDevice为空")
             bleConnectCallback?.callConnectFail(createNewDeviceInfo(), BleConnectFailType.NullableBluetoothDevice)
             getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callConnectFail(
                 createNewDeviceInfo(), BleConnectFailType.NullableBluetoothDevice
@@ -217,11 +217,11 @@ internal class BleConnectRequest(
     fun stopConnect() {
         if (lastState == BleConnectLastState.ConnectIdle ||
             lastState == BleConnectLastState.Connecting) {
-            val throwable = ActiveStopConnectedException("连接过程中取消/停止连接")
+            val throwable = ActiveStopConnectedException("[${bleDevice.deviceAddress}]连接过程中取消/停止连接")
             connectJob?.cancel(throwable)
             waitConnectJob?.cancel(throwable)
         } else {
-            BleLogger.i("非连接过程中，取消/停止连接无效")
+            BleLogger.i("[${bleDevice.deviceAddress}]非连接过程中，取消/停止连接无效")
         }
     }
 
@@ -239,7 +239,7 @@ internal class BleConnectRequest(
             closeBluetoothGatt()
             return
         }
-        BleLogger.i("连接状态变化BluetoothGatt是否为空：${gatt == null}")
+        BleLogger.i("[${bleDevice.deviceAddress}]连接状态变化BluetoothGatt是否为空：${gatt == null}")
         gatt?.let {
             bluetoothGatt = it
         }
@@ -259,10 +259,10 @@ internal class BleConnectRequest(
                     refreshDeviceCache()
                     closeBluetoothGatt()
                     lastState = BleConnectLastState.Disconnect
-                    checkIfContinueConnect(UnDefinedException("连接过程中断开"))
+                    checkIfContinueConnect(UnDefinedException("[${bleDevice.deviceAddress}]连接过程中断开"))
                 }
                 BleConnectLastState.ConnectFailure -> {
-                    BleLogger.i("连接失败后，设备触发断开连接")
+                    BleLogger.i("连接失败后，设备[${bleDevice.deviceAddress}]触发断开连接")
                     refreshDeviceCache()
                     closeBluetoothGatt()
                 }
@@ -299,7 +299,7 @@ internal class BleConnectRequest(
         gatt?.let {
             bluetoothGatt = it
         }
-        BleLogger.i("发现服务BluetoothGatt是否为空：${gatt == null}")
+        BleLogger.i("[${bleDevice.deviceAddress}]发现服务BluetoothGatt是否为空：${gatt == null}")
         if (status == BluetoothGatt.GATT_SUCCESS) {
             BleLogger.i("${bleDevice.deviceAddress} -> 连接成功，发现服务")
             currentConnectRetryCount = 0
@@ -377,7 +377,7 @@ internal class BleConnectRequest(
                 lastState = BleConnectLastState.Connecting
                 bluetoothGatt = bleDevice.deviceInfo?.connectGatt(getBleManager().getContext(),
                     autoConnect, coreGattCallback, BluetoothDevice.TRANSPORT_LE)
-                BleLogger.d("${bleDevice.deviceAddress} -> 开始第${currentConnectRetryCount + 1}次连接")
+                BleLogger.i("${bleDevice.deviceAddress} -> 开始第${currentConnectRetryCount + 1}次连接")
                 if (bluetoothGatt == null) {
                     cancel(CancellationException("连接异常：bluetoothGatt == null"))
                 } else {
@@ -608,7 +608,7 @@ internal class BleConnectRequest(
             val refresh = BluetoothGatt::class.java.getMethod("refresh")
             if (bluetoothGatt != null) {
                 val success = refresh.invoke(bluetoothGatt) as Boolean
-                BleLogger.i("refreshDeviceCache, is success:  $success")
+                BleLogger.d("refreshDeviceCache, is success:  $success")
             }
         } catch (e: Exception) {
             BleLogger.e("exception occur while refreshing device: " + e.message)

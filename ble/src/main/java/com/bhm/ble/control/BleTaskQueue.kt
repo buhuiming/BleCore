@@ -12,7 +12,7 @@ import com.bhm.ble.data.Constants.CANCEL_UN_COMPLETE
 import com.bhm.ble.data.Constants.COMPLETED
 import com.bhm.ble.data.Constants.UN_COMPLETE
 import com.bhm.ble.data.TimeoutCancelException
-import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.log.BleLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,7 +60,7 @@ internal class BleTaskQueue(private val tag: String = "") {
             }
             task.canceled.set(true)
             taskList.remove(task)
-            BleLogger.i("($tag) 任务：${task}结束完毕，剩下${taskList.size()}个任务")
+            BleLogger.d("($tag) 任务：${task}结束完毕，剩下${taskList.size()}个任务")
             if (task.autoDoNextTask) {
                 sendTask(taskList.firstOrNull())
             }
@@ -85,7 +85,7 @@ internal class BleTaskQueue(private val tag: String = "") {
         if (mCoroutineScope == null) {
             initLoop()
         }
-        BleLogger.i("($tag) 当前任务数量：${taskList.size()}, 添加任务：$task")
+        BleLogger.d("($tag) 当前任务数量：${taskList.size()}, 添加任务：$task")
         task.setCompleted(UN_COMPLETE)
         taskList.add(task)
         taskForTiming(task)

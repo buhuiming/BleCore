@@ -17,7 +17,7 @@ import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.BleBaseRequest
 import com.bhm.ble.request.base.BleRequestImp
-import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.log.BleLogger
 import com.bhm.ble.utils.BleUtil
 
 
@@ -60,7 +60,7 @@ class BleManager private constructor() {
         bleBaseRequest = BleRequestImp.get()
         bluetoothManager = application?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?
         BleLogger.isLogger = bleOptions?.enableLog?: false
-        BleLogger.d("ble Successful initialization")
+        BleLogger.i("ble Successful initialization")
     }
 
     /**

@@ -18,7 +18,7 @@ import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.data.Constants.WRITE_TASK_ID
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.BleTaskQueueRequest
-import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.log.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -486,7 +486,7 @@ internal class BleWriteRequest(
                     )
                     bleWriteData.isWriting = AtomicBoolean(false)
                     if (status == BluetoothGatt.GATT_SUCCESS) {
-                        BleLogger.d(
+                        BleLogger.i(
                             "$taskId -> 第${bleWriteData.currentPackage}包" +
                                     "数据写成功：" + BleUtil.bytesToHex(bleWriteData.data)
                         )

@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bhm.ble.device.BleDevice
-import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.log.BleLogger
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.R
 import com.bhm.demo.adapter.DeviceListAdapter
@@ -21,7 +21,6 @@ import com.bhm.support.sdk.utils.ViewUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import leakcanary.LeakCanary
-import kotlin.coroutines.resume
 
 /**
  * 主页面

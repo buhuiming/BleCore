@@ -12,7 +12,7 @@ import com.bhm.ble.BleManager
 import com.bhm.ble.data.BleDescriptorGetType
 import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.device.BleDevice
-import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.log.BleLogger
 import com.bhm.ble.utils.BleUtil
 import com.bhm.demo.entity.CharacteristicNode
 import com.bhm.demo.entity.LogEntity

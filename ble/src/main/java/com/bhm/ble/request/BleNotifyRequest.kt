@@ -20,7 +20,7 @@ import com.bhm.ble.data.Constants.NOTIFY_TASK_ID
 import com.bhm.ble.data.Constants.UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.BleTaskQueueRequest
-import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.log.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
 import java.util.*
@@ -171,7 +171,7 @@ internal class BleNotifyRequest(
             if (descriptor?.characteristic?.uuid?.toString().equals(it.getKey(), ignoreCase = true)
                 && cancelNotifyJob(it.getKey(), getTaskId(it.getKey()))) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
-                    BleLogger.d("${it.getKey()} -> 设置Notify成功")
+                    BleLogger.i("${it.getKey()} -> 设置Notify成功")
                     it.callNotifySuccess(bleDevice, it.getKey().toString())
                 } else {
                     val exception = UnDefinedException(

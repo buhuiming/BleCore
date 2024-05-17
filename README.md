@@ -320,6 +320,40 @@ BleDescriptorGetType设计原则
 
 #### v2.0.0新增writeQueueData方法
     BleManager.get().writeQueueData()，此方法支持跳过空数据包，支持写失败后重试，提高成功率。可以用于OTA升级
+
+#### 获取BleCore日志，使用自定义的日志框架打印日志或收集BleCore日志
+    通过第一步初始化时候，setEnableLog方法来决定是否使用BleCore的日志打印；
+    业务层，通过实现BleLogEvent接口，如下：
+
+    ```
+    class MainActivity : BaseActivity(), BleLogEvent {
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            //添加BleCore日志监听
+            BleLogManager.get().addLogListener(this)
+        }
+
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            //移除BleCore日志监听
+            BleLogManager.get().removeLogListener(this)
+        }
+
+        /**
+         * 获取BleCore库的日志，并统一使用Logger来打印日志获取其他收集功能
+        */
+        override fun onLog(level: BleLogLevel, tag: String, message: String?) {
+            if (message.isNullOrEmpty()) {
+                return
+            }
+           when (level) {
+               is BleLogLevel.Debug ->  Logger.d(tag, message)
+               is BleLogLevel.Info ->  Logger.i(tag, message)
+               is BleLogLevel.Warn ->  Logger.w(tag, message)
+               is BleLogLevel.Error ->  Logger.e(tag, message)
+           }
+        }
+    } 
     
 
 #### [问题锦集](https://juejin.cn/post/6844903896100372494)，但愿对你有帮助

@@ -12,7 +12,7 @@ import com.bhm.ble.callback.BleScanCallback
 import com.bhm.ble.data.BleConnectFailType
 import com.bhm.ble.data.BleScanFailType
 import com.bhm.ble.device.BleDevice
-import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.log.BleLogger
 import com.bhm.ble.utils.BleUtil
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.constants.LOCATION_PERMISSION

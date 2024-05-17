@@ -9,7 +9,7 @@ import android.bluetooth.BluetoothGatt
 import com.bhm.ble.BleManager
 import com.bhm.ble.data.BleConnectFailType
 import com.bhm.ble.device.BleDevice
-import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.log.BleLogger
 import kotlinx.coroutines.delay
 
 

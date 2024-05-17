@@ -17,7 +17,7 @@ import com.bhm.ble.data.TimeoutCancelException
 import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.Request
-import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.log.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlin.coroutines.Continuation

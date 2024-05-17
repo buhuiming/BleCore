@@ -10,7 +10,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.bhm.ble.callback.BluetoothCallback
-import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.log.BleLogger
 
 /**
  * @description 注册蓝牙广播

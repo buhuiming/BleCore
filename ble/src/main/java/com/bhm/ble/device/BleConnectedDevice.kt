@@ -9,7 +9,6 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
-import android.os.Build
 import android.util.SparseArray
 import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.callback.BleEventCallback

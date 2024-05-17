@@ -14,6 +14,7 @@ import android.location.LocationManager
 import android.os.Build
 import android.util.SparseArray
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.log.BleLogger
 import kotlin.math.roundToInt
 
 
@@ -160,7 +161,7 @@ object BleUtil {
                         packageLength
                     )
                 }
-                BleLogger.i("${i + 1} data is: ${bytesToHex(dataPkg)}")
+                BleLogger.d("${i + 1} data is: ${bytesToHex(dataPkg)}")
                 listData.put(i, dataPkg)
             }
         } else {

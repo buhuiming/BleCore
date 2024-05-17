@@ -19,7 +19,7 @@ import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.BleRequestImp
 import com.bhm.ble.request.base.Request
-import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.log.BleLogger
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.*
 import java.util.*
@@ -263,7 +263,7 @@ internal class BleScanRequest private constructor() : Request() {
             }
             bleScanCallback?.callScanComplete(results.toMutableList(), duplicateRemovalResults.toMutableList())
             if (results.isEmpty()) {
-                BleLogger.d("没有扫描到数据")
+                BleLogger.w("没有扫描到数据")
             }
             bleScanCallback?.launchInDefaultThread {
                 delay(500)

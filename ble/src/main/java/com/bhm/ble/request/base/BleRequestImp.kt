@@ -31,7 +31,7 @@ import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.receiver.BluetoothReceiver
 import com.bhm.ble.request.BleScanRequest
-import com.bhm.ble.utils.BleLogger
+import com.bhm.ble.log.BleLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -615,7 +615,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                     filter
                 )
             }
-            BleLogger.i("注册系统蓝牙广播")
+            BleLogger.d("注册系统蓝牙广播")
         }
     }
 
@@ -628,7 +628,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             BleManager.get().getContext()?.unregisterReceiver(it)
         }
         bluetoothReceiver = null
-        BleLogger.i("取消注册系统蓝牙广播")
+        BleLogger.d("取消注册系统蓝牙广播")
     }
 
     /**
