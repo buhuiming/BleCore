@@ -10,6 +10,7 @@ package com.bhm.ble.device
 import android.bluetooth.BluetoothDevice
 import android.os.Bundle
 import android.os.Parcel
+import android.os.ParcelUuid
 import android.os.Parcelable
 
 
@@ -34,6 +35,7 @@ data class BleDevice(
     val timestampNanos: Long?,
     val scanRecord: ByteArray?,
     val tag: Bundle?,
+    val serviceUuids: List<ParcelUuid>? = null
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
@@ -43,7 +45,8 @@ data class BleDevice(
         parcel.readValue(Int::class.java.classLoader) as? Int,
         parcel.readValue(Long::class.java.classLoader) as? Long,
         parcel.createByteArray(),
-        parcel.readBundle(Bundle::class.java.classLoader)
+        parcel.readBundle(Bundle::class.java.classLoader),
+        parcel.createTypedArrayList(ParcelUuid.CREATOR)
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -54,6 +57,7 @@ data class BleDevice(
         parcel.writeValue(timestampNanos)
         parcel.writeByteArray(scanRecord)
         parcel.writeBundle(tag)
+        parcel.writeTypedList(serviceUuids)
     }
 
     override fun describeContents(): Int {
@@ -90,4 +94,5 @@ data class BleDevice(
 
     fun getKey() = deviceAddress.toString()
 
+    fun getFirstServiceUuid() = serviceUuids?.firstOrNull()
 }

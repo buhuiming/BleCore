@@ -93,6 +93,7 @@ object BleUtil {
             rssi = scanResult.rssi,
             timestampNanos = scanResult.timestampNanos,
             scanRecord = scanResult.scanRecord?.bytes,
+            serviceUuids = scanResult.scanRecord?.serviceUuids,
             tag = null
         )
     }
