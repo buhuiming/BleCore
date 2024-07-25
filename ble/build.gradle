@@ -6,7 +6,7 @@ plugins {
 
 //ext.GROUP = "com.lute.ble"
 //ext.POM_ARTIFACT_ID = "BleCore"
-//ext.VERSION_NAME = "2.2.1"
+//ext.VERSION_NAME = "2.3.0"
 ////引用gradle_upload.gradle
 //apply from: "${project.rootDir}/maven_upload.gradle"
 
@@ -19,7 +19,7 @@ afterEvaluate {
                 // 这里头是artifacts的配置信息，不填会采用默认的
                 groupId = 'com.github.buhuiming'
                 artifactId = 'BleCore'
-                version = '2.2.1'
+                version = '2.3.0'
 
                 from components.release
                 artifact androidSourcesJar //打包源码，去除这行打的包将看不到源码
@@ -62,5 +62,5 @@ android {
 
 dependencies {
 //    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.10"
-    implementation 'androidx.lifecycle:lifecycle-common:2.6.2'
+    implementation 'androidx.lifecycle:lifecycle-common:2.8.3'
 }

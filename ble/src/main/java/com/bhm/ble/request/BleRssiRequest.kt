@@ -37,7 +37,7 @@ internal class BleRssiRequest(
 
     private var bleRssiCallback: BleRssiCallback? = null
 
-    private val bleTaskQueue: BleTaskQueue = BleTaskQueue("Rssi队列")
+    private val bleTaskQueue: BleTaskQueue = BleTaskQueue("${bleDevice.deviceAddress}Rssi队列")
 
     private fun addRssiCallback(callback: BleRssiCallback) {
         bleRssiCallback = callback

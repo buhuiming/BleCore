@@ -154,6 +154,7 @@ internal interface BleBaseRequest {
                   serviceUUID: String,
                   writeUUID: String,
                   dataArray: SparseArray<ByteArray>,
+                  writeType: Int? = null,
                   bleWriteCallback: BleWriteCallback.() -> Unit)
 
     /**
@@ -169,6 +170,8 @@ internal interface BleBaseRequest {
                        dataArray: SparseArray<ByteArray>,
                        skipErrorPacketData: Boolean = false,
                        retryWriteCount: Int = 0,
+                       retryDelayTime: Long = 0L,
+                       writeType: Int? = null,
                        bleWriteCallback: BleWriteCallback.() -> Unit)
 
     /**

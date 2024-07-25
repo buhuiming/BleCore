@@ -13,12 +13,16 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.os.Build
 import android.util.SparseArray
 import com.bhm.ble.callback.BleWriteCallback
-import com.bhm.ble.data.*
+import com.bhm.ble.data.BleWriteData
 import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.data.Constants.WRITE_TASK_ID
+import com.bhm.ble.data.NoBlePermissionException
+import com.bhm.ble.data.TimeoutCancelException
+import com.bhm.ble.data.UnDefinedException
+import com.bhm.ble.data.UnSupportException
 import com.bhm.ble.device.BleDevice
-import com.bhm.ble.request.base.BleTaskQueueRequest
 import com.bhm.ble.log.BleLogger
+import com.bhm.ble.request.base.BleTaskQueueRequest
 import com.bhm.ble.utils.BleUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,8 +30,9 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.*
+import java.util.Collections
+import java.util.LinkedList
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
@@ -35,7 +40,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import kotlin.math.max
 
 
 /**
@@ -55,6 +59,11 @@ internal class BleWriteRequest(
      * 写数据队列。写成功才写下一包。Ble库目前没有这样处理
      */
     private val linkedBlockingQueue = LinkedBlockingQueue<ByteArray>()
+
+    /**
+     * 写数据临时队列
+     */
+    private val linkedBlockingTempQueue = LinkedBlockingQueue<ByteArray>()
 
     /**
      * 添加任务线程
@@ -115,6 +124,8 @@ internal class BleWriteRequest(
         dataArray: SparseArray<ByteArray>,
         skipErrorPacketData: Boolean = false,
         retryWriteCount: Int = 0,
+        retryDelayTime: Long = 0L,
+        writeType: Int?,
         bleWriteCallback: BleWriteCallback
     ) {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
@@ -132,37 +143,33 @@ internal class BleWriteRequest(
             return
         }
         addWriteJobScope.launch {
-            if (linkedBlockingQueue.isEmpty()) {
-                for (i in 0 until dataArray.size()) {
-                    val data = dataArray.valueAt(i)
-                    withContext(Dispatchers.IO) {
-                        linkedBlockingQueue.put(data)
-                    }
-                    startWriteQueueJob(
-                        serviceUUID,
-                        writeUUID,
-                        operateRandomID,
-                        skipErrorPacketData,
-                        retryWriteCount,
-                        bleWriteCallback
-                    )
-                }
-                return@launch
-            }
             for (i in 0 until dataArray.size()) {
                 val data = dataArray.valueAt(i)
-                withContext(Dispatchers.IO) {
-                    linkedBlockingQueue.put(data)
-                }
+                linkedBlockingTempQueue.put(data)
+            }
+            if (getWriteDataFromTemp()) {
+                startWriteQueueJob(
+                    serviceUUID,
+                    writeUUID,
+                    operateRandomID,
+                    skipErrorPacketData,
+                    retryWriteCount,
+                    retryDelayTime,
+                    writeType,
+                    bleWriteCallback
+                )
             }
         }
     }
 
-    fun writeData(serviceUUID: String,
-                  writeUUID: String,
-                  operateRandomID: String,
-                  dataArray: SparseArray<ByteArray>,
-                  bleWriteCallback: BleWriteCallback) {
+    fun writeData(
+        serviceUUID: String,
+        writeUUID: String,
+        operateRandomID: String,
+        dataArray: SparseArray<ByteArray>,
+        writeType: Int?,
+        bleWriteCallback: BleWriteCallback
+    ) {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
             bleWriteCallback.callWriteFail(bleDevice, 0, dataArray.size(), NoBlePermissionException())
             bleWriteCallback.callWriteComplete(bleDevice, false)
@@ -219,7 +226,8 @@ internal class BleWriteRequest(
                     totalPackage = dataArray.size(),
                     data = dataArray.valueAt(i),
                     isWriting = AtomicBoolean(false),
-                    bleWriteCallback = bleWriteCallback
+                    bleWriteCallback = bleWriteCallback,
+                    writeType = writeType
                 )
                 addBleWriteData(writeUUID, bleWriteData)
                 startWriteJob(
@@ -237,9 +245,11 @@ internal class BleWriteRequest(
     }
 
     @SuppressLint("MissingPermission")
-    private fun startWriteJob(characteristic: BluetoothGattCharacteristic,
-                              index: Int,
-                              bleWriteData: BleWriteData) {
+    private fun startWriteJob(
+        characteristic: BluetoothGattCharacteristic,
+        index: Int,
+        bleWriteData: BleWriteData
+    ) {
         var mContinuation: Continuation<Throwable?>? = null
         val task = getTask(
             getTaskId(bleWriteData.writeUUID, bleWriteData.operateRandomID, bleWriteData.currentPackage),
@@ -309,21 +319,26 @@ internal class BleWriteRequest(
         operateRandomID: String,
         skipErrorPacketData: Boolean = false,
         retryWriteCount: Int = 0,
+        retryDelayTime: Long = 0L,
+        writeType: Int?,
         bleWriteCallback: BleWriteCallback
     ) {
         writeJobScope.launch {
             //写数据间隔，写太快会导致设备忙碌而失败率高
             delay(getOperateInterval())
             val currentWriteData = linkedBlockingQueue.peek()
+            //如果这个数据包是空的，同时skipErrorPacketData为true，则跳过这个数据包，写下一个数据包
             if (currentWriteData != null && currentWriteData.isEmpty() && skipErrorPacketData) {
                 linkedBlockingQueue.poll()
-                if (linkedBlockingQueue.isNotEmpty()) {
+                if (linkedBlockingQueue.isNotEmpty() || getWriteDataFromTemp()) {
                     startWriteQueueJob(
                         serviceUUID,
                         writeUUID,
                         operateRandomID,
                         true,
                         retryWriteCount,
+                        retryDelayTime,
+                        writeType,
                         bleWriteCallback
                     )
                 }
@@ -337,6 +352,7 @@ internal class BleWriteRequest(
                     SparseArray<ByteArray>(1).apply {
                         put(0, data)
                     },
+                    writeType,
                     object : BleWriteCallback() {
                         override fun callWriteFail(
                             bleDevice: BleDevice,
@@ -357,14 +373,17 @@ internal class BleWriteRequest(
                                         linkedBlockingQueue.poll()
                                     }
                                 }
-                                delay(200L + (max(currentRetryWriteCount.get(), 1) - 1)* 1000)
-                                if (linkedBlockingQueue.isNotEmpty()) {
+//                                delay(200L + (max(currentRetryWriteCount.get(), 1) - 1)* 1000)
+                                delay(retryDelayTime)
+                                if (linkedBlockingQueue.isNotEmpty() || getWriteDataFromTemp()) {
                                     startWriteQueueJob(
                                         serviceUUID,
                                         writeUUID,
                                         operateRandomID,
                                         skipErrorPacketData,
                                         retryWriteCount,
+                                        retryDelayTime,
+                                        writeType,
                                         bleWriteCallback
                                     )
                                 }
@@ -383,13 +402,15 @@ internal class BleWriteRequest(
                             if (linkedBlockingQueue.isNotEmpty()) {
                                 linkedBlockingQueue.poll()
                             }
-                            if (linkedBlockingQueue.isNotEmpty()) {
+                            if (linkedBlockingQueue.isNotEmpty() || getWriteDataFromTemp()) {
                                 startWriteQueueJob(
                                     serviceUUID,
                                     writeUUID,
                                     operateRandomID,
                                     skipErrorPacketData,
                                     retryWriteCount,
+                                    retryDelayTime,
+                                    writeType,
                                     bleWriteCallback
                                 )
                             }
@@ -413,8 +434,16 @@ internal class BleWriteRequest(
 //            delay(500)
 //            onCharacteristicWrite(characteristic, BluetoothGatt.GATT_SUCCESS)
 //        }
+        //当支持WRITE_NO_RESPONSE和PROPERTY_WRITE时，用户可以指定写类型
+        //否则如果支持WRITE_NO_RESPONSE，则使用WRITE_TYPE_NO_RESPONSE，否则使用WRITE_TYPE_DEFAULT
         val writeType =
             if (characteristic.properties and
+                BluetoothGattCharacteristic.PROPERTY_WRITE != 0 &&
+                characteristic.properties and
+                BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0 &&
+                bleWriteData.writeType != null) {
+                bleWriteData.writeType!!
+            } else if (characteristic.properties and
                 BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0) {
                 BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
             } else {
@@ -561,6 +590,18 @@ internal class BleWriteRequest(
         getTaskQueue(writeUUID?: "")?.removeTask(taskId)
     }
 
+    /**
+     * 从临时队列中获取数据
+     */
+    private fun getWriteDataFromTemp(): Boolean {
+        if (linkedBlockingQueue.isEmpty() && linkedBlockingTempQueue.isNotEmpty()) {
+            linkedBlockingQueue.addAll(linkedBlockingTempQueue)
+            linkedBlockingTempQueue.clear()
+            return true
+        }
+        return false
+    }
+
     override fun close() {
         super.close()
         removeAllWriteCallback()
@@ -568,5 +609,6 @@ internal class BleWriteRequest(
         addWriteJobScope.cancel()
         writeJobScope.cancel()
         linkedBlockingQueue.clear()
+        linkedBlockingTempQueue.clear()
     }
 }

@@ -34,6 +34,7 @@ internal data class BleWriteData(
     var isWriting: AtomicBoolean = AtomicBoolean(false),
     var isWriteFail: AtomicBoolean = AtomicBoolean(false),
     var bleWriteCallback: BleWriteCallback,
+    var writeType: Int? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -49,6 +50,7 @@ internal data class BleWriteData(
         if (!data.contentEquals(other.data)) return false
         if (isWriting != other.isWriting) return false
         if (bleWriteCallback != other.bleWriteCallback) return false
+        if (writeType != other.writeType) return false
 
         return true
     }
@@ -61,7 +63,11 @@ internal data class BleWriteData(
         result = 31 * result + totalPackage
         result = 31 * result + data.contentHashCode()
         result = 31 * result + isWriting.hashCode()
+        result = 31 * result + isWriteFail.hashCode()
         result = 31 * result + bleWriteCallback.hashCode()
+        result = 31 * result + (writeType ?: 0)
         return result
     }
+
+
 }

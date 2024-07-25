@@ -31,8 +31,9 @@ import kotlin.coroutines.suspendCoroutine
  * @author Buhuiming
  * @date 2023年06月07日 15时25分
  */
-internal class BleMtuRequest(private val bleDevice: BleDevice,
-                             private val bleTaskQueue: BleTaskQueue
+internal class BleMtuRequest(
+    private val bleDevice: BleDevice,
+    private val bleTaskQueue: BleTaskQueue
 ) : Request() {
 
     private var bleMtuChangedCallback: BleMtuChangedCallback? = null

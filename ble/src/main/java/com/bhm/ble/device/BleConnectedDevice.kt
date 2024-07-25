@@ -40,7 +40,7 @@ import com.bhm.ble.request.BleWriteRequest
  */
 internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallback() {
 
-    private var bleTaskQueue = BleTaskQueue("共享队列")
+    private var bleTaskQueue = BleTaskQueue("${bleDevice.deviceAddress}共享队列")
 
     private var bleConnectRequest: BleConnectRequest? = null
 
@@ -288,6 +288,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     /**
      * notify
      */
+    @Synchronized
     fun enableCharacteristicNotify(serviceUUID: String,
                                    notifyUUID: String,
                                    bleDescriptorGetType: BleDescriptorGetType,
@@ -305,6 +306,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     /**
      * stop notify
      */
+    @Synchronized
     fun disableCharacteristicNotify(serviceUUID: String,
                                     notifyUUID: String,
                                     bleDescriptorGetType: BleDescriptorGetType
@@ -320,6 +322,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     /**
      * indicate
      */
+    @Synchronized
     fun enableCharacteristicIndicate(serviceUUID: String,
                                      indicateUUID: String,
                                      bleDescriptorGetType: BleDescriptorGetType,
@@ -337,6 +340,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     /**
      * stop indicate
      */
+    @Synchronized
     fun disableCharacteristicIndicate(serviceUUID: String,
                                       indicateUUID: String,
                                       bleDescriptorGetType: BleDescriptorGetType
@@ -352,6 +356,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     /**
      * 读取信号值
      */
+    @Synchronized
     fun readRemoteRssi(bleRssiCallback: BleRssiCallback) {
         initBleRssiRequest()
         bleRssiRequest?.readRemoteRssi(bleRssiCallback)
@@ -360,6 +365,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     /**
      * 设置mtu
      */
+    @Synchronized
     fun setMtu(mtu: Int, bleMtuChangedCallback: BleMtuChangedCallback) {
         initBleMtuRequest()
         bleMtuRequest?.setMtu(mtu, bleMtuChangedCallback)
@@ -372,6 +378,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
      * [BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER]的其中一个
      *
      */
+    @Synchronized
     fun setConnectionPriority(connectionPriority: Int): Boolean {
         initBleSetPriorityRequest()
         return bleSetPriorityRequest?.setConnectionPriority(connectionPriority)?: false
@@ -380,6 +387,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     /**
      * 读特征值数据
      */
+    @Synchronized
     fun readData(serviceUUID: String,
                  readUUID: String,
                  bleIndicateCallback: BleReadCallback) {
@@ -390,9 +398,11 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     /**
      * 写数据
      */
+    @Synchronized
     fun writeData(serviceUUID: String,
                   writeUUID: String,
                   dataArray: SparseArray<ByteArray>,
+                  writeType: Int?,
                   bleWriteCallback: BleWriteCallback) {
         //以时间戳为id，来标记一次写操作
         initBleWriteRequest()
@@ -401,6 +411,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
             writeUUID,
             System.currentTimeMillis().toString(),
             dataArray,
+            writeType,
             bleWriteCallback
         )
     }
@@ -409,11 +420,14 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
      * 放入一个写队列，写成功，则从队列中取下一个数据，写失败，则重试[retryWriteCount]次
      * 与[writeData]的区别在于，[writeData]写成功，则从队列中取下一个数据，写失败，则不再继续写后面的数据
      */
+    @Synchronized
     fun writeQueueData(serviceUUID: String,
                        writeUUID: String,
                        dataArray: SparseArray<ByteArray>,
                        skipErrorPacketData: Boolean = false,
                        retryWriteCount: Int = 0,
+                       retryDelayTime: Long = 0L,
+                       writeType: Int? = null,
                        bleWriteCallback: BleWriteCallback) {
         //以时间戳为id，来标记一次写操作
         initBleWriteRequest()
@@ -424,42 +438,52 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
             dataArray,
             skipErrorPacketData,
             retryWriteCount,
+            retryDelayTime,
+            writeType,
             bleWriteCallback
         )
     }
 
     fun getShareBleTaskQueue() = bleTaskQueue
 
+    @Synchronized
     fun addBleEventCallback(bleEventCallback: BleEventCallback) {
         this.bleEventCallback = bleEventCallback
     }
 
     fun getBleEventCallback() = bleEventCallback
 
+    @Synchronized
     fun removeNotifyCallback(uuid: String?) {
         bleNotifyRequest?.removeNotifyCallback(uuid)
     }
 
+    @Synchronized
     fun removeIndicateCallback(uuid: String?) {
         bleIndicateRequest?.removeIndicateCallback(uuid)
     }
 
+    @Synchronized
     fun removeWriteCallback(uuid: String?, bleWriteCallback: BleWriteCallback? = null) {
         bleWriteRequest?.removeWriteCallback(uuid, bleWriteCallback)
     }
 
+    @Synchronized
     fun removeReadCallback(uuid: String?) {
         bleReadRequest?.removeReadCallback(uuid)
     }
 
+    @Synchronized
     fun removeRssiCallback() {
         bleRssiRequest?.removeRssiCallback()
     }
 
+    @Synchronized
     fun removeMtuChangedCallback() {
         bleMtuRequest?.removeMtuChangedCallback()
     }
 
+    @Synchronized
     fun removeBleConnectCallback() {
         bleConnectRequest?.removeBleConnectCallback()
     }
@@ -468,11 +492,13 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         bleEventCallback = null
     }
 
+    @Synchronized
     fun replaceBleConnectCallback(bleConnectCallback: BleConnectCallback) {
         bleConnectRequest?.removeBleConnectCallback()
         bleConnectRequest?.addBleConnectCallback(bleConnectCallback)
     }
 
+    @Synchronized
     fun removeAllCharacterCallback() {
         removeRssiCallback()
         removeMtuChangedCallback()

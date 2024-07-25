@@ -7,23 +7,36 @@
 package com.bhm.ble.request
 
 import android.annotation.SuppressLint
-import android.bluetooth.*
-import com.bhm.ble.callback.*
-import com.bhm.ble.control.*
-import com.bhm.ble.data.*
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothProfile
+import com.bhm.ble.callback.BleConnectCallback
+import com.bhm.ble.callback.BleMtuChangedCallback
+import com.bhm.ble.data.ActiveDisConnectedException
+import com.bhm.ble.data.ActiveStopConnectedException
+import com.bhm.ble.data.BleConnectFailType
+import com.bhm.ble.data.BleConnectLastState
+import com.bhm.ble.data.CompleteException
 import com.bhm.ble.data.Constants.AUTO_CONNECT
 import com.bhm.ble.data.Constants.DEFAULT_CONNECT_MILLIS_TIMEOUT
 import com.bhm.ble.data.Constants.DEFAULT_CONNECT_RETRY_INTERVAL
 import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.data.Constants.DEFAULT_OPERATE_INTERVAL
+import com.bhm.ble.data.UnDefinedException
 import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
+import com.bhm.ble.log.BleLogger
 import com.bhm.ble.request.base.BleRequestImp
 import com.bhm.ble.request.base.Request
-import com.bhm.ble.log.BleLogger
 import com.bhm.ble.utils.BleUtil
-import kotlinx.coroutines.*
-import java.util.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import java.util.concurrent.atomic.AtomicBoolean
 
 

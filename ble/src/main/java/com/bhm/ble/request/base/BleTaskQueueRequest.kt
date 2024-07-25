@@ -33,7 +33,7 @@ internal open class BleTaskQueueRequest(
 
     init {
         when (bleTaskQueueType) {
-            BleTaskQueueType.Operate -> operateBleTaskQueue = BleTaskQueue(tag)
+            BleTaskQueueType.Operate -> operateBleTaskQueue = BleTaskQueue(bleDevice.deviceAddress + tag)
             BleTaskQueueType.Independent ->  bleTaskQueueHashMap = ConcurrentHashMap()
             else -> {}
         }
@@ -50,7 +50,7 @@ internal open class BleTaskQueueRequest(
                 if (bleTaskQueueHashMap?.containsKey(uuid) == true) {
                     bleTaskQueueHashMap?.get(uuid)
                 } else {
-                    val independentBleTaskQueue = BleTaskQueue(tag)
+                    val independentBleTaskQueue = BleTaskQueue(bleDevice.deviceAddress + tag)
                     bleTaskQueueHashMap?.put(uuid, independentBleTaskQueue)
                     independentBleTaskQueue
                 }
