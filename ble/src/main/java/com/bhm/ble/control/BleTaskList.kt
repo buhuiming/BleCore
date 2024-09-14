@@ -27,6 +27,9 @@ internal class BleTaskList {
         list.add(element)
     }
 
+    /**
+     * 循环的移除的话，需要添加synchronized锁，使用Iterator.remove()方法
+     */
     fun remove(element: BleTask?) {
         if (taskIdList.contains(element?.taskId)) {
             taskIdList.remove(element?.taskId)
@@ -41,8 +44,12 @@ internal class BleTaskList {
     fun contains(task: BleTask?) = list.contains(task)
 
     fun clear() {
-        list.clear()
-        taskIdList.clear()
+        synchronized(list) {
+            list.clear()
+        }
+        synchronized(taskIdList) {
+            taskIdList.clear()
+        }
     }
 
     fun firstOrNull() = list.firstOrNull()

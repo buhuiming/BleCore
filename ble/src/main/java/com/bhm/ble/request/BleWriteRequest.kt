@@ -303,9 +303,11 @@ internal class BleWriteRequest(
                             bleWriteData.totalPackage,
                             exception
                         )
-                        if (bleWriteData.currentPackage == bleWriteData.totalPackage) {
-                            bleWriteData.bleWriteCallback.callWriteComplete(bleDevice, false)
-                        }
+                        //某个数据包写超时，后面的包不需再写
+                        cancelSameWriteJob(bleWriteData)
+//                        if (bleWriteData.currentPackage == bleWriteData.totalPackage) {
+//                            bleWriteData.bleWriteCallback.callWriteComplete(bleDevice, false)
+//                        }
                     }
                 }
             }
