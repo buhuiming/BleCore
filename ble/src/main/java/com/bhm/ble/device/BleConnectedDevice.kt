@@ -60,6 +60,8 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
 
     private var bleEventCallback: BleEventCallback? = null
 
+    private val characters = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+
     private fun initBleConnectRequest() {
         if (bleConnectRequest == null) {
             bleConnectRequest = BleConnectRequest(bleDevice, this)
@@ -409,7 +411,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         bleWriteRequest?.writeData(
             serviceUUID,
             writeUUID,
-            System.currentTimeMillis().toString(),
+            System.currentTimeMillis().toString() + generateRandomString(),
             dataArray,
             writeType,
             bleWriteCallback
@@ -434,7 +436,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         bleWriteRequest?.writeQueueData(
             serviceUUID,
             writeUUID,
-            System.currentTimeMillis().toString(),
+            System.currentTimeMillis().toString() + generateRandomString(),
             dataArray,
             skipErrorPacketData,
             retryWriteCount,
@@ -528,5 +530,14 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         bleRssiRequest = null
         bleConnectRequest = null
         bleEventCallback = null
+    }
+
+    /**
+     * 从[characters]中随机生成5个字符组成的字符串
+     */
+    private fun generateRandomString(): String {
+        return (1..5)
+            .map { characters.random() }
+            .joinToString("")
     }
 }
