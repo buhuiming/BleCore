@@ -14,6 +14,7 @@ import android.os.Build
 import android.util.SparseArray
 import com.bhm.ble.callback.BleWriteCallback
 import com.bhm.ble.data.BleWriteData
+import com.bhm.ble.data.BleWriteQueueData
 import com.bhm.ble.data.Constants.DEFAULT_MTU
 import com.bhm.ble.data.Constants.WRITE_TASK_ID
 import com.bhm.ble.data.NoBlePermissionException
@@ -58,12 +59,12 @@ internal class BleWriteRequest(
     /**
      * 写数据队列。写成功才写下一包。Ble库目前没有这样处理
      */
-    private val linkedBlockingQueue = LinkedBlockingQueue<ByteArray>()
+    private val linkedBlockingQueue = LinkedBlockingQueue<BleWriteQueueData>()
 
     /**
      * 写数据临时队列
      */
-    private val linkedBlockingTempQueue = LinkedBlockingQueue<ByteArray>()
+    private val linkedBlockingTempQueue = LinkedBlockingQueue<BleWriteQueueData>()
 
     /**
      * 添加任务线程
@@ -79,6 +80,8 @@ internal class BleWriteRequest(
      * 当前重写次数
      */
     private var currentRetryWriteCount = AtomicInteger(0)
+
+    private val characters = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
     private fun addBleWriteData(uuid: String, bleWriteData: BleWriteData) {
         if (bleWriteDataHashMap.containsKey(uuid) && bleWriteDataHashMap[uuid] != null) {
@@ -133,9 +136,10 @@ internal class BleWriteRequest(
             bleWriteCallback.callWriteComplete(bleDevice, false)
             return
         }
+        val randomStr =  generateRandomString()
         if (dataArray.size() == 0) {
             val exception = UnDefinedException(
-                getTaskId(writeUUID, operateRandomID, 0) + " -> 写数据失败，数据为空"
+                getTaskId(writeUUID, operateRandomID + randomStr, 0) + " -> 写数据失败，数据为空"
             )
             BleLogger.e(exception.message)
             bleWriteCallback.callWriteFail(bleDevice, 0, 0, exception)
@@ -145,19 +149,21 @@ internal class BleWriteRequest(
         addWriteJobScope.launch {
             for (i in 0 until dataArray.size()) {
                 val data = dataArray.valueAt(i)
-                linkedBlockingTempQueue.put(data)
+                linkedBlockingTempQueue.put(
+                    BleWriteQueueData(
+                        operateRandomID = operateRandomID + randomStr,
+                        serviceUUID = serviceUUID,
+                        writeUUID = writeUUID,
+                        data = data,
+                        skipErrorPacketData = skipErrorPacketData,
+                        retryWriteCount = retryWriteCount,
+                        retryDelayTime = retryDelayTime,
+                        writeType = writeType,
+                    )
+                )
             }
             if (getWriteDataFromTemp()) {
-                startWriteQueueJob(
-                    serviceUUID,
-                    writeUUID,
-                    operateRandomID,
-                    skipErrorPacketData,
-                    retryWriteCount,
-                    retryDelayTime,
-                    writeType,
-                    bleWriteCallback
-                )
+                startWriteQueueJob(bleWriteCallback)
             }
         }
     }
@@ -219,7 +225,7 @@ internal class BleWriteRequest(
             //循环数据包，生成对应的任务
             for (i in 0 until dataArray.size()) {
                 val bleWriteData = BleWriteData(
-                    operateRandomID = operateRandomID,
+                    operateRandomID = operateRandomID + generateRandomString(),
                     serviceUUID = serviceUUID,
                     writeUUID = writeUUID,
                     currentPackage = i + 1,
@@ -250,6 +256,7 @@ internal class BleWriteRequest(
         index: Int,
         bleWriteData: BleWriteData
     ) {
+        BleLogger.e("生成的operateRandomID: ${bleWriteData.operateRandomID}")
         var mContinuation: Continuation<Throwable?>? = null
         val task = getTask(
             getTaskId(bleWriteData.writeUUID, bleWriteData.operateRandomID, bleWriteData.currentPackage),
@@ -316,13 +323,6 @@ internal class BleWriteRequest(
     }
 
     private fun startWriteQueueJob(
-        serviceUUID: String,
-        writeUUID: String,
-        operateRandomID: String,
-        skipErrorPacketData: Boolean = false,
-        retryWriteCount: Int = 0,
-        retryDelayTime: Long = 0L,
-        writeType: Int?,
         bleWriteCallback: BleWriteCallback
     ) {
         writeJobScope.launch {
@@ -330,31 +330,22 @@ internal class BleWriteRequest(
             delay(getOperateInterval())
             val currentWriteData = linkedBlockingQueue.peek()
             //如果这个数据包是空的，同时skipErrorPacketData为true，则跳过这个数据包，写下一个数据包
-            if (currentWriteData != null && currentWriteData.isEmpty() && skipErrorPacketData) {
+            if (currentWriteData != null && currentWriteData.data.isEmpty() && currentWriteData.skipErrorPacketData) {
                 linkedBlockingQueue.poll()
                 if (linkedBlockingQueue.isNotEmpty() || getWriteDataFromTemp()) {
-                    startWriteQueueJob(
-                        serviceUUID,
-                        writeUUID,
-                        operateRandomID,
-                        true,
-                        retryWriteCount,
-                        retryDelayTime,
-                        writeType,
-                        bleWriteCallback
-                    )
+                    startWriteQueueJob(bleWriteCallback)
                 }
                 return@launch
             }
             currentWriteData?.let { data ->
                 writeData(
-                    serviceUUID,
-                    writeUUID,
-                    operateRandomID,
+                    data.serviceUUID,
+                    data.writeUUID,
+                    data.operateRandomID,
                     SparseArray<ByteArray>(1).apply {
-                        put(0, data)
+                        put(0, data.data)
                     },
-                    writeType,
+                    data.writeType,
                     object : BleWriteCallback() {
                         override fun callWriteFail(
                             bleDevice: BleDevice,
@@ -366,8 +357,8 @@ internal class BleWriteRequest(
                             bleWriteCallback.callWriteFail(bleDevice, current, total, throwable)
                             launchInIOThread {
                                 currentRetryWriteCount.set(currentRetryWriteCount.get() + 1)
-                                val isCancelRetry = currentRetryWriteCount.get() > retryWriteCount
-                                BleLogger.e("写失败，指定重试${retryWriteCount}次，是否进入下一次重试：${!isCancelRetry}")
+                                val isCancelRetry = currentRetryWriteCount.get() > data.retryWriteCount
+                                BleLogger.e("写失败，指定重试${data.retryWriteCount}次，是否进入下一次重试：${!isCancelRetry}")
                                 if (isCancelRetry) {
                                     //如果重试了retryWriteCount次还是失败，则丢掉此包，写下一包
                                     currentRetryWriteCount.set(0)
@@ -376,18 +367,9 @@ internal class BleWriteRequest(
                                     }
                                 }
 //                                delay(200L + (max(currentRetryWriteCount.get(), 1) - 1)* 1000)
-                                delay(retryDelayTime)
+                                delay(data.retryDelayTime)
                                 if (linkedBlockingQueue.isNotEmpty() || getWriteDataFromTemp()) {
-                                    startWriteQueueJob(
-                                        serviceUUID,
-                                        writeUUID,
-                                        operateRandomID,
-                                        skipErrorPacketData,
-                                        retryWriteCount,
-                                        retryDelayTime,
-                                        writeType,
-                                        bleWriteCallback
-                                    )
+                                    startWriteQueueJob(bleWriteCallback)
                                 }
                             }
                         }
@@ -405,16 +387,7 @@ internal class BleWriteRequest(
                                 linkedBlockingQueue.poll()
                             }
                             if (linkedBlockingQueue.isNotEmpty() || getWriteDataFromTemp()) {
-                                startWriteQueueJob(
-                                    serviceUUID,
-                                    writeUUID,
-                                    operateRandomID,
-                                    skipErrorPacketData,
-                                    retryWriteCount,
-                                    retryDelayTime,
-                                    writeType,
-                                    bleWriteCallback
-                                )
+                                startWriteQueueJob(bleWriteCallback)
                             }
                         }
                     }
@@ -602,6 +575,15 @@ internal class BleWriteRequest(
             return true
         }
         return false
+    }
+
+    /**
+     * 从[characters]中随机生成3个字符组成的字符串
+     */
+    private fun generateRandomString(): String {
+        return (1..3)
+            .map { characters.random() }
+            .joinToString("")
     }
 
     override fun close() {

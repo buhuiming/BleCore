@@ -184,7 +184,9 @@ class BleManager private constructor() {
                 bleConnectCallback: BleConnectCallback.() -> Unit
     ) {
         checkInitialize()
-        stopScan()
+        if (getOptions()?.stopScanWhenStartConnect == true) {
+            stopScan()
+        }
         bleBaseRequest?.connect(
             bleDevice,
             connectMillisTimeOut,

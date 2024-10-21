@@ -139,3 +139,5 @@ n
 0ble/src/main/java/com/bhm/ble/log/BleLogLevel.kt,3\1\31467d3bc83448372f072cec2148f35e8d6313af
 b
 2ble/src/main/java/com/bhm/ble/log/BleLogManager.kt,d\6\d62ac304742af6f279e8038f39f93e3d80eae305
+g
+7ble/src/main/java/com/bhm/ble/data/BleWriteQueueData.kt,b\0\b0ba7085629b0df3cde543978d2d8857d0a78420

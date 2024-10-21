@@ -44,6 +44,8 @@ object Constants {
 
     val DEFAULT_TASK_QUEUE_TYPE = BleTaskQueueType.Default
 
+    const val STOP_SCAN_WHEN_START_CONNECT = true
+
     //系统提供接受通知自带的UUID
     const val UUID_CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR =
         "00002902-0000-1000-8000-00805f9b34fb"
