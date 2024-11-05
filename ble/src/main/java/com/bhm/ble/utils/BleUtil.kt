@@ -54,28 +54,18 @@ object BleUtil {
 
     /**
      * 判断是否拥有蓝牙权限
-     * 精准定位权限由业务端自行申请和判断[Manifest.permission.ACCESS_FINE_LOCATION]，
-     * 注意：缺少精准位置权限，可能Ble扫描不到设备
      * @return true = 拥有该权限
      */
     fun isPermission(context: Context?): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-//            isPermission(context?.applicationContext,
-//                Manifest.permission.ACCESS_FINE_LOCATION) &&
-            isPermission(context?.applicationContext,
-                Manifest.permission.ACCESS_COARSE_LOCATION) &&
-            isPermission(context?.applicationContext,
-                Manifest.permission.BLUETOOTH_SCAN) &&
-            isPermission(context?.applicationContext,
-                Manifest.permission.BLUETOOTH_ADVERTISE) &&
-            isPermission(context?.applicationContext,
-                Manifest.permission.BLUETOOTH_CONNECT)) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+//            && isPermission(context?.applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)
+//            && isPermission(context?.applicationContext, Manifest.permission.ACCESS_COARSE_LOCATION)
+            && isPermission(context?.applicationContext, Manifest.permission.BLUETOOTH_SCAN)
+//            && isPermission(context?.applicationContext, Manifest.permission.BLUETOOTH_ADVERTISE)
+            && isPermission(context?.applicationContext, Manifest.permission.BLUETOOTH_CONNECT)) {
             return true
-        } else if (
-//            isPermission(context?.applicationContext,
-//                Manifest.permission.ACCESS_FINE_LOCATION) &&
-            isPermission(context?.applicationContext,
-                Manifest.permission.ACCESS_COARSE_LOCATION)) {
+        } else if (isPermission(context?.applicationContext,
+                Manifest.permission.ACCESS_FINE_LOCATION) && isPermission(context?.applicationContext, Manifest.permission.ACCESS_COARSE_LOCATION)) {
             return true
         }
         return false

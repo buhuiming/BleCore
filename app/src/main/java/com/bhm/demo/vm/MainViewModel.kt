@@ -56,7 +56,8 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
      * 初始化蓝牙组件
      */
     fun initBle() {
-        BleManager.get().init(application,
+        BleManager.get().init(
+            application,
             BleOptions.Builder()
                 .setScanMillisTimeOut(5000)
                 .setConnectMillisTimeOut(5000)
@@ -257,8 +258,8 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
     }
 
     private val connectCallback: BleConnectCallback.() -> Unit = {
-        onConnectStart {
-            BleLogger.e("-----onConnectStart")
+        onConnectStart { address ->
+            BleLogger.e("-----onConnectStart:${address}")
         }
         onConnectFail { bleDevice, connectFailType ->
             val msg: String = when (connectFailType) {
@@ -279,8 +280,10 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
             BleLogger.e("-----${bleDevice.deviceAddress} -> onDisConnecting: $isActiveDisConnected")
         }
         onDisConnected { isActiveDisConnected, bleDevice, _, _ ->
-            Toast.makeText(application, "断开连接(${bleDevice.deviceAddress}，isActiveDisConnected: " +
-                    "$isActiveDisConnected)", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                application, "断开连接(${bleDevice.deviceAddress}，isActiveDisConnected: " +
+                        "$isActiveDisConnected)", Toast.LENGTH_SHORT
+            ).show()
             BleLogger.e("-----${bleDevice.deviceAddress} -> onDisConnected: $isActiveDisConnected")
             refreshMutableStateFlow.value = RefreshBleDevice(bleDevice, System.currentTimeMillis())
             //发送断开的通知

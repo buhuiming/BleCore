@@ -2,9 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools">
 
-    <!--注册精准位置权限，否则可能Ble扫描不到设备-->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
     <application
             android:name="com.bhm.support.sdk.common.BaseApplication"
             android:allowBackup="true"
