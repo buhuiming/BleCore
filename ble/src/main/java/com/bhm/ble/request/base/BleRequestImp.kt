@@ -177,9 +177,9 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                 connectRetryInterval,
                 isForceConnect
             ) {
-                onConnectStart {
-                    connectCallback.callConnectStart()
-                    bleConnectedDeviceManager.getBleConnectedDevice(device!!)?.getBleEventCallback()?.callConnectStart()
+                onConnectStart { bleDevice ->
+                    connectCallback.callConnectStart(bleDevice)
+                    bleConnectedDeviceManager.getBleConnectedDevice(device!!)?.getBleEventCallback()?.callConnectStart(bleDevice)
                 }
                 onConnectSuccess { bleDevice, gatt ->
                     connectCallback.callConnectSuccess(bleDevice, gatt)

@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
 
     <!-- android 30之前 静态声明的蓝牙权限 -->
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        tools:remove="android:maxSdkVersion" />
+
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
     <!-- 使用蓝牙还需要 静态声明+动态申请位置（前台位置）权限 -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!--<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />-->
+    <uses-permission
+        android:name="android.permission.ACCESS_COARSE_LOCATION"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="30" />
     <!-- android 30之后 静态声明+动态申请的蓝牙权限 -->
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="s" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
     <application>

@@ -21,7 +21,7 @@ import kotlinx.coroutines.delay
  */
 open class BleEventCallback : BleBaseCallback() {
 
-    private var startConnect: (() -> Unit)? = null
+    private var startConnect: ((bleDevice: BleDevice) -> Unit)? = null
 
     private var connectFail: ((bleDevice: BleDevice, connectFailType: BleConnectFailType) -> Unit)? = null
 
@@ -59,7 +59,7 @@ open class BleEventCallback : BleBaseCallback() {
     /**
      * 开始连接
      */
-    fun onConnectStart(value: () -> Unit) {
+    fun onConnectStart(value: (bleDevice: BleDevice) -> Unit) {
         startConnect = value
     }
 
@@ -89,9 +89,9 @@ open class BleEventCallback : BleBaseCallback() {
         disConnected = value
     }
 
-    open fun callConnectStart() {
+    open fun callConnectStart(bleDevice: BleDevice) {
         launchInMainThread {
-            startConnect?.invoke()
+            startConnect?.invoke(bleDevice)
         }
     }
 

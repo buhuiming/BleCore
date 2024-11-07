@@ -44,22 +44,22 @@
 #### 添加权限
 
     //动态申请
-    val LOCATION_PERMISSION = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+    val LOCATION_PERMISSION = 
+        if (VERSION.SDK_INT < VERSION_CODES.S) {
             arrayOf(
-                //Manifest.permission.ACCESS_FINE_LOCATION,
+                //注册精准位置权限，否则可能Ble扫描不到设备
+                Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
             )
         } else {
             arrayOf(
-                //Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.BLUETOOTH_SCAN,
-                Manifest.permission.BLUETOOTH_ADVERTISE,
-                Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT,
             )
         }
-*    特别注意：如果需要用到扫描蓝牙设备的功能，需要申请精准位置权限：Manifest.permission.ACCESS_FINE_LOCATION，
-     否则可能会导致扫描不到设备。
+*    特别注意：权限Manifest.permission.ACCESS_FINE_LOCATION，Manifest.permission.ACCESS_COARSE_LOCATION
+     在Android12及以上版本已经去掉、包括校验。权限Manifest.permission.BLUETOOTH_ADVERTISE已经去掉。
+     否则可能会导致扫描不到设备。 
 
 *    注意：
 *    有些设备GPS是关闭状态的话，申请定位权限之后，GPS是依然关闭状态，这里要根据GPS是否打开来跳转页面

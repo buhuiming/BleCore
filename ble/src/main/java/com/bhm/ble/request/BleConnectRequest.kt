@@ -146,8 +146,9 @@ internal class BleConnectRequest(
                 "bluetoothGatt是否为空${bluetoothGatt == null}")
         //如果BleCore或者系统对应的状态是未连接、或者强制连接的情况
         if (!systemConnectStatus || !bleCoreConnectStatus || isForceConnect || bluetoothGatt == null) {
-            bleConnectCallback.callConnectStart()
-            getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callConnectStart()
+            val deviceInfo = createNewDeviceInfo()
+            bleConnectCallback.callConnectStart(deviceInfo)
+            getBleConnectedDevice(bleDevice)?.getBleEventCallback()?.callConnectStart(deviceInfo)
             startConnectJob()
         } else {
             //如果BleCore和系统对应的状态都是已连接，则直接返回状态
