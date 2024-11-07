@@ -59,7 +59,6 @@
         }
 *    特别注意：权限Manifest.permission.ACCESS_FINE_LOCATION，Manifest.permission.ACCESS_COARSE_LOCATION
      在Android12及以上版本已经去掉、包括校验。权限Manifest.permission.BLUETOOTH_ADVERTISE已经去掉。
-     否则可能会导致扫描不到设备。 
 
 *    注意：
 *    有些设备GPS是关闭状态的话，申请定位权限之后，GPS是依然关闭状态，这里要根据GPS是否打开来跳转页面
