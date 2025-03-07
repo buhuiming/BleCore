@@ -507,6 +507,17 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
+     * 取消写操作
+     */
+    override fun cancelWriting(bleDevice: BleDevice) {
+        val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
+        request?.let {
+            it.cancelWriting()
+            return
+        }
+    }
+
+    /**
      * 获取所有已连接设备集合
      */
     override fun getAllConnectedDevice(): MutableList<BleDevice> {

@@ -444,6 +444,10 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         )
     }
 
+    fun cancelWriting() {
+        bleWriteRequest?.cancelWriteQueueJob()
+    }
+
     fun getShareBleTaskQueue() = bleTaskQueue
 
     @Synchronized

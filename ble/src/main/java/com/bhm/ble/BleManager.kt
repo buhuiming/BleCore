@@ -672,6 +672,17 @@ class BleManager private constructor() {
     }
 
     /**
+     * 取消写操作
+     * 注意：不区分具体的特征值，因为不同的写方式和不同的写队列类型处理不一致。同个设备的写队列为Independent时，
+     * 为导致写忙碌(这个时候根据特征值取消写队列没有意义)；其他类型的写队列，是共用一个队列，而队列中的数据没有
+     * 区分特征值，所以无法取消某个特征值的写操作。
+     */
+    fun cancelWriting(bleDevice: BleDevice) {
+        checkInitialize()
+        bleBaseRequest?.cancelWriting(bleDevice)
+    }
+
+    /**
      * 获取所有已连接设备集合(不包含其他应用连接的设备、系统连接的设备)
      */
     fun getAllConnectedDevice(): MutableList<BleDevice>? {

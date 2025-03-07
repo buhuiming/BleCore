@@ -1,7 +1,18 @@
-def RELEASE_REPOSITORY_URL = "http://localhost:8081/nexus/content/repositories/releases/"
-def SNAPSHOT_REPOSITORY_URL = "http://localhost:8081/nexus/content/repositories/snapshots/"
-def NEXUS_USERNAME = "admin"
-def NEXUS_PASSWORD = "admin123"
+//def RELEASE_REPOSITORY_URL = "http://localhost:8081/nexus/content/repositories/releases/"
+//def SNAPSHOT_REPOSITORY_URL = "http://localhost:8081/nexus/content/repositories/snapshots/"
+//def NEXUS_USERNAME = "admin"
+//def NEXUS_PASSWORD = "admin123"
+
+apply plugin: 'maven-publish'
+
+def RELEASE_REPOSITORY_URL = "https://packages.aliyun.com/maven/repository/2354637-release-xwYh3l/"
+def SNAPSHOT_REPOSITORY_URL = "https://packages.aliyun.com/maven/repository/2354637-snapshot-lccqTz/"
+//这个是快照的账密
+//def NEXUS_USERNAME = "6535ec776052a37844c818cd"
+//def NEXUS_PASSWORD = "82jcDkLXfFVB"
+//这个是正式的账密
+def NEXUS_USERNAME = "643656aae37ceb0d147ecc52"
+def NEXUS_PASSWORD = "NEU85uR1RKZy"
 
 afterEvaluate {
     publishing {

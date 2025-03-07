@@ -175,6 +175,11 @@ internal interface BleBaseRequest {
                        bleWriteCallback: BleWriteCallback.() -> Unit)
 
     /**
+     * 取消写操作
+     */
+    fun cancelWriting(bleDevice: BleDevice)
+
+    /**
      * 获取所有已连接设备集合
      */
     fun getAllConnectedDevice(): MutableList<BleDevice>

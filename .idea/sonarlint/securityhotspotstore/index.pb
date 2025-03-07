@@ -141,3 +141,7 @@ b
 2ble/src/main/java/com/bhm/ble/log/BleLogManager.kt,d\6\d62ac304742af6f279e8038f39f93e3d80eae305
 g
 7ble/src/main/java/com/bhm/ble/data/BleWriteQueueData.kt,b\0\b0ba7085629b0df3cde543978d2d8857d0a78420
+d
+4app/src/main/java/com/bhm/demo/entity/ServiceNode.kt,d\4\d4fa269017487e9928b2b0032ceb1b0d842f680b
+k
+;app/src/main/java/com/bhm/demo/entity/CharacteristicNode.kt,f\c\fcad7073144dbc94401a4743995847bae973e7ee

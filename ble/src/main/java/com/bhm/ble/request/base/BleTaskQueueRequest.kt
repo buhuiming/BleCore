@@ -58,6 +58,21 @@ internal open class BleTaskQueueRequest(
         }
     }
 
+    fun getTaskQueueList(): List<BleTaskQueue?>? {
+        return when (bleTaskQueueType) {
+            BleTaskQueueType.Default ->
+                arrayListOf(
+                    BleConnectedDeviceManager.get()
+                        .getBleConnectedDevice(bleDevice)
+                        ?.getShareBleTaskQueue()
+                )
+            BleTaskQueueType.Operate -> arrayListOf(operateBleTaskQueue)
+            BleTaskQueueType.Independent -> {
+                bleTaskQueueHashMap?.values?.toList()
+            }
+        }
+    }
+
     open fun close() {
         when (bleTaskQueueType) {
             BleTaskQueueType.Operate -> operateBleTaskQueue?.clear()

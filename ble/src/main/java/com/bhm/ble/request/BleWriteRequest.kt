@@ -586,6 +586,14 @@ internal class BleWriteRequest(
             .joinToString("")
     }
 
+    fun cancelWriteQueueJob() {
+        removeAllWriteCallback()
+        linkedBlockingTempQueue.clear()
+        linkedBlockingQueue.clear()
+        getTaskQueueList()?.forEach { it?.removeAllTask() }
+        BleLogger.w("取消[${bleDevice.deviceAddress}]的所有写数据队列任务")
+    }
+
     override fun close() {
         super.close()
         removeAllWriteCallback()

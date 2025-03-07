@@ -216,10 +216,7 @@ internal class BleTaskQueue(private val tag: String = "") {
         }
     }
 
-    /**
-     * 关闭并释放资源
-     */
-    fun clear() {
+    fun removeAllTask() {
         synchronized(taskList.list()) {
             val iterator = taskList.iterator()
             while (iterator.hasNext()) {
@@ -234,6 +231,13 @@ internal class BleTaskQueue(private val tag: String = "") {
             }
         }
         taskList.clear()
+    }
+
+    /**
+     * 关闭并释放资源
+     */
+    fun clear() {
+        removeAllTask()
         mCoroutineScope?.cancel()
         mCoroutineScope = null
         (threadContext.executor as ExecutorService).shutdown()
