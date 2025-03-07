@@ -20,7 +20,6 @@ import com.bhm.support.sdk.core.AppTheme
 import com.bhm.support.sdk.utils.ViewUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import leakcanary.LeakCanary
 
 /**
  * 主页面
@@ -38,7 +37,6 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
     override fun initData() {
         super.initData()
         AppTheme.setStatusBarColor(this, R.color.black)
-        LeakCanary.runCatching {  }
         initList()
         viewModel.initBle()
     }
