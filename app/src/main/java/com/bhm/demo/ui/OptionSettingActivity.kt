@@ -23,6 +23,7 @@ import com.bhm.ble.data.Constants.DEFAULT_SCAN_MILLIS_TIMEOUT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_COUNT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_INTERVAL
 import com.bhm.ble.data.Constants.ENABLE_LOG
+import com.bhm.ble.data.Constants.SCAN_NEED_CHECK_GPS
 import com.bhm.demo.BaseActivity
 import com.bhm.demo.R
 import com.bhm.demo.databinding.ActivitySettingBinding
@@ -99,6 +100,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
             viewBinding.etMTU.setText(it.mtu.toString())
             viewBinding.cbContainScanDeviceName.isChecked = it.containScanDeviceName
             viewBinding.cbLogger.isChecked = it.enableLog
+            viewBinding.cbNeedCheckGPS.isChecked = it.needCheckGps
             viewBinding.cbMtu.isChecked = it.autoSetMtu
             viewBinding.cbAutoConnect.isChecked = it.autoConnect
             viewBinding.spTaskQueueType.setSelection(getTaskQueueType(it.taskQueueType))
@@ -126,6 +128,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
             viewBinding.etMTU.setText(DEFAULT_MTU.toString())
             viewBinding.cbContainScanDeviceName.isChecked = CONTAIN_SCAN_DEVICE_NAME
             viewBinding.cbLogger.isChecked = ENABLE_LOG
+            viewBinding.cbNeedCheckGPS.isChecked = SCAN_NEED_CHECK_GPS
             viewBinding.cbMtu.isChecked = DEFAULT_AUTO_SET_MTU
             viewBinding.cbAutoConnect.isChecked = AUTO_CONNECT
             viewBinding.spTaskQueueType.setSelection(0)
@@ -170,6 +173,7 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
                 .setMaxConnectNum(viewBinding.etMaxConnectNum.text.toString().toInt())
                 .setMtu(viewBinding.etMTU.text.toString().toInt(), viewBinding.cbMtu.isChecked)
                 .setTaskQueueType(getTaskQueueType(viewBinding.spTaskQueueType.selectedItemPosition))
+                .setNeedCheckGps(viewBinding.cbNeedCheckGPS.isChecked)
             BleManager.get().init(application, builder.build())
             BleManager.get().disConnectAll()
             finish()

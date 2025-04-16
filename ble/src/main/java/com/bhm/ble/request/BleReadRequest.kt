@@ -153,5 +153,6 @@ internal class BleReadRequest(
     override fun close() {
         super.close()
         removeAllReadCallback()
+        getTaskQueueList()?.forEach { it?.removeAllTask() }
     }
 }

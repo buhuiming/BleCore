@@ -77,4 +77,6 @@ object Constants {
 
     //设置通知失败，SetCharacteristicNotificationFail
     const val EXCEPTION_CODE_SET_CHARACTERISTIC_NOTIFICATION_FAIL = 101
+
+    const val SCAN_NEED_CHECK_GPS = true
 }

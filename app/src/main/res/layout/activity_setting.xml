@@ -398,6 +398,29 @@
             </androidx.appcompat.widget.LinearLayoutCompat>
 
             <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:layout_marginVertical="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="扫描设备是否需要检测GPS开关："
+                    android:textSize="16sp"
+                    android:textColor="@color/black"
+                    android:layout_marginEnd="12dp"/>
+
+                <CheckBox
+                    android:id="@+id/cbNeedCheckGPS"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:checked="true"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"

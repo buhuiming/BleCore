@@ -293,6 +293,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     override fun notify(bleDevice: BleDevice,
                         serviceUUID: String,
                         notifyUUID: String,
+                        timeoutMillis: Long?,
                         bleDescriptorGetType: BleDescriptorGetType,
                         bleNotifyCallback: BleNotifyCallback.() -> Unit) {
         val callback = BleNotifyCallback()
@@ -302,6 +303,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             it.enableCharacteristicNotify(
                 serviceUUID,
                 notifyUUID,
+                timeoutMillis,
                 bleDescriptorGetType,
                 callback
             )
@@ -339,6 +341,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     override fun indicate(bleDevice: BleDevice,
                           serviceUUID: String,
                           indicateUUID: String,
+                          timeoutMillis: Long?,
                           bleDescriptorGetType: BleDescriptorGetType,
                           bleIndicateCallback: BleIndicateCallback.() -> Unit) {
         val callback = BleIndicateCallback()
@@ -348,6 +351,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
             it.enableCharacteristicIndicate(
                 serviceUUID,
                 indicateUUID,
+                timeoutMillis,
                 bleDescriptorGetType,
                 callback
             )

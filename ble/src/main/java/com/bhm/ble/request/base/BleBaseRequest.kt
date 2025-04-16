@@ -89,6 +89,7 @@ internal interface BleBaseRequest {
     fun notify(bleDevice: BleDevice,
                serviceUUID: String,
                notifyUUID: String,
+               timeoutMillis: Long?,
                bleDescriptorGetType: BleDescriptorGetType = BleDescriptorGetType.Default,
                bleNotifyCallback: BleNotifyCallback.() -> Unit)
 
@@ -106,6 +107,7 @@ internal interface BleBaseRequest {
     fun indicate(bleDevice: BleDevice,
                  serviceUUID: String,
                  indicateUUID: String,
+                 timeoutMillis: Long?,
                  bleDescriptorGetType: BleDescriptorGetType = BleDescriptorGetType.Default,
                  bleIndicateCallback: BleIndicateCallback.() -> Unit)
 

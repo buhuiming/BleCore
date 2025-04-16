@@ -14,13 +14,14 @@ import com.bhm.ble.data.Constants.DEFAULT_CONNECT_RETRY_COUNT
 import com.bhm.ble.data.Constants.DEFAULT_CONNECT_RETRY_INTERVAL
 import com.bhm.ble.data.Constants.DEFAULT_MAX_CONNECT_NUM
 import com.bhm.ble.data.Constants.DEFAULT_MTU
+import com.bhm.ble.data.Constants.DEFAULT_OPERATE_INTERVAL
 import com.bhm.ble.data.Constants.DEFAULT_OPERATE_MILLIS_TIMEOUT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_MILLIS_TIMEOUT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_COUNT
 import com.bhm.ble.data.Constants.DEFAULT_SCAN_RETRY_INTERVAL
-import com.bhm.ble.data.Constants.DEFAULT_OPERATE_INTERVAL
 import com.bhm.ble.data.Constants.DEFAULT_TASK_QUEUE_TYPE
 import com.bhm.ble.data.Constants.ENABLE_LOG
+import com.bhm.ble.data.Constants.SCAN_NEED_CHECK_GPS
 import com.bhm.ble.data.Constants.STOP_SCAN_WHEN_START_CONNECT
 
 
@@ -70,6 +71,8 @@ class BleOptions private constructor(builder: Builder) {
 
     var stopScanWhenStartConnect = builder.stopScanWhenStartConnect
 
+    var needCheckGps = builder.needCheckGps
+
     companion object {
 
         @JvmStatic
@@ -118,6 +121,8 @@ class BleOptions private constructor(builder: Builder) {
         internal var taskQueueType: BleTaskQueueType = DEFAULT_TASK_QUEUE_TYPE
 
         internal var stopScanWhenStartConnect = STOP_SCAN_WHEN_START_CONNECT
+
+        internal var needCheckGps = SCAN_NEED_CHECK_GPS
 
         /**
          * 设置扫描过滤规则：只查询对应ServiceUuid的设备
@@ -281,6 +286,14 @@ class BleOptions private constructor(builder: Builder) {
          */
         fun setStopScanWhenStartConnect(stopScanWhenStartConnect: Boolean) = apply {
             this.stopScanWhenStartConnect = stopScanWhenStartConnect
+        }
+
+        /**
+         * 设置是否需要打开GPS，默认为[SCAN_NEED_CHECK_GPS]
+         *  有些设备不具备GPS模块，如果需要打开或关闭GPS，请调用该方法设置
+         */
+        fun setNeedCheckGps(needCheckGps: Boolean) = apply {
+            this.needCheckGps = needCheckGps
         }
 
         fun build(): BleOptions {

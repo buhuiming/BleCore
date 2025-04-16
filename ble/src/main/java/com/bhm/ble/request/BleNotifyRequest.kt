@@ -62,6 +62,7 @@ internal class BleNotifyRequest(
      */
     fun enableCharacteristicNotify(serviceUUID: String,
                                    notifyUUID: String,
+                                   timeoutMillis: Long?,
                                    bleDescriptorGetType: BleDescriptorGetType,
                                    bleNotifyCallback: BleNotifyCallback) {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
@@ -77,6 +78,7 @@ internal class BleNotifyRequest(
             var mContinuation: Continuation<Throwable?>? = null
             val task = getTask(
                 getTaskId(notifyUUID),
+                durationTimeMillis = timeoutMillis?: getOperateTime(),
                 block = {
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation

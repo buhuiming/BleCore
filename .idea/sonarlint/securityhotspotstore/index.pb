@@ -151,7 +151,5 @@ A
 local.properties,0\7\0712df971a99ac4d2fccb8e0fb19f377f3374cca
 X
 (gradle/wrapper/gradle-wrapper.properties,f\b\fbe448ebfc3eb2d4e308f6b8b043666f5b57235e
-l
-<support/src/test/java/com/bhm/support/sdk/ExampleUnitTest.kt,e\9\e9952047c8d0c63f8d5c7ad2c208dc8ee2817bf8
-{
-Ksupport/src/androidTest/java/com/bhm/support/sdk/ExampleInstrumentedTest.kt,2\f\2f4e6a2936976d1d60ae99503ab1c2b9c7cabc3d
+s
+Csupport/src/main/java/com/bhm/support/sdk/common/BaseApplication.kt,6\6\6673ef6911570f3c4074f01fbbf73556221b2f21

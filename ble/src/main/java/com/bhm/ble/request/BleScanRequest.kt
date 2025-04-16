@@ -115,7 +115,8 @@ internal class BleScanRequest private constructor() : Request() {
             bleScanCallback.callScanFail(BleScanFailType.UnSupportBle)
             return
         }
-        if (!BleUtil.isGpsOpen(bleManager.getContext()?.applicationContext)) {
+        val needGps = getBleOptions()?.needCheckGps?: true
+        if (!BleUtil.isGpsOpen(bleManager.getContext()?.applicationContext) && needGps) {
             BleLogger.e("设备未打开GPS定位")
             bleScanCallback.callScanFail(BleScanFailType.GPSDisable)
             return

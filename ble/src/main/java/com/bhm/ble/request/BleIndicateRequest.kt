@@ -62,6 +62,7 @@ internal class BleIndicateRequest(
      */
     fun enableCharacteristicIndicate(serviceUUID: String,
                                      indicateUUID: String,
+                                     timeoutMillis: Long?,
                                      bleDescriptorGetType: BleDescriptorGetType,
                                      bleIndicateCallback: BleIndicateCallback) {
         if (!BleUtil.isPermission(getBleManager().getContext())) {
@@ -77,6 +78,7 @@ internal class BleIndicateRequest(
             var mContinuation: Continuation<Throwable?>? = null
             val task = getTask(
                 getTaskId(indicateUUID),
+                durationTimeMillis = timeoutMillis?: getOperateTime(),
                 block = {
                     suspendCoroutine<Throwable?> { continuation ->
                         mContinuation = continuation

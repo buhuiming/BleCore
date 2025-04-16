@@ -65,6 +65,7 @@ class MainViewModel(private val application: Application) : BaseViewModel(applic
                 .setMaxConnectNum(2)
                 .setConnectRetryCountAndInterval(2, 1000)
                 .setStopScanWhenStartConnect(false)
+                .setNeedCheckGps(true)
                 .build()
         )
         BleManager.get().registerBluetoothStateReceiver {

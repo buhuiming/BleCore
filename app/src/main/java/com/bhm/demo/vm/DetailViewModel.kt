@@ -122,7 +122,7 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
     fun notify(bleDevice: BleDevice,
                node: CharacteristicNode
     ) {
-        BleManager.get().notify(bleDevice, node.serviceUUID, node.characteristicUUID, BleDescriptorGetType.AllDescriptor) {
+        BleManager.get().notify(bleDevice, node.serviceUUID, node.characteristicUUID, 2000, BleDescriptorGetType.AllDescriptor) {
             onNotifyFail { _, _, t ->
                 addLogMsg(LogEntity(Level.OFF, "notify失败：${t.message}"))
                 node.enableNotify = false
@@ -274,19 +274,34 @@ class DetailViewModel(application: Application) : BaseViewModel(application) {
         //mtu长度包含了ATT的opcode一个字节以及ATT的handle2个字节
         val maxLength = mtu - 3
         val listData: SparseArray<ByteArray> = BleUtil.subpackage(data, maxLength)
-        BleManager.get().writeData(bleDevice, node.serviceUUID, node.characteristicUUID, listData) {
-            onWriteFail { _, currentPackage, _, t ->
-                addLogMsg(LogEntity(Level.OFF, "第${currentPackage}包数据写失败：${t.message}"))
+        BleManager.get()
+            .writeData(bleDevice, node.serviceUUID, node.characteristicUUID, listData) {
+                onWriteFail { _, currentPackage, _, t ->
+                    addLogMsg(
+                        LogEntity(
+                            Level.OFF,
+                            "第${currentPackage}包数据写失败：${t.message}"
+                        )
+                    )
+                }
+                onWriteSuccess { _, currentPackage, _, justWrite ->
+                    addLogMsg(
+                        LogEntity(
+                            Level.FINE,
+                            "${node.characteristicUUID} -> 第${currentPackage}包数据写成功：" +
+                                    BleUtil.bytesToHex(justWrite)
+                        )
+                    )
+                }
+                onWriteComplete { _, allSuccess ->
+                    //代表所有数据写成功，可以在这个方法中处理成功的逻辑
+                    addLogMsg(
+                        LogEntity(
+                            Level.FINE,
+                            "${node.characteristicUUID} -> 写数据完成，是否成功：$allSuccess"
+                        )
+                    )
+                }
             }
-            onWriteSuccess { _, currentPackage, _, justWrite ->
-                addLogMsg(LogEntity(Level.FINE, "${node.characteristicUUID} -> 第${currentPackage}包数据写成功：" +
-                        BleUtil.bytesToHex(justWrite)
-                ))
-            }
-            onWriteComplete { _, allSuccess ->
-                //代表所有数据写成功，可以在这个方法中处理成功的逻辑
-                addLogMsg(LogEntity(Level.FINE, "${node.characteristicUUID} -> 写数据完成，是否成功：$allSuccess"))
-            }
-        }
     }
 }

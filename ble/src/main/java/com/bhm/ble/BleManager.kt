@@ -366,6 +366,7 @@ class BleManager private constructor() {
     fun notify(bleDevice: BleDevice,
                serviceUUID: String,
                notifyUUID: String,
+               timeoutMillis: Long? = bleOptions?.operateMillisTimeOut,
                bleDescriptorGetType: BleDescriptorGetType = BleDescriptorGetType.Default,
                bleNotifyCallback: BleNotifyCallback.() -> Unit) {
         checkInitialize()
@@ -373,6 +374,25 @@ class BleManager private constructor() {
             bleDevice,
             serviceUUID,
             notifyUUID,
+            timeoutMillis,
+            bleDescriptorGetType,
+            bleNotifyCallback
+        )
+    }
+
+    /**
+     * notify
+     */
+    fun notify(bleDevice: BleDevice,
+               serviceUUID: String,
+               notifyUUID: String,
+               bleDescriptorGetType: BleDescriptorGetType = BleDescriptorGetType.Default,
+               bleNotifyCallback: BleNotifyCallback.() -> Unit) {
+        notify(
+            bleDevice,
+            serviceUUID,
+            notifyUUID,
+            null,
             bleDescriptorGetType,
             bleNotifyCallback
         )
@@ -454,6 +474,7 @@ class BleManager private constructor() {
     fun indicate(bleDevice: BleDevice,
                  serviceUUID: String,
                  indicateUUID: String,
+                 timeoutMillis: Long? = bleOptions?.operateMillisTimeOut,
                  bleDescriptorGetType: BleDescriptorGetType = BleDescriptorGetType.Default,
                  bleIndicateCallback: BleIndicateCallback.() -> Unit) {
         checkInitialize()
@@ -461,6 +482,25 @@ class BleManager private constructor() {
             bleDevice,
             serviceUUID,
             indicateUUID,
+            timeoutMillis,
+            bleDescriptorGetType,
+            bleIndicateCallback
+        )
+    }
+
+    /**
+     * indicate
+     */
+    fun indicate(bleDevice: BleDevice,
+                 serviceUUID: String,
+                 indicateUUID: String,
+                 bleDescriptorGetType: BleDescriptorGetType = BleDescriptorGetType.Default,
+                 bleIndicateCallback: BleIndicateCallback.() -> Unit) {
+        indicate(
+            bleDevice,
+            serviceUUID,
+            indicateUUID,
+            null,
             bleDescriptorGetType,
             bleIndicateCallback
         )

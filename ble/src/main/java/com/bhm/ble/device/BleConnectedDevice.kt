@@ -291,6 +291,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     @Synchronized
     fun enableCharacteristicNotify(serviceUUID: String,
                                    notifyUUID: String,
+                                   timeoutMillis: Long?,
                                    bleDescriptorGetType: BleDescriptorGetType,
                                    bleNotifyCallback: BleNotifyCallback
     ) {
@@ -298,6 +299,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         bleNotifyRequest?.enableCharacteristicNotify(
             serviceUUID,
             notifyUUID,
+            timeoutMillis,
             bleDescriptorGetType,
             bleNotifyCallback
         )
@@ -325,6 +327,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     @Synchronized
     fun enableCharacteristicIndicate(serviceUUID: String,
                                      indicateUUID: String,
+                                     timeoutMillis: Long?,
                                      bleDescriptorGetType: BleDescriptorGetType,
                                      bleIndicateCallback: BleIndicateCallback
     ) {
@@ -332,6 +335,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
         bleIndicateRequest?.enableCharacteristicIndicate(
             serviceUUID,
             indicateUUID,
+            timeoutMillis,
             bleDescriptorGetType,
             bleIndicateCallback
         )
