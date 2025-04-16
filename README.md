@@ -2,6 +2,11 @@
 
 ## 本项目持续维护更新
 
+*   如果觉得对您有帮助，可以犒劳一下作者
+*   ![1744788695450](https://github.com/user-attachments/assets/62a16ec4-e1d9-4bb3-9dc3-bc6e11cad38f)
+ 
+
+
 *   当前版本[![](https://jitpack.io/v/buhuiming/BleCore.svg)](https://jitpack.io/#buhuiming/BleCore) 
 *   minSdk 24
 *   targetSdk 34
