@@ -67,7 +67,7 @@
 
 *    注意：
 *    有些设备GPS是关闭状态的话，申请定位权限之后，GPS是依然关闭状态，这里要根据GPS是否打开来跳转页面
-*    BleUtil.isGpsOpen(context) 判断GPS是否打开
+*    BleUtil.isGpsOpen(context) 判断GPS是否打开（可以通过BleOptions.setNeedCheckGps(boolean)来配置是否需要GPS检测）
 *    跳转到系统GPS设置页面，GPS设置是全局的独立的，是否打开跟权限申请无关
      startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
 *    跳转到系统蓝牙设置页面
