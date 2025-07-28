@@ -21,13 +21,14 @@
         tools:targetApi="s" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
-    <application>
-        <!--注册系统蓝牙广播-->
+    <!--使用动态注册，避免国内应用市场对于此注册导致的应用自启动问题，而拒绝上架-->
+    <!--<application>
+        &lt;!&ndash;注册系统蓝牙广播&ndash;&gt;
         <receiver android:name=".receiver.BluetoothReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.bluetooth.adapter.action.STATE_CHANGED"/>
             </intent-filter>
         </receiver>
-    </application>
+    </application>-->
 </manifest>
