@@ -35,6 +35,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import java.util.concurrent.atomic.AtomicBoolean
@@ -385,17 +386,27 @@ internal class BleConnectRequest(
             connectTime = DEFAULT_CONNECT_MILLIS_TIMEOUT
         }
         connectJob = bleConnectCallback?.launchInMainThread {
-            withTimeout(connectTime) {
-                //每次连接之前确保和上一次操作间隔一定时间
-                delay(waitTime)
-                lastState = BleConnectLastState.Connecting
-                bluetoothGatt = bleDevice.deviceInfo?.connectGatt(getBleManager().getContext(),
-                    autoConnect, coreGattCallback, BluetoothDevice.TRANSPORT_LE)
-                BleLogger.i("${bleDevice.deviceAddress} -> 开始第${currentConnectRetryCount + 1}次连接")
-                if (bluetoothGatt == null) {
-                    cancel(CancellationException("连接异常：bluetoothGatt == null"))
-                } else {
-                    delay(connectTime + waitTime * 6) //需要加上等待发现服务的时间
+            try {
+                withTimeout(connectTime) {
+                    //每次连接之前确保和上一次操作间隔一定时间
+                    delay(waitTime)
+                    lastState = BleConnectLastState.Connecting
+                    bluetoothGatt = bleDevice.deviceInfo?.connectGatt(
+                        getBleManager().getContext(),
+                        autoConnect, coreGattCallback, BluetoothDevice.TRANSPORT_LE
+                    )
+                    BleLogger.i("${bleDevice.deviceAddress} -> 开始第${currentConnectRetryCount + 1}次连接")
+                    if (bluetoothGatt == null) {
+                        cancel(CancellationException("连接异常：bluetoothGatt == null"))
+                    } else {
+                        delay(connectTime + waitTime * 6) //需要加上等待发现服务的时间
+                    }
+                }
+            } catch (e: TimeoutCancellationException) {
+                // 如果是因为主动取消导致的超时，这里替换掉异常
+                if (isActive) {
+                    //如果已经取消的job，则不抛出超时异常
+                    throw e
                 }
             }
         }
@@ -425,6 +436,9 @@ internal class BleConnectRequest(
                 when (it) {
                     //连接超时
                     is TimeoutCancellationException -> {
+                        if (lastState == BleConnectLastState.Connected) {
+                            return
+                        }
                         connectFail()
                         val connectTime = connectMillisTimeOut?: (getBleOptions()?.connectMillisTimeOut?: DEFAULT_CONNECT_MILLIS_TIMEOUT)
                         val retryCount = connectRetryCount?: (getBleOptions()?.connectRetryCount?: 0)

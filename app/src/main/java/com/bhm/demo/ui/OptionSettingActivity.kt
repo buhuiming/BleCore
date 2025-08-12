@@ -6,6 +6,7 @@
 package com.bhm.demo.ui
 
 import android.widget.ArrayAdapter
+import androidx.core.view.WindowCompat
 import com.bhm.ble.BleManager
 import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.data.BleTaskQueueType
@@ -44,7 +45,12 @@ class OptionSettingActivity : BaseActivity<BaseViewModel, ActivitySettingBinding
 
     override fun initData() {
         super.initData()
-        AppTheme.setStatusBarColor(this, R.color.black)
+        val controller = WindowCompat.getInsetsController(
+            window,
+            window.decorView
+        )
+        controller.isAppearanceLightStatusBars = true
+        controller.isAppearanceLightNavigationBars = true
         val taskQueueTypes = arrayOf("Default", "Operate", "Independent")
         viewBinding.spTaskQueueType.adapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, taskQueueTypes)

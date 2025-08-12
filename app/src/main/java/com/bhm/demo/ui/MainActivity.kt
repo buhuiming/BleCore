@@ -4,6 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -16,7 +19,6 @@ import com.bhm.demo.adapter.DeviceListAdapter
 import com.bhm.demo.constants.LOCATION_PERMISSION
 import com.bhm.demo.databinding.ActivityMainBinding
 import com.bhm.demo.vm.MainViewModel
-import com.bhm.support.sdk.core.AppTheme
 import com.bhm.support.sdk.utils.ViewUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -36,7 +38,21 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
 
     override fun initData() {
         super.initData()
-        AppTheme.setStatusBarColor(this, R.color.black)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val controller = WindowCompat.getInsetsController(
+            window,
+            window.decorView
+        )
+        controller.isAppearanceLightStatusBars = false
+        controller.isAppearanceLightNavigationBars = false
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.vTop) { _: View, insets: WindowInsetsCompat ->
+            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            viewBinding.vTop.layoutParams.height = statusBars.top
+            rootView.setPadding(0, 0, 0, navBars.bottom)
+            insets
+        }
+        ViewCompat.requestApplyInsets(viewBinding.vTop)
         initList()
         viewModel.initBle()
     }

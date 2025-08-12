@@ -13,6 +13,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.widget.CheckBox
 import android.widget.Toast
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -62,7 +63,12 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
 
     override fun initData() {
         super.initData()
-        AppTheme.setStatusBarColor(this, R.color.black)
+        val controller = WindowCompat.getInsetsController(
+            window,
+            window.decorView
+        )
+        controller.isAppearanceLightStatusBars = true
+        controller.isAppearanceLightNavigationBars = true
         bleDevice = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra("data", BleDevice::class.java)
         } else {
