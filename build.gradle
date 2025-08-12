@@ -8,7 +8,7 @@ plugins {
 ext {
     coreKtxVersion = '1.13.1'
     appcompatVersion = '1.7.1'
-    materialVersion = '1.12.0'
+    materialVersion = '1.9.0'
     multidexVersion = '2.0.1'
     lifecycleExtensionsVersion = '2.2.0'
     lifecycleVersion = '2.6.1'
