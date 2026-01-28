@@ -598,6 +598,15 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
     }
 
     /**
+     * 添加一个新的设备扫描回调
+     */
+    override fun addBleScanCallback(bleScanCallback: BleScanCallback.() -> Unit) {
+        val callback = BleScanCallback()
+        callback.apply(bleScanCallback)
+        BleScanRequest.get().addBleScanCallback(callback)
+    }
+
+    /**
      * 移除该设备回调，BleConnectCallback除外
      */
     override fun removeAllCharacterCallback(bleDevice: BleDevice) {

@@ -837,6 +837,14 @@ class BleManager private constructor() {
     }
 
     /**
+     * 添加一个新的扫描回调
+     */
+    fun addBleScanCallback(bleScanCallback: BleScanCallback.() -> Unit) {
+        checkInitialize()
+        bleBaseRequest?.addBleScanCallback(bleScanCallback)
+    }
+
+    /**
      * 移除该设备回调，BleConnectCallback除外
      */
     fun removeAllCharacterCallback(bleDevice: BleDevice) {

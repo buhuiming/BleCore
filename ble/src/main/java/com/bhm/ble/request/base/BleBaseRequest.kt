@@ -256,6 +256,11 @@ internal interface BleBaseRequest {
     fun removeBleScanCallback()
 
     /**
+     * 添加一个新的Scan回调
+     */
+    fun addBleScanCallback(bleScanCallback: BleScanCallback.() -> Unit)
+
+    /**
      * 注册系统蓝牙广播
      */
     fun registerBluetoothStateReceiver(bluetoothCallback: BluetoothCallback.() -> Unit)

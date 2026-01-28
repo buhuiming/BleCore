@@ -70,6 +70,8 @@ internal class BleScanRequest private constructor() : Request() {
 
     private var scanRetryInterval: Long? = null
 
+    private var bleScanCallbacksList: MutableList<BleScanCallback>? = null
+
     /**
      * 开始扫描
      */
@@ -79,8 +81,9 @@ internal class BleScanRequest private constructor() : Request() {
         scanRetryInterval: Long?,
         bleScanCallback: BleScanCallback
     ) {
+        this.bleScanCallback = bleScanCallback
         if (!BleUtil.isPermission(getBleManager().getContext())) {
-            bleScanCallback.callScanFail(BleScanFailType.NoBlePermission)
+            callScanFail(BleScanFailType.NoBlePermission)
             return
         }
         initScannerAndStart(
@@ -103,32 +106,31 @@ internal class BleScanRequest private constructor() : Request() {
         this.scanMillisTimeOut = scanMillisTimeOut
         this.scanRetryCount = scanRetryCount
         this.scanRetryInterval = scanRetryInterval
-        this.bleScanCallback = bleScanCallback
         val bleManager = getBleManager()
         if (!BleUtil.isPermission(bleManager.getContext()?.applicationContext)) {
             BleLogger.e("权限不足，请检查")
-            bleScanCallback.callScanFail(BleScanFailType.NoBlePermission)
+            callScanFail(BleScanFailType.NoBlePermission)
             return
         }
         if (!bleManager.isBleSupport()) {
             BleLogger.e("设备不支持蓝牙")
-            bleScanCallback.callScanFail(BleScanFailType.UnSupportBle)
+            callScanFail(BleScanFailType.UnSupportBle)
             return
         }
         val needGps = getBleOptions()?.needCheckGps?: true
         if (!BleUtil.isGpsOpen(bleManager.getContext()?.applicationContext) && needGps) {
             BleLogger.e("设备未打开GPS定位")
-            bleScanCallback.callScanFail(BleScanFailType.GPSDisable)
+            callScanFail(BleScanFailType.GPSDisable)
             return
         }
         if (!bleManager.isBleEnable()) {
             BleLogger.e("蓝牙未打开")
-            bleScanCallback.callScanFail(BleScanFailType.BleDisable)
+            callScanFail(BleScanFailType.BleDisable)
             return
         }
         if (isScanning.get()) {
             BleLogger.e("已存在相同扫描")
-            bleScanCallback.callScanFail(BleScanFailType.AlReadyScanning)
+            callScanFail(BleScanFailType.AlReadyScanning)
             return
         }
         duplicateRemovalResults.clear()
@@ -159,7 +161,7 @@ internal class BleScanRequest private constructor() : Request() {
                 }
             } catch (e: IllegalArgumentException) {
                 BleLogger.e("扫描参数设置有误： ${e.message}")
-                bleScanCallback.callScanFail(BleScanFailType.ScanError(-1, e))
+                callScanFail(BleScanFailType.ScanError(-1, e))
                 return
             }
         }
@@ -171,11 +173,11 @@ internal class BleScanRequest private constructor() : Request() {
                     .build()
             } catch (e: IllegalArgumentException) {
                 BleLogger.e("扫描参数设置有误： ${e.message}")
-                bleScanCallback.callScanFail(BleScanFailType.ScanError(-1, e))
+                callScanFail(BleScanFailType.ScanError(-1, e))
                 return
             }
         val scanner = bleManager.getBluetoothManager()?.adapter?.bluetoothLeScanner
-        bleScanCallback.callScanStart()
+        callScanStart()
         bleScan(scanner, scanFilters, scanSetting)
     }
 
@@ -200,7 +202,7 @@ internal class BleScanRequest private constructor() : Request() {
                     scanner?.startScan(scanFilters, scanSetting, scanCallback)
                 } catch (e: Exception) {
                     BleLogger.e("扫描失败： ${e.message}")
-                    bleScanCallback?.callScanFail(BleScanFailType.ScanError(-1, e))
+                    callScanFail(BleScanFailType.ScanError(-1, e))
                 }
                 delay(scanTime)
             }
@@ -238,7 +240,7 @@ internal class BleScanRequest private constructor() : Request() {
             scanner?.stopScan(scanCallback)
         } catch (e: Exception) {
             BleLogger.e("停止扫描失败： ${e.message}")
-            bleScanCallback?.callScanFail(BleScanFailType.ScanError(-1, e))
+            callScanFail(BleScanFailType.ScanError(-1, e))
             return
         }
         if (ifContinueScan()) {
@@ -259,10 +261,10 @@ internal class BleScanRequest private constructor() : Request() {
             throwable?.let {
                 if (it !is CancellationException) {
                     BleLogger.e("扫描失败： ${it.message}")
-                    bleScanCallback?.callScanFail(BleScanFailType.ScanError(-1, it))
+                    callScanFail(BleScanFailType.ScanError(-1, it))
                 }
             }
-            bleScanCallback?.callScanComplete(results.toMutableList(), duplicateRemovalResults.toMutableList())
+            callScanComplete(results.toMutableList(), duplicateRemovalResults.toMutableList())
             if (results.isEmpty()) {
                 BleLogger.w("没有扫描到数据")
             }
@@ -323,7 +325,7 @@ internal class BleScanRequest private constructor() : Request() {
              */
             val e = UnDefinedException("扫描失败，请查验[android.bluetooth.le.ScanCallback错误码]")
             BleLogger.e(e.message)
-            bleScanCallback?.callScanFail(BleScanFailType.ScanError(errorCode, e))
+            callScanFail(BleScanFailType.ScanError(errorCode, e))
         }
     }
 
@@ -332,10 +334,10 @@ internal class BleScanRequest private constructor() : Request() {
      */
     private fun filterData(bleDevice: BleDevice) {
         results.add(bleDevice)
-        bleScanCallback?.callLeScan(bleDevice, currentReyCount + 1)
+        callLeScan(bleDevice, currentReyCount + 1)
         if (duplicateRemovalResults.isEmpty()) {
             duplicateRemovalResults.add(bleDevice)
-            bleScanCallback?.callLeScanDuplicateRemoval(bleDevice, currentReyCount + 1)
+            callLeScanDuplicateRemoval(bleDevice, currentReyCount + 1)
         } else {
             var same = false
             for (mBleDevice in duplicateRemovalResults) {
@@ -346,9 +348,51 @@ internal class BleScanRequest private constructor() : Request() {
             }
             if (!same) {
                 duplicateRemovalResults.add(bleDevice)
-                bleScanCallback?.callLeScanDuplicateRemoval(bleDevice, currentReyCount + 1)
+                callLeScanDuplicateRemoval(bleDevice, currentReyCount + 1)
             }
         }
+    }
+
+    private fun callScanStart() {
+        bleScanCallback?.callScanStart()
+        bleScanCallbacksList?.forEach {
+            it.callScanStart()
+        }
+    }
+
+    private fun callScanComplete(results: MutableList<BleDevice>, duplicateRemovalResults: MutableList<BleDevice>) {
+        bleScanCallback?.callScanComplete(results, duplicateRemovalResults)
+        bleScanCallbacksList?.forEach {
+            it.callScanComplete(results, duplicateRemovalResults)
+        }
+    }
+
+    private fun callScanFail(failType: BleScanFailType) {
+        bleScanCallback?.callScanFail(failType)
+        bleScanCallbacksList?.forEach {
+            it.callScanFail(failType)
+        }
+    }
+
+    private fun callLeScan(bleDevice: BleDevice, reyCount: Int) {
+        bleScanCallback?.callLeScan(bleDevice, reyCount)
+        bleScanCallbacksList?.forEach {
+            it.callLeScan(bleDevice, reyCount)
+        }
+    }
+
+    private fun callLeScanDuplicateRemoval(bleDevice: BleDevice, reyCount: Int) {
+        bleScanCallback?.callLeScanDuplicateRemoval(bleDevice, reyCount)
+        bleScanCallbacksList?.forEach {
+            it.callLeScanDuplicateRemoval(bleDevice, reyCount)
+        }
+    }
+
+    fun addBleScanCallback(bleScanCallback: BleScanCallback) {
+        if (bleScanCallbacksList == null) {
+            bleScanCallbacksList = mutableListOf()
+        }
+        bleScanCallbacksList?.add(bleScanCallback)
     }
 
     /**
@@ -358,6 +402,7 @@ internal class BleScanRequest private constructor() : Request() {
 
     fun removeBleScanCallback() {
         this.bleScanCallback = null
+        bleScanCallbacksList?.clear()
     }
 
     /**
@@ -374,6 +419,8 @@ internal class BleScanRequest private constructor() : Request() {
         scanJob = null
         waitScanJob = null
         bleScanCallback = null
+        bleScanCallbacksList?.clear()
+        bleScanCallbacksList = null
         results.clear()
         duplicateRemovalResults.clear()
     }
