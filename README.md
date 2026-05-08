@@ -9,8 +9,8 @@
 
 *   当前版本[![](https://jitpack.io/v/buhuiming/BleCore.svg)](https://jitpack.io/#buhuiming/BleCore) 
 *   minSdk 24
-*   targetSdk 35
-*   compileSdk 35
+*   targetSdk 36
+*   compileSdk 36
 
 #### * 基于Kotlin、协程
 #### * 基于sdk 35，最新API
