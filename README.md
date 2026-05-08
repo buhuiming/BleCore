@@ -13,7 +13,7 @@
 *   compileSdk 36
 
 #### * 基于Kotlin、协程
-#### * 基于sdk 35，最新API
+#### * 基于sdk 36，最新API
 #### * 详细的完整的容错机制
 #### * 基于多个蓝牙库的设计思想
 #### * 强大的Notify\Indicate\Read\Write任务队列
