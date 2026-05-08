@@ -23,7 +23,11 @@ internal class BleLruHashMap(
 
     private val keyLists = Collections.synchronizedList(LinkedList<String>())
 
-    override fun put(key: String, value: BleConnectedDevice): BleConnectedDevice? {
+    override fun put(key: String, value: BleConnectedDevice?): BleConnectedDevice? {
+        if (value == null) {
+            keyLists.add(key)
+            return super.put(key, null)
+        }
         if (size == maxSize) {
             BleLogger.w("超出最大连接设备数：${maxSize}，断开第一个设备的连接")
             get(keyLists.firstOrNull())?.disConnect()

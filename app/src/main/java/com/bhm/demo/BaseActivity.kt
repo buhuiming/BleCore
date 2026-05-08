@@ -11,11 +11,14 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.view.KeyEvent
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.viewbinding.ViewBinding
@@ -62,6 +65,12 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewBinding> : HttpActivity(
 
     private var httpOptions: HttpOptions? = null
 
+    /**
+     * 默认启用 edge-to-edge 并自动处理 system bars insets。
+     * 如果子类自己处理（例如手动给某些 View 做 padding），可以重写为 false。
+     */
+    protected open fun handleEdgeToEdgeInsets(): Boolean = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         BackgroundLibrary.inject(this)
         super.onCreate(savedInstanceState)
@@ -72,6 +81,8 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewBinding> : HttpActivity(
         viewBinding = ViewUtil.inflateWithGeneric(this, layoutInflater)
         rootView = viewBinding.root
         setContentView(rootView)
+        initBackHandling()
+        initEdgeToEdge()
         initData()
         initEvent()
     }
@@ -155,6 +166,30 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewBinding> : HttpActivity(
         return false
     }
 
+    private fun initBackHandling() {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (isRefusedBackPress()) return
+                    finish()
+                }
+            }
+        )
+    }
+
+    private fun initEdgeToEdge() {
+        if (!handleEdgeToEdgeInsets()) return
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        ViewCompat.setOnApplyWindowInsetsListener(rootView) { v, insets ->
+            val sysBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(sysBars.left, sysBars.top, sysBars.right, sysBars.bottom)
+            insets
+        }
+        ViewCompat.requestApplyInsets(rootView)
+    }
+
     private fun createViewModel(owner: ViewModelStoreOwner, viewModel: VM): VM {
         return ViewModelProvider(owner)[viewModel.javaClass]
     }
@@ -194,14 +229,5 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewBinding> : HttpActivity(
     @Subscribe(threadMode = ThreadMode.MAIN)
     open fun onMessageEvent(event: MessageEvent?) {
         //EventBus Do something
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (isRefusedBackPress() && keyCode == KeyEvent.KEYCODE_BACK) {  //欢迎页 按物理返回键不能关闭APP
-            return true
-        } else if (keyCode == KeyEvent.KEYCODE_BACK) {
-            finish()
-        }
-        return super.onKeyDown(keyCode, event)
     }
 }

@@ -36,6 +36,8 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
 
     override fun createViewModel() = MainViewModel(application)
 
+    override fun handleEdgeToEdgeInsets(): Boolean = false
+
     override fun initData() {
         super.initData()
         WindowCompat.setDecorFitsSystemWindows(window, false)

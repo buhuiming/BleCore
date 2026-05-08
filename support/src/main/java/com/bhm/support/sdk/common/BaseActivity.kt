@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.view.KeyEvent
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -52,6 +52,7 @@ abstract class BaseActivity<VM : BaseViewModel> : AppCompatActivity(), Handler.C
         ActivityUtil.addActivity(this)
         EventBus.getDefault().register(this)
         init()
+        initBackHandling()
     }
 
     override fun onDestroy() {
@@ -107,6 +108,18 @@ abstract class BaseActivity<VM : BaseViewModel> : AppCompatActivity(), Handler.C
         return false
     }
 
+    private fun initBackHandling() {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (isRefusedBackPress()) return
+                    finish()
+                }
+            }
+        )
+    }
+
     private fun createViewModel(owner: ViewModelStoreOwner, viewModel: VM): VM {
         return ViewModelProvider(owner).get(viewModel.javaClass)
     }
@@ -143,15 +156,5 @@ abstract class BaseActivity<VM : BaseViewModel> : AppCompatActivity(), Handler.C
     @Subscribe(threadMode = ThreadMode.MAIN)
     open fun onMessageEvent(event: MessageEvent?) {
        //EventBus Do something
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        // TODO Auto-generated method stub
-        if (isRefusedBackPress() && keyCode == KeyEvent.KEYCODE_BACK) {  //欢迎页 按物理返回键不能关闭APP
-            return true
-        } else if (keyCode == KeyEvent.KEYCODE_BACK) {
-            finish()
-        }
-        return super.onKeyDown(keyCode, event)
     }
 }

@@ -6,6 +6,8 @@ import android.os.Build
 import android.view.View
 import android.view.WindowManager
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 /**
  * 沉浸式状态栏样式
@@ -16,8 +18,7 @@ object AppTheme {
      * 将内容提升至状态栏
      */
     fun fitSystemWindow(activity: Activity) {
-        activity.window.decorView.systemUiVisibility =
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        WindowCompat.setDecorFitsSystemWindows(activity.window, false)
         setStatusBarColor(activity, android.R.color.transparent)
     }
 
@@ -25,11 +26,10 @@ object AppTheme {
      * 将内容提升至状态栏
      */
     fun fitSystemLightWindow(activity: Activity) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            activity.window.decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-            setStatusBarColor(activity, android.R.color.transparent)
-        }
+        WindowCompat.setDecorFitsSystemWindows(activity.window, false)
+        WindowInsetsControllerCompat(activity.window, activity.window.decorView)
+            .isAppearanceLightStatusBars = true
+        setStatusBarColor(activity, android.R.color.transparent)
     }
 
     /**
@@ -60,20 +60,16 @@ object AppTheme {
      * 设置状态栏Light主题
      */
     fun setLightStatusBar(activity: Activity) {
-        val window = activity.window
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-        }
+        WindowInsetsControllerCompat(activity.window, activity.window.decorView)
+            .isAppearanceLightStatusBars = true
     }
 
     /**
      * 设置状态栏Dark主题
      */
     fun setDarkStatusBar(activity: Activity) {
-        val window = activity.window
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
-        }
+        WindowInsetsControllerCompat(activity.window, activity.window.decorView)
+            .isAppearanceLightStatusBars = false
     }
 
     /**

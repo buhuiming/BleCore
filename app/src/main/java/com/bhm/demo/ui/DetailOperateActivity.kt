@@ -9,10 +9,10 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import android.content.Intent
 import android.os.Build
-import android.view.KeyEvent
 import android.view.View
 import android.widget.CheckBox
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -63,6 +63,7 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
 
     override fun initData() {
         super.initData()
+        initBackHandling()
         val controller = WindowCompat.getInsetsController(
             window,
             window.decorView
@@ -88,6 +89,24 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
             append("地址：${getBleDevice().deviceAddress}")
         }
         initList()
+    }
+
+    private fun initBackHandling() {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (disConnectWhileClose) {
+                        BleManager.get().close(getBleDevice())
+                        setResult(0, Intent())
+                    } else {
+                        BleManager.get().removeAllCharacterCallback(getBleDevice())
+                        setResult(0, null)
+                    }
+                    finish()
+                }
+            }
+        )
     }
 
     private fun getBleDevice(): BleDevice {
@@ -252,21 +271,6 @@ class DetailOperateActivity : BaseActivity<DetailViewModel, ActivityDetailBindin
                 finish()
             }
         }
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (disConnectWhileClose) {
-                BleManager.get().close(getBleDevice())
-                setResult(0, Intent())
-            } else {
-                BleManager.get().removeAllCharacterCallback(getBleDevice())
-                setResult(0, null)
-            }
-            finish()
-            return true
-        }
-        return super.onKeyDown(keyCode, event)
     }
 
     override fun onDestroy() {
