@@ -2,28 +2,28 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!--去掉权限声明，由业务接入来自由声明，避免影响某些权限的正常使用，以及应用市场的校验问题-->
+    <!--    &lt;!&ndash; android 30之前 静态声明的蓝牙权限 &ndash;&gt;-->
+    <!--    <uses-permission-->
+    <!--        android:name="android.permission.BLUETOOTH"-->
+    <!--        tools:remove="android:maxSdkVersion" />-->
 
-    <!-- android 30之前 静态声明的蓝牙权限 -->
-    <uses-permission
-        android:name="android.permission.BLUETOOTH"
-        tools:remove="android:maxSdkVersion" />
-
-    <uses-permission
-        android:name="android.permission.BLUETOOTH_ADMIN"
-        android:maxSdkVersion="30" />
-    <!-- 使用蓝牙还需要 静态声明+动态申请位置（前台位置）权限 -->
-    <uses-permission
-        android:name="android.permission.ACCESS_COARSE_LOCATION"
-        android:maxSdkVersion="30" />
-    <uses-permission
-        android:name="android.permission.ACCESS_FINE_LOCATION"
-        android:maxSdkVersion="30" />
-    <!-- android 30之后 静态声明+动态申请的蓝牙权限 -->
-    <uses-permission
-        android:name="android.permission.BLUETOOTH_SCAN"
-        android:usesPermissionFlags="neverForLocation"
-        tools:targetApi="s" />
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!--    <uses-permission-->
+    <!--        android:name="android.permission.BLUETOOTH_ADMIN"-->
+    <!--        android:maxSdkVersion="30" />-->
+    <!--    &lt;!&ndash; 使用蓝牙还需要 静态声明+动态申请位置（前台位置）权限 &ndash;&gt;-->
+    <!--    <uses-permission-->
+    <!--        android:name="android.permission.ACCESS_COARSE_LOCATION"-->
+    <!--        android:maxSdkVersion="30" />-->
+    <!--    <uses-permission-->
+    <!--        android:name="android.permission.ACCESS_FINE_LOCATION"-->
+    <!--        android:maxSdkVersion="30" />-->
+    <!--    &lt;!&ndash; android 30之后 静态声明+动态申请的蓝牙权限 &ndash;&gt;-->
+    <!--    <uses-permission-->
+    <!--        android:name="android.permission.BLUETOOTH_SCAN"-->
+    <!--        android:usesPermissionFlags="neverForLocation"-->
+    <!--        tools:targetApi="s" />-->
+    <!--    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />-->
 
     <!--使用动态注册，避免国内应用市场对于此注册导致的应用自启动问题，而拒绝上架-->
     <!--<application>
