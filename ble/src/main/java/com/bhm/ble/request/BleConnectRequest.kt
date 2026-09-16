@@ -247,6 +247,12 @@ internal class BleConnectRequest(
         BleLogger.i("onConnectionStateChange： status = $status " +
                 ", newState = $newState , currentThread = ${Thread.currentThread().name} " +
                 ", bleAddress = ${bleDevice.deviceAddress} , lastState = $lastState")
+        when (newState) {
+            BluetoothProfile.STATE_CONNECTED ->
+                BleConnectedDeviceManager.get().updateConnectionState(bleDevice, true)
+            BluetoothProfile.STATE_DISCONNECTED ->
+                BleConnectedDeviceManager.get().updateConnectionState(bleDevice, false)
+        }
         if (lastState == BleConnectLastState.ConnectFailure) {
             //上一个状态为null即调用了close，就不再处理，这里出现有些手机，调用了close之后，还会触发onConnectionStateChange
             disConnectGatt()
@@ -623,9 +629,8 @@ internal class BleConnectRequest(
      * Gatt断开连接，需要一段时间才会触发onConnectionStateChange
      */
     private fun disConnectGatt() {
-        if (getBleManager().isConnected(bleDevice, true)) {
-            bluetoothGatt?.disconnect()
-        }
+        //不依赖连接状态判断，避免BleCore状态已释放、系统层仍持有链路时漏掉disconnect
+        bluetoothGatt?.disconnect()
     }
 
     /**
@@ -648,6 +653,7 @@ internal class BleConnectRequest(
      * 关闭Gatt
      */
     private fun closeBluetoothGatt() {
+        BleConnectedDeviceManager.get().updateConnectionState(bleDevice, false)
         bluetoothGatt?.close()
     }
 }

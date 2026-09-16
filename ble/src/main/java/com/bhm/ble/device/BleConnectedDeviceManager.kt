@@ -10,6 +10,7 @@ package com.bhm.ble.device
 import com.bhm.ble.BleManager
 import com.bhm.ble.control.BleLruHashMap
 import com.bhm.ble.data.Constants.DEFAULT_MAX_CONNECT_NUM
+import java.util.concurrent.ConcurrentHashMap
 
 
 /**
@@ -23,6 +24,8 @@ internal class BleConnectedDeviceManager private constructor() {
     private val bleLruHashMap: BleLruHashMap =
         BleLruHashMap(BleManager.get().getOptions()?.maxConnectNum
             ?: DEFAULT_MAX_CONNECT_NUM)
+
+    private val connectedDeviceKeys = ConcurrentHashMap.newKeySet<String>()
 
     companion object {
 
@@ -75,13 +78,31 @@ internal class BleConnectedDeviceManager private constructor() {
     }
 
     /**
+     * 更新Gatt回调上报的连接状态
+     */
+    fun updateConnectionState(bleDevice: BleDevice, isConnected: Boolean) {
+        if (isConnected) {
+            connectedDeviceKeys.add(bleDevice.getKey())
+        } else {
+            connectedDeviceKeys.remove(bleDevice.getKey())
+        }
+    }
+
+    /**
+     * Gatt回调上报的设备是否已连接
+     */
+    fun isConnected(bleDevice: BleDevice): Boolean {
+        return connectedDeviceKeys.contains(bleDevice.getKey())
+    }
+
+    /**
      * 获取所有已连接设备集合
      */
     fun getAllConnectedDevice(): MutableList<BleDevice> {
         val list = mutableListOf<BleDevice>()
         bleLruHashMap.forEach {
             it.value?.let { device ->
-                if (BleManager.get().isConnected(device.bleDevice)) {
+                if (isConnected(device.bleDevice)) {
                     list.add(device.bleDevice)
                 }
             }
@@ -116,5 +137,6 @@ internal class BleConnectedDeviceManager private constructor() {
             it?.close()
         }
         bleLruHashMap.clear()
+        connectedDeviceKeys.clear()
     }
 }

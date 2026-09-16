@@ -14,6 +14,7 @@ import com.bhm.ble.attribute.BleOptions
 import com.bhm.ble.callback.*
 import com.bhm.ble.data.BleDescriptorGetType
 import com.bhm.ble.data.Constants.DEFAULT_MTU
+import com.bhm.ble.device.BleConnectedDeviceManager
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.request.base.BleBaseRequest
 import com.bhm.ble.request.base.BleRequestImp
@@ -132,9 +133,8 @@ class BleManager private constructor() {
     /**
      * 是否已连接，确保已获取到权限
      *
-     * 操作断开连接后，getConnectionState马上回去到的状态还是连接状态，所以需要bleBaseRequest?.isConnected判断
-     *  @param simplySystemStatus 为true，只根据系统的状态规则；为false，会根据sdk的状态；
-     *  此字段的意义在于：有时，sdk资源被系统回收(状态未连接)，但是系统的状态是已连接。
+     * 连接状态由Gatt回调更新到内存，避免同步查询系统蓝牙服务阻塞调用线程
+     * @param simplySystemStatus 为true，只根据Gatt回调状态；为false，同时校验sdk的状态
      */
     @SuppressLint("MissingPermission")
     fun isConnected(bleDeviceAddress: String, simplySystemStatus: Boolean = true): Boolean {
@@ -150,22 +150,11 @@ class BleManager private constructor() {
         if (!BleUtil.isPermission(application)) {
             return false
         }
-        bleDevice?.let {
-            val connectedDevices: List<BluetoothDevice>? = bluetoothManager?.getConnectedDevices(BluetoothProfile.GATT)
-            if (connectedDevices.isNullOrEmpty()) {
-                return false
-            }
-            for (connectedDevice in connectedDevices) {
-                if (it.deviceAddress == connectedDevice.address) {
-                    return if (simplySystemStatus) {
-                        true
-                    } else {
-                        bleBaseRequest?.isConnected(it) == true
-                    }
-                }
-            }
+        bleDevice ?: return false
+        if (!BleConnectedDeviceManager.get().isConnected(bleDevice)) {
+            return false
         }
-        return false
+        return simplySystemStatus || bleBaseRequest?.isConnected(bleDevice) == true
     }
 
     /**
@@ -732,9 +721,23 @@ class BleManager private constructor() {
 
     /**
      * 获取系统已连接设备集合，确保已获取到权限
+     *
+     * 内部调用 [getSystemGattConnectedDevices]，可能是耗时操作。
      */
     @SuppressLint("MissingPermission")
     fun getSystemAllConnectedDevice(): MutableList<BluetoothDevice>? {
+        return getSystemGattConnectedDevices()
+    }
+
+    /**
+     * 同步查询系统层 GATT 已连接设备，确保已获取到权限。
+     *
+     * **可能是耗时操作**：内部为 [BluetoothManager.getConnectedDevices] 的同步 Binder 调用，
+     * 蓝牙系统服务繁忙、重启或异常时可能阻塞当前线程数秒，禁止在主线程调用。
+     * 日常连接判断请使用 [isConnected]。
+     */
+    @SuppressLint("MissingPermission")
+    fun getSystemGattConnectedDevices(): MutableList<BluetoothDevice>? {
         checkInitialize()
         if (!BleUtil.isPermission(application)) {
             return null

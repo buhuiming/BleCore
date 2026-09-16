@@ -11,6 +11,7 @@ import com.bhm.ble.data.BleConnectFailType
 import com.bhm.ble.device.BleDevice
 import com.bhm.ble.log.BleLogger
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeoutOrNull
 
 
 /**
@@ -103,9 +104,11 @@ open class BleConnectCallback : BleBaseCallback() {
                               gatt: BluetoothGatt?, status: Int) {
         launchInMainThread {
             val start = System.currentTimeMillis()
-            while (BleManager.get().isConnected(bleDevice, true)) {
-                //主动断开，需要等待gatt释放的时间更长一些
-                delay(if (isActiveDisConnected) 80 else 4)
+            withTimeoutOrNull(3000) {
+                while (BleManager.get().isConnected(bleDevice, true)) {
+                    //主动断开，需要等待gatt释放的时间更长一些
+                    delay(if (isActiveDisConnected) 80 else 4)
+                }
             }
             val end = System.currentTimeMillis()
             BleLogger.i("触发onDisConnecting，${(end - start)}毫秒后触发onDisConnected")
