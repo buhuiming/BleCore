@@ -9,7 +9,9 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
+import android.bluetooth.BluetoothProfile
 import android.util.SparseArray
+import com.bhm.ble.BleManager
 import com.bhm.ble.callback.BleConnectCallback
 import com.bhm.ble.callback.BleEventCallback
 import com.bhm.ble.callback.BleIndicateCallback
@@ -59,6 +61,27 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     private var bleWriteRequest: BleWriteRequest? = null
 
     private var bleEventCallback: BleEventCallback? = null
+
+    private data class MtuConnectionState(
+        val gatt: BluetoothGatt,
+        val isolated: Boolean,
+        val actualMtu: Int = 23
+    )
+
+    @Volatile
+    private var mtuConnectionState: MtuConnectionState? = null
+
+    fun isMtuIsolated(): Boolean {
+        val state = mtuConnectionState ?: return false
+        return state.isolated && state.gatt === bleConnectRequest?.getBluetoothGatt()
+    }
+
+    fun getIsolatedMtu(): Int? {
+        val state = mtuConnectionState ?: return null
+        return state.actualMtu.takeIf {
+            state.isolated && state.gatt === bleConnectRequest?.getBluetoothGatt()
+        }
+    }
 
     private fun initBleConnectRequest() {
         if (bleConnectRequest == null) {
@@ -113,6 +136,14 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
      */
     override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
         super.onConnectionStateChange(gatt, status, newState)
+        synchronized(this) {
+            if (newState == BluetoothProfile.STATE_DISCONNECTED && mtuConnectionState?.gatt === gatt) {
+                mtuConnectionState = null
+            } else if (newState == BluetoothProfile.STATE_CONNECTED &&
+                gatt === bleConnectRequest?.getBluetoothGatt() && mtuConnectionState?.gatt !== gatt) {
+                mtuConnectionState = null
+            }
+        }
         bleConnectRequest?.onConnectionStateChange(gatt, status, newState)
     }
 
@@ -121,6 +152,21 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
      */
     override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
         super.onServicesDiscovered(gatt, status)
+        if (gatt != null) {
+            synchronized(this) {
+                if (gatt === bleConnectRequest?.getBluetoothGatt()) {
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        if (mtuConnectionState?.gatt !== gatt) {
+                            mtuConnectionState = MtuConnectionState(
+                                gatt, BleManager.get().shouldIsolateMtu(bleDevice, gatt)
+                            )
+                        }
+                    } else if (mtuConnectionState?.gatt === gatt) {
+                        mtuConnectionState = null
+                    }
+                }
+            }
+        }
         bleConnectRequest?.onServicesDiscovered(gatt, status)
     }
 
@@ -239,7 +285,15 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
      */
     override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
         super.onMtuChanged(gatt, mtu, status)
-        bleMtuRequest?.onMtuChanged(mtu, status)
+        if (gatt == null || gatt !== bleConnectRequest?.getBluetoothGatt()) return
+        synchronized(this) {
+            val state = mtuConnectionState
+            if (state?.isolated == true && state.gatt === gatt &&
+                status == BluetoothGatt.GATT_SUCCESS && mtu >= 23) {
+                mtuConnectionState = state.copy(actualMtu = mtu)
+            }
+        }
+        bleMtuRequest?.onMtuChanged(gatt, mtu, status)
         bleEventCallback?.callMtuChanged(mtu, bleDevice)
     }
 
@@ -522,6 +576,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
     }
 
     fun close() {
+        mtuConnectionState = null
         bleNotifyRequest?.close()
         bleIndicateRequest?.close()
         bleReadRequest?.close()

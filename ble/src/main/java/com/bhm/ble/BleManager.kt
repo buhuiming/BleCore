@@ -37,6 +37,9 @@ class BleManager private constructor() {
 
     private var bleBaseRequest: BleBaseRequest? = null
 
+    @Volatile
+    private var mtuIsolationSelector: ((BleDevice, BluetoothGatt) -> Boolean)? = null
+
     companion object {
 
         private var instance: BleManager = BleManager()
@@ -913,6 +916,21 @@ class BleManager private constructor() {
     }
 
     fun getOptions() = bleOptions
+
+    /** Selects MTU isolation once for each GATT after services are discovered. */
+    fun setMtuIsolationSelector(selector: ((BleDevice, BluetoothGatt) -> Boolean)?) {
+        mtuIsolationSelector = selector
+    }
+
+    internal fun shouldIsolateMtu(bleDevice: BleDevice, gatt: BluetoothGatt): Boolean {
+        return runCatching { mtuIsolationSelector?.invoke(bleDevice, gatt) == true }
+            .getOrDefault(false)
+    }
+
+    /** Whether the device's current GATT uses an independent MTU. */
+    fun isMtuIsolated(bleDevice: BleDevice): Boolean {
+        return BleConnectedDeviceManager.get().getBleConnectedDevice(bleDevice)?.isMtuIsolated() == true
+    }
 
     fun getContext() = application
 

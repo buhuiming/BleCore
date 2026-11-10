@@ -38,6 +38,12 @@ internal class BleMtuRequest(
 
     private var bleMtuChangedCallback: BleMtuChangedCallback? = null
 
+    @Volatile
+    private var isolatedMtuRequest = false
+
+    @Volatile
+    private var requestedGatt: BluetoothGatt? = null
+
     private fun addMtuChangedCallback(callback: BleMtuChangedCallback) {
         bleMtuChangedCallback = callback
     }
@@ -56,6 +62,7 @@ internal class BleMtuRequest(
             return
         }
         cancelSetMtuJob()
+        requestedGatt = null
         addMtuChangedCallback(bleMtuChangedCallback)
         var mContinuation: Continuation<Throwable?>? = null
         val task = getTask(
@@ -63,7 +70,10 @@ internal class BleMtuRequest(
             block = {
                 suspendCoroutine<Throwable?> { continuation ->
                     mContinuation = continuation
-                    if (getBluetoothGatt(bleDevice)?.requestMtu(mtu) == false) {
+                    val gatt = getBluetoothGatt(bleDevice)
+                    isolatedMtuRequest = getBleConnectedDevice(bleDevice)?.isMtuIsolated() == true
+                    requestedGatt = gatt
+                    if (gatt?.requestMtu(mtu) == false) {
                         try {
                             continuation.resume(UnDefinedException("Gatt设置mtu失败"))
                         } catch (e: Exception) {
@@ -96,13 +106,17 @@ internal class BleMtuRequest(
     /**
      * 设置Mtu值后会触发
      */
-    fun onMtuChanged(mtu: Int, status: Int) {
+    fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
+        if (gatt == null || gatt !== requestedGatt) return
         bleMtuChangedCallback?.let {
             if (cancelSetMtuJob()) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     BleLogger.d("${bleDevice.deviceAddress} -> 设置Mtu成功：$mtu")
                     it.callMtuChanged(bleDevice, mtu)
-                    getBleOptions()?.mtu = mtu
+                    if (!isolatedMtuRequest &&
+                        getBleConnectedDevice(bleDevice)?.isMtuIsolated() != true) {
+                        getBleOptions()?.mtu = mtu
+                    }
                 } else {
                     val exception = UnDefinedException(
                         "${bleDevice.deviceAddress} -> " +

@@ -202,7 +202,8 @@ internal class BleWriteRequest(
                 bleWriteCallback.callWriteComplete(bleDevice, false)
                 return
             }
-            val mtu = getBleOptions()?.mtu?: DEFAULT_MTU
+            val mtu = getBleConnectedDevice(bleDevice)?.getIsolatedMtu()
+                ?: getBleOptions()?.mtu ?: DEFAULT_MTU
             //mtu长度包含了ATT的opcode一个字节以及ATT的handle2个字节
             val maxWriteLength = mtu - 3
             if (data.size > maxWriteLength) {

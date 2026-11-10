@@ -52,7 +52,10 @@ internal class BleTaskList {
         }
     }
 
-    fun firstOrNull() = list.firstOrNull()
+    fun firstOrNull(): BleTask? = synchronized(list) {
+        // 判空和读取首项需在同一把锁内，避免并发清空导致下标越界。
+        list.firstOrNull()
+    }
 
     fun containsTaskId(taskId: String) = taskIdList.contains(taskId)
 }

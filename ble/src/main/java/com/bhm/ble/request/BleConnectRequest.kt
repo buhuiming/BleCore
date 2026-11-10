@@ -59,7 +59,7 @@ internal class BleConnectRequest(
 
     private var isActiveDisconnect = AtomicBoolean(false)
 
-    private var bluetoothGatt: BluetoothGatt? = null
+    @Volatile private var bluetoothGatt: BluetoothGatt? = null
 
     private var currentConnectRetryCount = 0
 
@@ -583,7 +583,8 @@ internal class BleConnectRequest(
      * 自动设置mtu
      */
     private fun autoSetMtu() {
-        if (getBleOptions()?.autoSetMtu == true) {
+        if (getBleOptions()?.autoSetMtu == true &&
+            getBleConnectedDevice(bleDevice)?.isMtuIsolated() != true) {
             getBleConnectedDevice(bleDevice)?.setMtu(getBleOptions()?.mtu?: DEFAULT_MTU,
                 object : BleMtuChangedCallback() {
                     override fun callMtuChanged(bleDevice: BleDevice, mtu: Int) {
