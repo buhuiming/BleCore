@@ -457,11 +457,22 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                            dataArray: SparseArray<ByteArray>,
                            writeType: Int?,
                            bleWriteCallback: BleWriteCallback.() -> Unit) {
+        writeData(bleDevice, serviceUUID, writeUUID, dataArray, writeType, null, bleWriteCallback)
+    }
+
+    /** 仅透传本次间隔，不修改全局配置，避免不同设备的写入互相影响。 */
+    override fun writeData(bleDevice: BleDevice,
+                           serviceUUID: String,
+                           writeUUID: String,
+                           dataArray: SparseArray<ByteArray>,
+                           writeType: Int?,
+                           operateIntervalMs: Long?,
+                           bleWriteCallback: BleWriteCallback.() -> Unit) {
         val callback = BleWriteCallback()
         callback.apply(bleWriteCallback)
         val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
         request?.let {
-            it.writeData(serviceUUID, writeUUID, dataArray, writeType, callback)
+            it.writeData(serviceUUID, writeUUID, dataArray, writeType, operateIntervalMs, callback)
             return
         }
         val exception = UnConnectedException("$writeUUID -> 写数据失败，设备未连接")
@@ -488,6 +499,23 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
         writeType: Int?,
         bleWriteCallback: BleWriteCallback.() -> Unit
     ) {
+        writeQueueData(bleDevice, serviceUUID, writeUUID, dataArray, skipErrorPacketData,
+            retryWriteCount, retryDelayTime, writeType, null, bleWriteCallback)
+    }
+
+    /** 将队列项的间隔覆盖传到连接对象，保留每次调用的独立配置。 */
+    override fun writeQueueData(
+        bleDevice: BleDevice,
+        serviceUUID: String,
+        writeUUID: String,
+        dataArray: SparseArray<ByteArray>,
+        skipErrorPacketData: Boolean,
+        retryWriteCount: Int,
+        retryDelayTime: Long,
+        writeType: Int?,
+        operateIntervalMs: Long?,
+        bleWriteCallback: BleWriteCallback.() -> Unit
+    ) {
         val callback = BleWriteCallback()
         callback.apply(bleWriteCallback)
         val request = bleConnectedDeviceManager.getBleConnectedDevice(bleDevice)
@@ -500,6 +528,7 @@ internal class BleRequestImp private constructor() : BleBaseRequest {
                 retryWriteCount,
                 retryDelayTime,
                 writeType,
+                operateIntervalMs,
                 callback
             )
             return

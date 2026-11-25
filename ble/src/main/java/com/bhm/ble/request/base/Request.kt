@@ -84,10 +84,25 @@ internal abstract class Request {
         interrupt: (task: BleTask, throwable: Throwable?) -> Unit,
         callback: (task: BleTask, throwable: Throwable?) -> Unit
     ): BleTask {
+        return getTask(taskId, durationTimeMillis, null, block, interrupt, callback)
+    }
+
+    /** 单次任务间隔覆盖：null 继承全局配置，0 不增加任务等待，正数按毫秒等待。 */
+    fun getTask(
+        taskId: String,
+        durationTimeMillis: Long,
+        operateIntervalMs: Long?,
+        block: suspend BleTask.() -> Unit,
+        interrupt: (task: BleTask, throwable: Throwable?) -> Unit,
+        callback: (task: BleTask, throwable: Throwable?) -> Unit
+    ): BleTask {
+        // 显式的 0 必须直接进入任务，不能触发全局 getter 的默认值回退。
+        val effectiveIntervalMs = operateIntervalMs ?: getOperateInterval()
+        require(effectiveIntervalMs >= 0) { "单次任务操作间隔不能为负数" }
         return BleTask(
             taskId = taskId,
             durationTimeMillis = durationTimeMillis,
-            operateInterval = getOperateInterval(),
+            operateInterval = effectiveIntervalMs,
             callInMainThread = false,
             autoDoNextTask = true,
             block = block,

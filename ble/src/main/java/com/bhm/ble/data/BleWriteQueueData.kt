@@ -14,6 +14,8 @@ internal data class BleWriteQueueData(
     var retryWriteCount: Int,
     var retryDelayTime: Long,
     var writeType: Int?,
+    /** 本次队列项两层共用的间隔；null 继承全局配置，0 不增加等待。 */
+    val operateIntervalMs: Long? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -29,6 +31,7 @@ internal data class BleWriteQueueData(
         if (retryWriteCount != other.retryWriteCount) return false
         if (retryDelayTime != other.retryDelayTime) return false
         if (writeType != other.writeType) return false
+        if (operateIntervalMs != other.operateIntervalMs) return false
 
         return true
     }
@@ -42,6 +45,7 @@ internal data class BleWriteQueueData(
         result = 31 * result + retryWriteCount
         result = 31 * result + retryDelayTime.hashCode()
         result = 31 * result + (writeType ?: 0)
+        result = 31 * result + (operateIntervalMs?.hashCode() ?: 0)
         return result
     }
 }

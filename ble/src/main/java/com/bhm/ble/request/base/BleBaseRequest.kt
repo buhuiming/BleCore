@@ -159,6 +159,15 @@ internal interface BleBaseRequest {
                   writeType: Int? = null,
                   bleWriteCallback: BleWriteCallback.() -> Unit)
 
+    /** 本次写任务的间隔覆盖；null 保持原全局配置，显式 0 不回退默认值。 */
+    fun writeData(bleDevice: BleDevice,
+                  serviceUUID: String,
+                  writeUUID: String,
+                  dataArray: SparseArray<ByteArray>,
+                  writeType: Int? = null,
+                  operateIntervalMs: Long?,
+                  bleWriteCallback: BleWriteCallback.() -> Unit)
+
     /**
      * 放入一个写队列，写成功，则从队列中取下一个数据，写失败，则重试[retryWriteCount]次
      * 与[writeData]的区别在于，[writeData]写成功，则从队列中取下一个数据，写失败，则不再继续写后面的数据
@@ -174,6 +183,18 @@ internal interface BleBaseRequest {
                        retryWriteCount: Int = 0,
                        retryDelayTime: Long = 0L,
                        writeType: Int? = null,
+                       bleWriteCallback: BleWriteCallback.() -> Unit)
+
+    /** 本次队列项的间隔覆盖，队列等待和写任务等待使用同一个值。 */
+    fun writeQueueData(bleDevice: BleDevice,
+                       serviceUUID: String,
+                       writeUUID: String,
+                       dataArray: SparseArray<ByteArray>,
+                       skipErrorPacketData: Boolean = false,
+                       retryWriteCount: Int = 0,
+                       retryDelayTime: Long = 0L,
+                       writeType: Int? = null,
+                       operateIntervalMs: Long?,
                        bleWriteCallback: BleWriteCallback.() -> Unit)
 
     /**

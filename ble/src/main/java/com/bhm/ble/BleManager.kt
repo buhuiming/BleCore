@@ -612,6 +612,20 @@ class BleManager private constructor() {
                   data: ByteArray,
                   writeType: Int? = null,
                   bleWriteCallback: BleWriteCallback.() -> Unit) {
+        writeData(bleDevice, serviceUUID, writeUUID, data, writeType, null, bleWriteCallback)
+    }
+
+    /**
+     * 按本次操作间隔写数据，保留原接口及其默认行为。
+     * @param operateIntervalMs null 沿用全局间隔，0 不额外等待，正数为本次写任务前等待毫秒数。
+     */
+    fun writeData(bleDevice: BleDevice,
+                  serviceUUID: String,
+                  writeUUID: String,
+                  data: ByteArray,
+                  writeType: Int? = null,
+                  operateIntervalMs: Long?,
+                  bleWriteCallback: BleWriteCallback.() -> Unit) {
         writeData(
             bleDevice,
             serviceUUID,
@@ -620,6 +634,7 @@ class BleManager private constructor() {
                 put(0, data)
             },
             writeType,
+            operateIntervalMs,
             bleWriteCallback
         )
     }
@@ -634,8 +649,23 @@ class BleManager private constructor() {
                   dataArray: SparseArray<ByteArray>,
                   writeType: Int? = null,
                   bleWriteCallback: BleWriteCallback.() -> Unit) {
+        writeData(bleDevice, serviceUUID, writeUUID, dataArray, writeType, null, bleWriteCallback)
+    }
+
+    /**
+     * 按本次操作间隔写入各包；每个写任务均使用同一个传入值。
+     * @param operateIntervalMs null 沿用全局间隔，0 不额外等待，正数为每个写任务前等待毫秒数。
+     */
+    fun writeData(bleDevice: BleDevice,
+                  serviceUUID: String,
+                  writeUUID: String,
+                  dataArray: SparseArray<ByteArray>,
+                  writeType: Int? = null,
+                  operateIntervalMs: Long?,
+                  bleWriteCallback: BleWriteCallback.() -> Unit) {
         checkInitialize()
-        bleBaseRequest?.writeData(bleDevice, serviceUUID, writeUUID, dataArray, writeType, bleWriteCallback)
+        bleBaseRequest?.writeData(bleDevice, serviceUUID, writeUUID, dataArray, writeType,
+            operateIntervalMs, bleWriteCallback)
     }
 
     /**
@@ -656,6 +686,24 @@ class BleManager private constructor() {
                        retryDelayTime: Long = 0L,
                        writeType: Int? = null,
                        bleWriteCallback: BleWriteCallback.() -> Unit) {
+        writeQueueData(bleDevice, serviceUUID, writeUUID, data, skipErrorPacketData,
+            retryWriteCount, retryDelayTime, writeType, null, bleWriteCallback)
+    }
+
+    /**
+     * 按本次操作间隔写队列数据，队列等待与写任务等待共用一个参数。
+     * @param operateIntervalMs null 保持原全局间隔，0 取消两层额外等待，正数分别用于两层等待。
+     */
+    fun writeQueueData(bleDevice: BleDevice,
+                       serviceUUID: String,
+                       writeUUID: String,
+                       data: ByteArray,
+                       skipErrorPacketData: Boolean = false,
+                       retryWriteCount: Int = 0,
+                       retryDelayTime: Long = 0L,
+                       writeType: Int? = null,
+                       operateIntervalMs: Long?,
+                       bleWriteCallback: BleWriteCallback.() -> Unit) {
         writeQueueData(
             bleDevice,
             serviceUUID,
@@ -667,6 +715,7 @@ class BleManager private constructor() {
             retryWriteCount,
             retryDelayTime,
             writeType,
+            operateIntervalMs,
             bleWriteCallback
         )
     }
@@ -689,6 +738,24 @@ class BleManager private constructor() {
                        retryDelayTime: Long = 0L,
                        writeType: Int? = null,
                        bleWriteCallback: BleWriteCallback.() -> Unit) {
+        writeQueueData(bleDevice, serviceUUID, writeUUID, dataArray, skipErrorPacketData,
+            retryWriteCount, retryDelayTime, writeType, null, bleWriteCallback)
+    }
+
+    /**
+     * 按本次操作间隔写入队列各包，重试继续使用对应队列项的间隔。
+     * @param operateIntervalMs null 保持原全局间隔，0 取消两层额外等待，正数分别用于两层等待。
+     */
+    fun writeQueueData(bleDevice: BleDevice,
+                       serviceUUID: String,
+                       writeUUID: String,
+                       dataArray: SparseArray<ByteArray>,
+                       skipErrorPacketData: Boolean = false,
+                       retryWriteCount: Int = 0,
+                       retryDelayTime: Long = 0L,
+                       writeType: Int? = null,
+                       operateIntervalMs: Long?,
+                       bleWriteCallback: BleWriteCallback.() -> Unit) {
         checkInitialize()
         bleBaseRequest?.writeQueueData(
             bleDevice,
@@ -699,6 +766,7 @@ class BleManager private constructor() {
             retryWriteCount,
             retryDelayTime,
             writeType,
+            operateIntervalMs,
             bleWriteCallback
         )
     }

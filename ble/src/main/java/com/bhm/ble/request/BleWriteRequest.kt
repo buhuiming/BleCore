@@ -131,6 +131,24 @@ internal class BleWriteRequest(
         writeType: Int?,
         bleWriteCallback: BleWriteCallback
     ) {
+        writeQueueData(serviceUUID, writeUUID, operateRandomID, dataArray,
+            skipErrorPacketData, retryWriteCount, retryDelayTime, writeType, null, bleWriteCallback)
+    }
+
+    /** 单个间隔参数同时用于队列等待和写任务等待，重试时继续使用当前队列项的配置。 */
+    fun writeQueueData(
+        serviceUUID: String,
+        writeUUID: String,
+        operateRandomID: String,
+        dataArray: SparseArray<ByteArray>,
+        skipErrorPacketData: Boolean = false,
+        retryWriteCount: Int = 0,
+        retryDelayTime: Long = 0L,
+        writeType: Int?,
+        operateIntervalMs: Long?,
+        bleWriteCallback: BleWriteCallback
+    ) {
+        if (!validateOperateInterval(writeUUID, operateIntervalMs, dataArray.size(), bleWriteCallback)) return
         if (!BleUtil.isPermission(getBleManager().getContext())) {
             bleWriteCallback.callWriteFail(bleDevice, 0, dataArray.size(), NoBlePermissionException())
             bleWriteCallback.callWriteComplete(bleDevice, false)
@@ -146,6 +164,9 @@ internal class BleWriteRequest(
             bleWriteCallback.callWriteComplete(bleDevice, false)
             return
         }
+        if (operateIntervalMs != null) {
+            BleLogger.d("写队列使用单次操作间隔：两层间隔均为 ${operateIntervalMs}ms，包数=${dataArray.size()}")
+        }
         addWriteJobScope.launch {
             for (i in 0 until dataArray.size()) {
                 val data = dataArray.valueAt(i)
@@ -159,6 +180,7 @@ internal class BleWriteRequest(
                         retryWriteCount = retryWriteCount,
                         retryDelayTime = retryDelayTime,
                         writeType = writeType,
+                        operateIntervalMs = operateIntervalMs,
                     )
                 )
             }
@@ -176,6 +198,20 @@ internal class BleWriteRequest(
         writeType: Int?,
         bleWriteCallback: BleWriteCallback
     ) {
+        writeData(serviceUUID, writeUUID, operateRandomID, dataArray, writeType, null, bleWriteCallback)
+    }
+
+    /** null 继承全局间隔，0 取消额外等待，正数覆盖本次写任务的等待时间。 */
+    fun writeData(
+        serviceUUID: String,
+        writeUUID: String,
+        operateRandomID: String,
+        dataArray: SparseArray<ByteArray>,
+        writeType: Int?,
+        operateIntervalMs: Long?,
+        bleWriteCallback: BleWriteCallback
+    ) {
+        if (!validateOperateInterval(writeUUID, operateIntervalMs, dataArray.size(), bleWriteCallback)) return
         if (!BleUtil.isPermission(getBleManager().getContext())) {
             bleWriteCallback.callWriteFail(bleDevice, 0, dataArray.size(), NoBlePermissionException())
             bleWriteCallback.callWriteComplete(bleDevice, false)
@@ -223,6 +259,9 @@ internal class BleWriteRequest(
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0 ||
                     characteristic.properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0)
         ) {
+            if (operateIntervalMs != null) {
+                BleLogger.d("写数据使用单次操作间隔：任务等待=${operateIntervalMs}ms，包数=${dataArray.size()}")
+            }
             //循环数据包，生成对应的任务
             for (i in 0 until dataArray.size()) {
                 val bleWriteData = BleWriteData(
@@ -240,7 +279,8 @@ internal class BleWriteRequest(
                 startWriteJob(
                     characteristic,
                     (getTaskQueue(bleWriteData.writeUUID)?.getTaskList()?.size()?: 0) + i + 1,
-                    bleWriteData
+                    bleWriteData,
+                    operateIntervalMs
                 )
             }
         } else {
@@ -255,13 +295,15 @@ internal class BleWriteRequest(
     private fun startWriteJob(
         characteristic: BluetoothGattCharacteristic,
         index: Int,
-        bleWriteData: BleWriteData
+        bleWriteData: BleWriteData,
+        operateIntervalMs: Long?
     ) {
         BleLogger.e("生成的operateRandomID: ${bleWriteData.operateRandomID}")
         var mContinuation: Continuation<Throwable?>? = null
         val task = getTask(
             getTaskId(bleWriteData.writeUUID, bleWriteData.operateRandomID, bleWriteData.currentPackage),
             getOperateTime() * index,
+            operateIntervalMs = operateIntervalMs,
             block = {
                 suspendCoroutine<Throwable?> { continuation ->
                     mContinuation = continuation
@@ -327,9 +369,15 @@ internal class BleWriteRequest(
         bleWriteCallback: BleWriteCallback
     ) {
         writeJobScope.launch {
-            //写数据间隔，写太快会导致设备忙碌而失败率高
-            delay(getOperateInterval())
+            // 每个队列项独立保存间隔；null 保留旧全局逻辑，显式 0 不回退。
+            val waitingWriteData = linkedBlockingQueue.peek()
+            delay(waitingWriteData?.operateIntervalMs ?: getOperateInterval())
             val currentWriteData = linkedBlockingQueue.peek()
+            if (waitingWriteData?.operateIntervalMs != null && currentWriteData !== waitingWriteData) {
+                // 等待期间取消或切换了队首，不能把旧间隔用于新队列项。
+                BleLogger.d("写队列等待期间队首已变更，忽略旧队列项")
+                return@launch
+            }
             //如果这个数据包是空的，同时skipErrorPacketData为true，则跳过这个数据包，写下一个数据包
             if (currentWriteData != null && currentWriteData.data.isEmpty() && currentWriteData.skipErrorPacketData) {
                 linkedBlockingQueue.poll()
@@ -347,6 +395,7 @@ internal class BleWriteRequest(
                         put(0, data.data)
                     },
                     data.writeType,
+                    data.operateIntervalMs,
                     object : BleWriteCallback() {
                         override fun callWriteFail(
                             bleDevice: BleDevice,
@@ -536,6 +585,21 @@ internal class BleWriteRequest(
 
     private fun getTaskId(uuid: String?, operateRandomID: String, currentPackage: Int) =
         "$WRITE_TASK_ID：$uuid($operateRandomID)($currentPackage)"
+
+    /** 负数间隔按现有写失败回调返回，避免异常逃逸或进入异步队列后才失败。 */
+    private fun validateOperateInterval(
+        writeUUID: String,
+        operateIntervalMs: Long?,
+        totalPackage: Int,
+        bleWriteCallback: BleWriteCallback
+    ): Boolean {
+        if (operateIntervalMs == null || operateIntervalMs >= 0) return true
+        val exception = UnDefinedException("$writeUUID -> 写数据失败，单次操作间隔不能为负数：${operateIntervalMs}ms")
+        BleLogger.e(exception.message)
+        bleWriteCallback.callWriteFail(bleDevice, 0, totalPackage, exception)
+        bleWriteCallback.callWriteComplete(bleDevice, false)
+        return false
+    }
 
     /**
      * 某个数据包写失败，后面的包不需再写

@@ -462,6 +462,17 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
                   dataArray: SparseArray<ByteArray>,
                   writeType: Int?,
                   bleWriteCallback: BleWriteCallback) {
+        writeData(serviceUUID, writeUUID, dataArray, writeType, null, bleWriteCallback)
+    }
+
+    /** 本次操作间隔随写入请求传递，不写入连接级或全局可变配置。 */
+    @Synchronized
+    fun writeData(serviceUUID: String,
+                  writeUUID: String,
+                  dataArray: SparseArray<ByteArray>,
+                  writeType: Int?,
+                  operateIntervalMs: Long?,
+                  bleWriteCallback: BleWriteCallback) {
         //以时间戳为id，来标记一次写操作
         initBleWriteRequest()
         bleWriteRequest?.writeData(
@@ -470,6 +481,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
             System.currentTimeMillis().toString(),
             dataArray,
             writeType,
+            operateIntervalMs,
             bleWriteCallback
         )
     }
@@ -487,6 +499,21 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
                        retryDelayTime: Long = 0L,
                        writeType: Int? = null,
                        bleWriteCallback: BleWriteCallback) {
+        writeQueueData(serviceUUID, writeUUID, dataArray, skipErrorPacketData,
+            retryWriteCount, retryDelayTime, writeType, null, bleWriteCallback)
+    }
+
+    /** 队列等待和实际写任务共用本次传入的间隔。 */
+    @Synchronized
+    fun writeQueueData(serviceUUID: String,
+                       writeUUID: String,
+                       dataArray: SparseArray<ByteArray>,
+                       skipErrorPacketData: Boolean = false,
+                       retryWriteCount: Int = 0,
+                       retryDelayTime: Long = 0L,
+                       writeType: Int? = null,
+                       operateIntervalMs: Long?,
+                       bleWriteCallback: BleWriteCallback) {
         //以时间戳为id，来标记一次写操作
         initBleWriteRequest()
         bleWriteRequest?.writeQueueData(
@@ -498,6 +525,7 @@ internal class BleConnectedDevice(val bleDevice: BleDevice) : BluetoothGattCallb
             retryWriteCount,
             retryDelayTime,
             writeType,
+            operateIntervalMs,
             bleWriteCallback
         )
     }

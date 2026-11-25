@@ -294,6 +294,34 @@ BleDescriptorGetType设计原则
 
 *    一次写操作，分包后，假如某个数据包写失败，后面的数据包不会继续写，例如一次写操作分包后有10个数据包，第7个写失败，后面第8、9、10不会再写     
 
+#### 2.7.4：单次写入操作间隔
+
+`writeData` 和 `writeQueueData` 的 `ByteArray`、`SparseArray<ByteArray>` 形式均新增了带
+`operateIntervalMs: Long?` 的重载，原有接口保留。新参数需明确传入，单位为毫秒：
+
+* `null`：沿用全局 `BleOptions.operateInterval`，保持原有等待逻辑。
+* `0L`：取消本次写入的额外操作等待，不会回退到默认间隔。
+* 正数：本次写入使用指定间隔；负数通过 `onWriteFail` 和 `onWriteComplete(false)` 返回失败。
+
+```kotlin
+BleManager.get().writeData(
+    bleDevice = bleDevice,
+    serviceUUID = serviceUUID,
+    writeUUID = writeUUID,
+    data = payload,
+    operateIntervalMs = 0L,
+) {
+    onWriteComplete { _, allSuccess ->
+        // 在这里处理本次写入结果。
+    }
+}
+```
+
+普通 `writeData` 在每个写任务执行前等待一次；`writeQueueData` 在队列推进前和内部写任务执行前
+分别等待一次，两层共用同一个参数。例如队列传 `500L` 时，每包包含两次 500ms 的软件等待。
+每个队列项独立保存间隔，失败重试继续使用该项配置，`retryDelayTime` 仍为独立的重试等待。
+GATT 写入仍等待实际完成回调。若协议 SDK 已负责动态分包间隔，调用本重载时传 `0L`，避免叠加等待。
+
 #### 断开某个设备的连接 释放资源
     BleManager.get().close(bleDevice: BleDevice)
 
